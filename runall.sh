@@ -2,12 +2,6 @@
 
 rundir()
 {
-	if hash pypy &> /dev/null; then
-		python=pypy
-	else
-		python=python
-	fi
-
 	input=""
 	if [ -f $1/input.txt ]; then
 		input="$1/input.txt"
@@ -15,7 +9,8 @@ rundir()
 
 	for i in $1/*.py; do
 		echo "$i" "$input"
-		$python "$i" "$input"
+		python "$i" "$input"
+		echo
 	done
 }
 
