@@ -1,20 +1,7 @@
+import itertools
+
 def lookandsay(line):
-    p = None
-    n = 0
-    result = []
-    for c in line:
-        if n > 0 and p is not c:
-            result.append(str(n))
-            result.append(p)
-            n = 0
-
-        p = c
-        n += 1
-
-    result.append(str(n))
-    result.append(p)
-
-    return ''.join(result)
+    return ''.join([str(len(list(it))) + c for c, it in itertools.groupby(line)])
 
 
 line = "1321131112"
