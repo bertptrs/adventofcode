@@ -1,3 +1,4 @@
+from __future__ import print_function
 import fileinput
 from operator import mul
 from functools import reduce

@@ -1,3 +1,4 @@
+from __future__ import print_function
 import sys
 from hashlib import md5
 import fileinput
