@@ -18,5 +18,5 @@ for line in fileinput.input():
     if inbetween.search(line) and twodouble.search(line):
         nice2 += 1
 
-print nice1, "nice1 strings."
-print nice2, "nice2 strings."
+print(nice1, "nice1 strings.")
+print(nice2, "nice2 strings.")

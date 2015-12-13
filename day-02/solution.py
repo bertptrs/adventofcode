@@ -1,5 +1,6 @@
 import fileinput
 from operator import mul
+from functools import reduce
 
 totalArea = 0
 totalRibbon = 0
@@ -14,6 +15,6 @@ for line in fileinput.input():
     totalRibbon += 2 * (parts[0] + parts[1])
     totalRibbon += reduce(mul, parts, 1)
 
-print totalArea, "paper"
-print totalRibbon, "ribbon"
+print(totalArea, "paper")
+print(totalRibbon, "ribbon")
 

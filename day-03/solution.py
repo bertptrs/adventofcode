@@ -25,4 +25,4 @@ for line in fileinput.input():
             pos2 = move(pos2, c)
             places.add(pos2)
 
-print "Houses:", len(places)
+print("Houses:", len(places))

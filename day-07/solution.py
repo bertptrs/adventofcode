@@ -59,7 +59,7 @@ for line in fileinput.input():
 
 a = findValue("a")
 
-print "Initial a is ", a
+print("Initial a is ", a)
 values = {}
 values["b"] = a
-print "Secondary a is", findValue("a")
+print("Secondary a is", findValue("a"))

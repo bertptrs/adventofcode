@@ -25,7 +25,7 @@ maxHappiness = 0
 maxWithMe = 0
 
 # Compute happiness with everyone present
-for permutation in permutations(ratings.keys()):
+for permutation in permutations(list(ratings.keys())):
     happiness = 0
     withMe = 0
 
@@ -46,5 +46,5 @@ for permutation in permutations(ratings.keys()):
     maxWithMe = max(maxWithMe, withMe)
 
 
-print maxHappiness, maxWithMe
+print(maxHappiness, maxWithMe)
 
