@@ -59,5 +59,5 @@ for i in dist:
         possible.append(shortest)
         possible.append(longest)
 
-print "Shortest path is", min(possible)
-print "Longest path is", max(possible)
+print("Shortest path is", min(possible))
+print("Longest path is", max(possible))

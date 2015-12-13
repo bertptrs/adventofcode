@@ -7,10 +7,10 @@ def totals(obj):
         return obj
     if isinstance(obj, list):
         return sum(totals(i) for i in obj)
-    if not isinstance(obj, dict) or "red" in obj.values():
+    if not isinstance(obj, dict) or "red" in list(obj.values()):
         return 0
 
-    return sum(totals(i) for i in obj.values())
+    return sum(totals(i) for i in list(obj.values()))
 
 fileData = ''.join(line for line in fileinput.input())
 
@@ -20,4 +20,4 @@ total = sum(int(match) for match in pattern.findall(fileData))
 
 data = json.loads(fileData)
 
-print total, totals(data)
+print(total, totals(data))

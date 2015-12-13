@@ -8,9 +8,9 @@ line = "1321131112"
 for x in range(40):
     line = lookandsay(line)
 
-print "40:", len(line)
+print("40:", len(line))
 
 for x in range(10):
     line = lookandsay(line)
 
-print "50:", len(line)
+print("50:", len(line))

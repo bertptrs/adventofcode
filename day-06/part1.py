@@ -14,7 +14,7 @@ for line in fileinput.input():
     match = commandExpr.search(line)
 
     if not match:
-        print "Invalid string"
+        print("Invalid string")
         sys.exit(1)
 
     xStart = int(match.group(3))
@@ -38,4 +38,4 @@ total = 0
 for row in lights:
     total += sum([int(i) for i in row])
 
-print total
+print(total)

@@ -26,5 +26,5 @@ for line in fileinput.input():
     totalLess += diff
     totalMore += plus
 
-print totalLess, "less"
-print totalMore, "more"
+print(totalLess, "less")
+print(totalMore, "more")

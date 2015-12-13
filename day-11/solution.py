@@ -1,6 +1,6 @@
 import string
 
-letters = [c for c in string.lowercase]
+letters = [c for c in string.ascii_lowercase]
 
 password = "hxbxwxba"
 
@@ -58,5 +58,5 @@ for x in range(2):
     increment(passwordCode)
     while not isOk(passwordCode):
         increment(passwordCode)
-    
-    print "Next password is", ''.join([letters[c] for c in passwordCode])
+
+    print("Next password is", ''.join([letters[c] for c in passwordCode]))

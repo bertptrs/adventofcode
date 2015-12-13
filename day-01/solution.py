@@ -12,6 +12,6 @@ for line in fileinput.input():
 
         if not seenBasement and floor == -1:
             seenBasement = True
-            print "Basement reached at", idx + 1
+            print("Basement reached at", idx + 1)
 
-print "Finally arrived at", floor
+print("Finally arrived at", floor)
