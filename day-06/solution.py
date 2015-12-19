@@ -21,8 +21,38 @@ def compact(lightList):
 
     return newList
 
+def updateState(sliceList, yStart, yEnd, updateFnc):
+    newList = []
+    for start, end, state in lights[x]:
+        if not start <= yStart  <= end and not yStart <= start <= yEnd:
+            # Block not in range, skip
+            newList.append((start, end, state))
+            continue
+
+        if start < yStart:
+            # Split the block at the start
+            newList.append((start, yStart - 1, state))
+            start = yStart
+
+        if end > yEnd:
+            # Split the block at the end
+            newList.append((yEnd + 1, end, state))
+            end = yEnd
+
+        newList.append((start, end, updateFnc(state)))
+
+    return compact(newList)
+
 def colsum(lightList):
     return sum(int(state) * (stop - start + 1) for start, stop, state in lightList)
+
+def getPart1Update(command):
+    if "toggle" in command:
+        return lambda x: not x
+    elif "on" in command:
+        return lambda _: True
+    else:
+        return lambda _: False
 
 lights = []
 for x in range(1000):
@@ -40,31 +70,7 @@ for line in fileinput.input():
     command = match.group(1)
 
     for x in range(xStart, xEnd + 1):
-        newList = []
-        for start, end, state in lights[x]:
-            if not start <= yStart  <= end and not yStart <= start <= yEnd:
-                # Block not in range, skip
-                newList.append((start, end, state))
-                continue
-
-            if start < yStart:
-                # Split the block at the start
-                newList.append((start, yStart - 1, state))
-                start = yStart
-
-            if end > yEnd:
-                # Split the block at the end
-                newList.append((yEnd + 1, end, state))
-                end = yEnd
-
-            if "toggle" in command:
-                newList.append((start, end, not state))
-            elif "on" in command:
-                newList.append((start, end, True))
-            else:
-                newList.append((start, end, False))
-
-        lights[x] = compact(newList)
+        lights[x] = updateState(lights[x], yStart, yEnd, getPart1Update(command))
 
 total = sum(colsum(x) for x in lights)
 
