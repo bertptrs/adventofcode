@@ -23,8 +23,10 @@ def solve(word, zeroes):
 
         number = number + 1
 
-for line in fileinput.input():
-    word, zeroes = line.split("\t")
-    zeroes = int(zeroes.strip())
+    return number
 
-    solve(word, zeroes)
+for line in fileinput.input():
+    word = line.strip()
+
+    solve(word, 5)
+    solve(word, 6)
