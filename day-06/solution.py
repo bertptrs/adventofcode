@@ -23,7 +23,7 @@ def compact(lightList):
 
 def updateState(sliceList, yStart, yEnd, updateFnc):
     newList = []
-    for start, end, state in lights[x]:
+    for start, end, state in sliceList:
         if not start <= yStart  <= end and not yStart <= start <= yEnd:
             # Block not in range, skip
             newList.append((start, end, state))
@@ -54,9 +54,19 @@ def getPart1Update(command):
     else:
         return lambda _: False
 
-lights = []
+def getPart2Update(command):
+    if "toggle" in command:
+        return lambda x: x + 2
+    elif "on" in command:
+        return lambda x: x + 1
+    else:
+        return lambda x: max(0, x - 1)
+
+lights1 = []
+lights2 = []
 for x in range(1000):
-    lights.append([(0, 999, False)])
+    lights1.append([(0, 999, False)])
+    lights2.append([(0, 999, 0)])
 
 for line in fileinput.input():
     match = re.search(r"^(toggle|turn (on|off)) (\d+),(\d+) through (\d+),(\d+)$", line)
@@ -70,8 +80,8 @@ for line in fileinput.input():
     command = match.group(1)
 
     for x in range(xStart, xEnd + 1):
-        lights[x] = updateState(lights[x], yStart, yEnd, getPart1Update(command))
+        lights1[x] = updateState(lights1[x], yStart, yEnd, getPart1Update(command))
+        lights2[x] = updateState(lights2[x], yStart, yEnd, getPart2Update(command))
 
-total = sum(colsum(x) for x in lights)
-
-print(total)
+print("Lights on:", sum(colsum(x) for x in lights1))
+print("Lumen:", sum(colsum(x) for x in lights2))
