@@ -3,20 +3,33 @@ import fileinput
 import re
 import sys
 
-commandExpr = re.compile(r"^(toggle|turn (on|off)) (\d+),(\d+) through (\d+),(\d+)$")
+def compact(lightList):
+    last = None
+    newList = []
+    for streak in sorted(lightList):
+        if last is not None:
+            if streak[2] == last[2]:
+                # Repeating state, merge
+                last = (last[0], streak[1], last[2])
+                continue
+            else:
+                newList.append(last)
+
+        last = streak
+
+    newList.append(last)
+
+    return newList
+
+def colsum(lightList):
+    return sum(int(state) * (stop - start + 1) for start, stop, state in lightList)
 
 lights = []
 for x in range(1000):
-    lights.append([])
-    for y in range(1000):
-        lights[x].append(False)
+    lights.append([(0, 999, False)])
 
 for line in fileinput.input():
-    match = commandExpr.search(line)
-
-    if not match:
-        print("Invalid string")
-        sys.exit(1)
+    match = re.search(r"^(toggle|turn (on|off)) (\d+),(\d+) through (\d+),(\d+)$", line)
 
     xStart = int(match.group(3))
     yStart = int(match.group(4))
@@ -27,16 +40,32 @@ for line in fileinput.input():
     command = match.group(1)
 
     for x in range(xStart, xEnd + 1):
-        for y in range(yStart, yEnd + 1):
-            if command == "toggle":
-                lights[x][y] = not lights[x][y]
-            elif "on" in command:
-                lights[x][y] = True
-            else:
-                lights[x][y] = False
+        newList = []
+        for start, end, state in lights[x]:
+            if not start <= yStart  <= end and not yStart <= start <= yEnd:
+                # Block not in range, skip
+                newList.append((start, end, state))
+                continue
 
-total = 0
-for row in lights:
-    total += sum([int(i) for i in row])
+            if start < yStart:
+                # Split the block at the start
+                newList.append((start, yStart - 1, state))
+                start = yStart
+
+            if end > yEnd:
+                # Split the block at the end
+                newList.append((yEnd + 1, end, state))
+                end = yEnd
+
+            if "toggle" in command:
+                newList.append((start, end, not state))
+            elif "on" in command:
+                newList.append((start, end, True))
+            else:
+                newList.append((start, end, False))
+
+        lights[x] = compact(newList)
+
+total = sum(colsum(x) for x in lights)
 
 print(total)
