@@ -9,7 +9,7 @@ rundir()
 
 	for i in $1/*.py; do
 		echo "$i" "$input"
-		python "$i" "$input"
+		time python "$i" "$input"
 		echo
 	done
 }
