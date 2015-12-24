@@ -32,11 +32,6 @@ def run(instructions, registers):
 
     return registers
 
-registers = {
-        'a': 0,
-        'b': 0,
-        }
-
 instructions = []
 
 for line in fileinput.input():
