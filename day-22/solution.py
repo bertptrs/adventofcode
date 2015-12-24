@@ -1,5 +1,5 @@
 from __future__ import print_function, division
-from queue import PriorityQueue
+import heapq
 
 def applyEffects(current):
     if current['recharge'] > 0:
@@ -15,15 +15,14 @@ def applyEffects(current):
 
 
 def dijkstraMagic(initialState, hard):
-    todo = PriorityQueue()
-    todo.put((0, 0, initialState.copy()))
+    todo = [(0, 0, initialState.copy())]
 
     visited = {tuple(initialState.values()): 0}
     iteration = 0
 
-    while not todo.empty():
+    while todo:
         iteration += 1
-        top = todo.get()
+        top = heapq.heappop(todo)
         current = top[2].copy()
         manaSpent = top[0]
 
@@ -81,7 +80,7 @@ def dijkstraMagic(initialState, hard):
                 if key not in visited or visited[key] > newMana:
                     # Insert the route in to the visited and queue
                     visited[key] = newMana
-                    todo.put((newMana, iteration, newState))
+                    heapq.heappush(todo, (newMana, iteration, newState))
 
     return None
 
