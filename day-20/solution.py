@@ -1,11 +1,7 @@
 from __future__ import print_function
 
 def findFirst(data, target):
-    for idx, value in enumerate(data):
-        if value >= target:
-            return idx
-
-    return None
+    return next(idx for idx, value in enumerate(data) if value >= target)
 
 target = 34000000
 
