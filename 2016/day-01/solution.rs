@@ -6,10 +6,19 @@ use std::io::prelude::*;
 use std::path::Path;
 use std::str;
 
-fn dist(pos: (i32, i32)) -> i32 {
+fn dist(pos: (i32, i32)) -> i32
+{
     let (x, y) = pos;
 
     return x.abs() + y.abs()
+}
+
+fn walk(pos: (i32, i32), dir: i32) -> (i32, i32)
+{
+    let backwards = if dir & 2 == 2 { -1 } else { 1 };
+    let (x, y) = pos;
+
+    (x + backwards * (1 - (dir & 1)), y + backwards * (dir & 1))
 }
 
 fn main() {
@@ -33,13 +42,12 @@ fn main() {
         Ok(_) => {},
     };
 
-    let mut posx = 0;
-    let mut posy = 0;
+    let mut pos = (0, 0);
     let mut dir = 0;
     let mut found = false;
 
     let mut positions = HashSet::new();
-    positions.insert((posx, posy));
+    positions.insert(pos);
 
     for instruction in content.split(", ") {
         let turn = &instruction[..1];
@@ -51,36 +59,20 @@ fn main() {
         if turn == "R" {
             dir += 1;
         } else {
-            dir -= 1;
+            dir += 3;
         }
-        dir = (dir + 4) % 4;
+        dir %= 4;
 
-        let backwards = if dir & 2 == 2 { -1 } else { 1 };
-        if dir & 1 == 1 {
-            // Move in y direction
-            for y in 1..(steps + 1) {
-                if positions.contains(&(posx, posy + y * backwards)) && !found {
-                    found = true;
-                    println!("Arrived at the same position, dist {}", dist((posx, posy + y * backwards)));
-                } else {
-                    positions.insert((posx, posy + y * backwards));
-                }
+        for _ in 0..steps {
+            pos = walk(pos, dir);
+            if !found && positions.contains(&pos) {
+                println!("Visited twice at dist {}", dist(pos)) ;
+                found = true;
+            } else {
+                positions.insert(pos);
             }
-            posy += steps * backwards;
-        } else {
-            // Move in x direction
-            for x in 1..(steps + 1) {
-                if positions.contains(&(posx + x * backwards, posy)) && !found {
-                    println!("Arrived at the same position, dist {}", dist((posx + x * backwards, posy)));
-                    found = true;
-                } else {
-                    positions.insert((posx + x * backwards, posy));
-                }
-            }
-            posx += steps * backwards;
         }
     }
 
-    println!("Total distance is {}", dist((posx, posy)))
-
+    println!("Total distance is {}", dist(pos));
 }
