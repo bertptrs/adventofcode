@@ -3,21 +3,41 @@ extern crate crypto;
 use crypto::md5::Md5;
 use crypto::digest::Digest;
 
-fn find_hash(word: &str, mut start: i32) -> (char, char, i32)
+
+fn five_zeroes(a: u8, b: u8, c: u8) -> bool
 {
-    let mut hasher = Md5::new();
-    loop {
-        let num = start.to_string();
-        hasher.reset();
-        hasher.input_str(word);
-        hasher.input_str(&num);
+    (a | b | (c >> 4)) == 0
+}
 
-        let hash = hasher.result_str();
-        if &hash[0..5] == "00000" {
-            return (hash.chars().nth(5).unwrap(), hash.chars().nth(6).unwrap(), start);
+struct Hasher {
+    index: i32,
+    base: String,
+    hasher: Md5,
+}
+
+impl Hasher {
+    fn new(start: &str) -> Hasher { Hasher {index: 0, base: String::from(start), hasher: Md5::new() } }
+}
+
+impl Iterator for Hasher {
+    type Item = String;
+
+    fn next(&mut self) -> Option<String> {
+        let mut digest = [0u8; 16];
+        loop {
+            let num = self.index.to_string();
+            self.index += 1;
+            self.hasher.reset();
+
+            self.hasher.input_str(&self.base);
+            self.hasher.input_str(&num);
+
+            self.hasher.result(&mut digest);
+
+            if five_zeroes(digest[0], digest[1], digest[2]) {
+                return Some(self.hasher.result_str());
+            }
         }
-
-        start += 1;
     }
 }
 
@@ -34,16 +54,15 @@ fn pos(c: char) -> i32
 fn main() {
     let input = "cxdnnyjw";
 
-    let mut start = 0;
     let mut password = ['-'; 8];
     let mut used = [false; 8];
 
     let mut found = 0;
     let mut printed = 0;
 
-    while found < 8 {
-        let (c1, c2, num) = find_hash(input, start);
-        start = num + 1;
+    for hash in Hasher::new(input) {
+        let c1 = hash.chars().nth(5).unwrap();
+        let c2 = hash.chars().nth(6).unwrap();
 
         if valid_pos(c1) {
             let p = pos(c1) as usize;
@@ -51,6 +70,10 @@ fn main() {
                 found += 1;
                 password[p] = c2;
                 used[p] = true;
+
+                if found >= 8 {
+                    break;
+                }
             }
         }
 
