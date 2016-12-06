@@ -29,8 +29,6 @@ fn least_frequent(counts: &HashMap<char, i32>) -> char
 }
 
 fn main() {
-    println!("Hello, world!");
-
     let args: Vec<String> = env::args().collect();
     let f = File::open(&args[1]).expect("Could not open file");
     let reader = BufReader::new(f);
@@ -39,17 +37,12 @@ fn main() {
 
     for line in reader.lines() {
         for (i, c) in line.unwrap().trim().chars().enumerate() {
-            let pos = i as usize;
-            if pos >= counts.len() {
+            if i >= counts.len() {
                 counts.push(HashMap::new());
             }
 
-            if ! counts[pos].contains_key(&c) {
-                counts[pos].insert(c, 1);
-            } else {
-                let cur = counts[pos][&c];
-                counts[pos].insert(c, cur + 1);
-            }
+            let cur = counts[i].entry(c).or_insert(0);
+            *cur += 1;
         }
     }
 
