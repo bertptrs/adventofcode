@@ -5,7 +5,7 @@ sum2=0
 
 while read -r line; do
 	sorted=$(echo "$line" | xargs -n 1 echo | sort -n)
-	checksum=$(($(echo "$sorted" | tail -n 1) - $(echo "$sorted" | head -n 1)))
+	((sum1 += $(echo "$sorted" | tail -n 1) - $(echo "$sorted" | head -n 1)))
 
 	for a in $sorted; do
 		for b in $sorted; do
@@ -19,8 +19,6 @@ while read -r line; do
 			fi
 		done
 	done
-
-	((sum1 += checksum))
 done
 
 echo Sum 1: $sum1
