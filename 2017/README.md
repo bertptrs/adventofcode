@@ -7,7 +7,7 @@ and using 25 different programming languages.
 The current plan, in no particular order:
 
 - [ ] AWK (note, not included in shell script)
-- [x] Bash/shell script - [Day 02](./day-02/solution.cpp)
+- [x] Bash/shell script - [Day 02](./day-02/solution.sh)
 - [ ] C
 - [x] C++ - [Day 01](./day-01/solution.cpp)
 - [ ] C#
