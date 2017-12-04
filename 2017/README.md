@@ -6,7 +6,7 @@ and using 25 different programming languages.
 
 The current plan, in no particular order:
 
-- [x] AWK - [Day 04](./day-04) (two separate scripts)
+- [x] AWK - [Day 04](./day-04/solution.awk)
 - [x] Bash/shell script - [Day 02](./day-02/solution.sh)
 - [ ] C
 - [x] C++ - [Day 01](./day-01/solution.cpp)
