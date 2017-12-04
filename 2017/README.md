@@ -6,11 +6,12 @@ and using 25 different programming languages.
 
 The current plan, in no particular order:
 
-- [ ] AWK (note, not included in shell script)
+- [x] AWK - [Day 04](./day-04) (two separate scripts)
 - [x] Bash/shell script - [Day 02](./day-02/solution.sh)
 - [ ] C
 - [x] C++ - [Day 01](./day-01/solution.cpp)
 - [ ] C#
+- [ ] Clojure - [Day 03](./day-03/solution.clj) (need to finish part 2)
 - [ ] Coffeescript
 - [ ] Haskell
 - [ ] Java
@@ -27,4 +28,4 @@ The current plan, in no particular order:
 - [ ] Scheme
 - [ ] SQL
 
-… and then I will need 5 more. But that will come in time.
+… and then I will need some more. But that will come in time.
