@@ -18,7 +18,7 @@ The current plan, in no particular order:
 - [ ] Kotlin
 - [ ] Node.js
 - [ ] Objective C
-- [ ] Perl
+- [x] Perl - [Day 05](./day-05/solution.pl)
 - [ ] PHP
 - [ ] Prolog
 - [ ] Python
