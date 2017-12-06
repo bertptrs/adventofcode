@@ -16,6 +16,7 @@ The current plan, in no particular order:
 - [ ] Haskell
 - [ ] Java
 - [ ] Kotlin
+- [x] Matlab - [Day 06](./day-06)
 - [ ] Node.js
 - [ ] Objective C
 - [x] Perl - [Day 05](./day-05/solution.pl)
