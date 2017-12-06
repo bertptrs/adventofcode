@@ -1,19 +1,23 @@
 #!/usr/bin/perl
+
+use strict;
+use warnings;
+
 my @instructions;
 
-for $line ( <STDIN> ) {
+for my $line ( <STDIN> ) {
 	push @instructions, $line;
 }
 
-@instructions2 = @instructions;
+my @instructions2 = @instructions;
 
-$iptr = 0;
+my $iptr = 0;
 
-$steps = 0;
+my $steps = 0;
 
-while ($iptr >= 0 and $iptr < 0 + @instructions) {
-	$jump = @instructions[$iptr];
-	@instructions[$iptr]++;
+while ($iptr >= 0 and $iptr < @instructions) {
+	my $jump = $instructions[$iptr];
+	$instructions[$iptr]++;
 	$steps++;
 
 	$iptr += $jump
@@ -24,12 +28,12 @@ print $steps, "\n";
 $iptr = 0;
 $steps = 0;
 
-while ($iptr >= 0 and $iptr < 0 + @instructions2) {
-	$jump = @instructions2[$iptr];
+while ($iptr >= 0 and $iptr < @instructions2) {
+	my $jump = $instructions2[$iptr];
 	if ($jump >= 3) {
-		@instructions2[$iptr]--;
+		$instructions2[$iptr]--;
 	} else {
-		@instructions2[$iptr]++;
+		$instructions2[$iptr]++;
 	}
 	$steps++;
 
