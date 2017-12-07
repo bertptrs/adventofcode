@@ -10,7 +10,7 @@ The current plan, in no particular order:
 - [x] Bash/shell script - [Day 02](./day-02/solution.sh)
 - [ ] C
 - [x] C++ - [Day 01](./day-01/solution.cpp)
-- [ ] C#
+- [x] C# - [Day 07](./day-07/solution.cs)
 - [ ] Clojure - [Day 03](./day-03/solution.clj) (need to finish part 2)
 - [ ] Coffeescript
 - [ ] Haskell
