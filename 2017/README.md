@@ -23,7 +23,7 @@ The current plan, in no particular order:
 - [ ] PHP
 - [ ] Prolog
 - [ ] Python
-- [ ] Ruby
+- [x] Ruby - [Day 08](./day-08/solution.rb)
 - [ ] Rust
 - [ ] Scala
 - [ ] Scheme
