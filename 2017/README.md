@@ -15,7 +15,7 @@ The current plan, in no particular order:
 - [ ] Coffeescript
 - [ ] Haskell
 - [ ] Java
-- [ ] Kotlin
+- [x] Kotlin - [Day 10](./day-10/solution.kt)
 - [x] Lex - [Day 09](./day-09/solution.l)
 - [x] Matlab - [Day 06](./day-06)
 - [ ] Node.js
