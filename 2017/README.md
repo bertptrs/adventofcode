@@ -26,7 +26,7 @@ The current plan, in no particular order:
 - [ ] Python
 - [x] Ruby - [Day 08](./day-08/solution.rb)
 - [ ] Rust
-- [ ] Scala
+- [x] Scala - [Day 11](./day-11/solution.scala)
 - [ ] Scheme
 - [ ] SQL
 
