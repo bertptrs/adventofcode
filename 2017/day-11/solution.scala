@@ -32,6 +32,10 @@ object solution {
   }
 
   def dist(x: Int, y: Int): Int = {
-    return Math.max(x, y);
+    if (x.signum == y.signum) {
+      return Math.max(x.abs, y.abs);
+    } else {
+      return x.abs + y.abs
+    }
   }
 }
