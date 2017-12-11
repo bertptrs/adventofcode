@@ -2,8 +2,6 @@ import scala.io.StdIn
 
 object solution {
   def main(args: Array[String]) {
-    println("Hello, world!")
-
     val input = StdIn.readLine()
     val dirs = input.trim.split(",")
 
