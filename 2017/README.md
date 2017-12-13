@@ -18,7 +18,7 @@ The current plan, in no particular order:
 - [x] Kotlin - [Day 10](./day-10/solution.kt)
 - [x] Lex - [Day 09](./day-09/solution.l)
 - [x] Matlab - [Day 06](./day-06)
-- [ ] Node.js
+- [x] Node.js - [Day 12](./day-12/solution.js)
 - [ ] Objective C
 - [x] Perl - [Day 05](./day-05/solution.pl)
 - [ ] PHP
