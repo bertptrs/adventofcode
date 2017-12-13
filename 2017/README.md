@@ -13,6 +13,7 @@ The current plan, in no particular order:
 - [x] C# - [Day 07](./day-07/solution.cs)
 - [x] Clojure - [Day 03](./day-03/solution.clj)
 - [ ] Coffeescript
+- [x] Go - [Day 13](./day-13/solution.go)
 - [ ] Haskell
 - [ ] Java
 - [x] Kotlin - [Day 10](./day-10/solution.kt)
