@@ -14,7 +14,7 @@ The current plan, in no particular order:
 - [x] Clojure - [Day 03](./day-03/solution.clj)
 - [ ] Coffeescript
 - [x] Go - [Day 13](./day-13/solution.go)
-- [ ] Haskell
+- [x] Haskell - [Day 15](./day-15/solution.hs)
 - [ ] Java
 - [x] Kotlin - [Day 10](./day-10/solution.kt)
 - [x] Lex - [Day 09](./day-09/solution.l)
@@ -26,7 +26,7 @@ The current plan, in no particular order:
 - [ ] Prolog
 - [ ] Python
 - [x] Ruby - [Day 08](./day-08/solution.rb)
-- [ ] Rust
+- [x] Rust - [Day 14](./day-14/solution.rs)
 - [x] Scala - [Day 11](./day-11/solution.scala)
 - [ ] Scheme
 - [ ] SQL
