@@ -31,5 +31,6 @@ The current plan, in no particular order:
 - [x] Scala - [Day 11](./day-11/solution.scala)
 - [ ] Scheme
 - [ ] SQL
+- [ ] Swift - [Day 17](./day-17/solution.swift)
 
 … and then I will need some more. But that will come in time.
