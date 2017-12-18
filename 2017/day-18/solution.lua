@@ -27,7 +27,7 @@ end
 
 registers = {}
 
-function argval(input)
+function argval(input, registers)
 	if tonumber(input) ~= nil then
 		return tonumber(input)
 	elseif registers[input] ~= nil then
@@ -37,80 +37,62 @@ function argval(input)
 	end
 end
 
+function alu(instr, registers)
+	-- Perform instruction and return offset to iptr
+	if instr[1] == "set" then
+		registers[instr[2]] = argval(instr[3], registers)
+	elseif instr[1] == "snd" then
+		last_played = argval(instr[2], registers)
+	elseif instr[1] == "add" then
+		registers[instr[2]] = argval(instr[2], registers) + argval(instr[3], registers)
+	elseif instr[1] == "mul" then
+		registers[instr[2]] = argval(instr[2], registers) * argval(instr[3], registers)
+	elseif instr[1] == "mod" then
+		registers[instr[2]] = argval(instr[2], registers) % argval(instr[3], registers)
+	elseif instr[1] == "jgz" then
+		if argval(instr[2], registers) > 0 then
+			return argval(instr[3], registers)
+		end
+	else
+		print("Invalid instruction", instr[1])
+		return nil
+	end
+
+	return 1
+end
+
 iptr = 0
 
 while true do
 	instr = instructions[iptr]
 
-	if instr[1] == "set" then
-		registers[instr[2]] = argval(instr[3])
-	elseif instr[1] == "snd" then
-		last_played = argval(instr[2])
-	elseif instr[1] == "add" then
-		registers[instr[2]] = argval(instr[2]) + argval(instr[3])
-	elseif instr[1] == "mul" then
-		registers[instr[2]] = argval(instr[2]) * argval(instr[3])
-	elseif instr[1] == "mod" then
-		registers[instr[2]] = argval(instr[2]) % argval(instr[3])
+	if instr[1] == "snd" then
+		last_played = argval(instr[2], registers)
+		iptr = iptr + 1
 	elseif instr[1] == "rcv" then
 		print("Last played", last_played)
+		iptr = iptr + 1
 		break
-	elseif instr[1] == "jgz" then
-		if argval(instr[2]) > 0 then
-			iptr = iptr + argval(instr[3]) - 1 -- correct for the subsequent add
-		end
 	else
-		print("Illegal instruction", instr[1])
-		break
-	end
-
-	iptr = iptr + 1
-end
-
-registers = {}
-registers[0] = {}
-registers[1] = {}
-
-function argval(input, pid)
-	if tonumber(input) ~= nil then
-		return tonumber(input)
-	elseif registers[pid][input] ~= nil then
-		return registers[pid][input]
-	else
-		return pid
+		iptr = iptr + alu(instr, registers)
 	end
 end
 
--- Double instruction pointer
-iptr = {}
-iptr[0] = 0
-iptr[1] = 0
--- Double receive buffer
-rbuf = {}
-rbuf[0] = {}
-rbuf[1] = {}
--- Pointer in the receive buffer
-rptr = {}
-rptr[0] = 0
-rptr[1] = 0
--- Number of entries in each buffer
-rctr = {}
-rctr[0] = 0
-rctr[1] = 0
--- Whether one thread is waiting
-waiting = {}
-waiting[0] = false
-waiting[1] = false
+registers = {{p=0}, {p=1}}
 
-sends = 0
+iptr = {0, 0} -- instruction pointers
+rbuf = {{}, {}} -- receive buffers
+rptr = {0, 0} -- Pointer in the receive buffer
+rctr = {0, 0} -- Number of entries in each buffer
+waiting = {false, false} -- Whether one thread is waiting
 
-pid = 0
+pid = 1
 
 function nextpid(pid)
-	if pid == 0 then
-		return 1
+	if pid == 1 then
+		return 2
 	else
-		return 0
+		return 1
 	end
 end
 
@@ -122,39 +104,27 @@ while true do
 		break
 	end
 
-	if instr[1] == "set" then
-		registers[pid][instr[2]] = argval(instr[3], pid)
-	elseif instr[1] == "snd" then
-		rbuf[nextpid(pid)][rctr[nextpid(pid)]] = argval(instr[2], pid)
-		rctr[nextpid(pid)] = rctr[nextpid(pid)] + 1
-	elseif instr[1] == "add" then
-		registers[pid][instr[2]] = argval(instr[2], pid) + argval(instr[3], pid)
-	elseif instr[1] == "mul" then
-		registers[pid][instr[2]] = argval(instr[2], pid) * argval(instr[3], pid)
-	elseif instr[1] == "mod" then
-		registers[pid][instr[2]] = argval(instr[2], pid) % argval(instr[3], pid)
+	if instr[1] == "snd" then
+		npid = nextpid(pid)
+		rbuf[npid][rctr[npid]] = argval(instr[2], registers[pid])
+		rctr[npid] = rctr[npid] + 1
+		waiting[npid] = false
+
+		iptr[pid] = iptr[pid] + 1
 	elseif instr[1] == "rcv" then
 		if rbuf[pid][rptr[pid]] ~= nil then
 			-- Have value, read and continue
 			registers[pid][instr[2]] = rbuf[pid][rptr[pid]]
 			rptr[pid] = rptr[pid] + 1
-			waiting[nextpid(pid)] = false
+			iptr[pid] = iptr[pid] + 1
 		else
 			-- Need to wait for value, continue with execution of the other
 			waiting[pid] = true
 			pid = nextpid(pid)
-			iptr[pid] = iptr[pid] - 1 -- Correct for subsequent increase
-		end
-	elseif instr[1] == "jgz" then
-		if argval(instr[2], pid) > 0 then
-			iptr[pid] = iptr[pid] + argval(instr[3], pid) - 1 -- correct for the subsequent add
 		end
 	else
-		print("Illegal instruction", instr[1])
-		break
+		iptr[pid] = iptr[pid] + alu(instr, registers[pid])
 	end
 
-	iptr[pid] = iptr[pid] + 1
 end
-
-print("Final sends from 1:", rctr[0])
+print("Final sends from 1:", rctr[1])
