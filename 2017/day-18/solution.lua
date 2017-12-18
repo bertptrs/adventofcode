@@ -117,7 +117,7 @@ end
 while true do
 	instr = instructions[iptr[pid]]
 
-	if waiting[0] and waiting[1] then
+	if waiting[pid] then
 		print("Deadlocked!")
 		break
 	end
