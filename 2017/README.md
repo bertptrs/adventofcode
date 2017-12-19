@@ -24,7 +24,7 @@ The current plan, in no particular order:
 - [x] Node.js - [Day 12](./day-12/solution.js)
 - [ ] Objective C
 - [x] Perl - [Day 05](./day-05/solution.pl)
-- [ ] PHP
+- [x] PHP - [Day 19](./day-19/solution.php)
 - [ ] Prolog
 - [ ] Python
 - [x] Ruby - [Day 08](./day-08/solution.rb)
