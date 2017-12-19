@@ -16,11 +16,11 @@ while ($maze[$y][$x] != ' ') {
         $path .= $maze[$y][$x];
     } elseif ($maze[$y][$x] == '+') {
         if ($dir[0] == 0) {
-            $dir[0] = ($x + 1 >= strlen($maze[$y]) || $maze[$y][$x + 1] == ' ') ? -1 : 1;
+            $dir[0] = ($x == 0 || $maze[$y][$x - 1] == ' ') ? 1 : -1;
             $dir[1] = 0;
         } else {
             $dir[0] = 0;
-            $dir[1] = ($y + 1 >= count($maze) || $maze[$y + 1][$x] == ' ') ? -1 : 1;
+            $dir[1] = ($y == 0 || $maze[$y - 1][$x] == ' ') ? 1 : -1;
         }
     }
 
