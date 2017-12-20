@@ -27,6 +27,7 @@ The current plan, in no particular order:
 - [x] PHP - [Day 19](./day-19/solution.php)
 - [ ] Prolog
 - [ ] Python
+- [x] R - [Day 20](./day-20/solution.r)
 - [x] Ruby - [Day 08](./day-08/solution.rb)
 - [x] Rust - [Day 14](./day-14/solution.rs)
 - [x] Scala - [Day 11](./day-11/solution.scala)
