@@ -21,9 +21,9 @@ for (i in 1:100) {
 		input[,coord] <- input[,coord] + input[,coord+3]
 	}
 
-	dups = !(duplicated(input[,1:3]) | duplicated(input[,1:3], fromLast=TRUE))
+	dups <- !(duplicated(input[,1:3]) | duplicated(input[,1:3], fromLast=TRUE))
 
-	input = input[dups,]
+	input <- input[dups,]
 }
 
 print(nrow(input))
