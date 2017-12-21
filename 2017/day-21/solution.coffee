@@ -45,7 +45,7 @@ stdin.on 'end', () ->
 	state = '.#./..#/###'
 	view state
 
-	for _ in [1..5]
+	for _ in [1..18]
 		newrows = []
 		oldrows = state.split '/'
 
@@ -77,5 +77,4 @@ stdin.on 'end', () ->
 					newrows.push row
 
 		state = newrows.join '/'
-		console.log(state.count(/#/g))
-		view state
+		console.log _, state.count(/#/g)

@@ -12,8 +12,7 @@ The current plan, in no particular order:
 - [x] C++ - [Day 01](./day-01/solution.cpp)
 - [x] C# - [Day 07](./day-07/solution.cs)
 - [x] Clojure - [Day 03](./day-03/solution.clj)
-- [ ] Coffeescript - [Day 21](./day-21/solution.coffee) (Need to finish
-  part 2)
+- [x] Coffeescript - [Day 21](./day-21/solution.coffee)
 - [x] Go - [Day 13](./day-13/solution.go)
 - [x] Groovy - [Day 16](./day-16/solution.groovy)
 - [x] Haskell - [Day 15](./day-15/solution.hs)
