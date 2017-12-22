@@ -1,3 +1,4 @@
+#!/usr/bin/env coffee
 String.prototype.count = (pattern) ->
 	(this.match(pattern) || []).length
 

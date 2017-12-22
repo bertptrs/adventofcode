@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 const stdin = process.openStdin();
 let content = '';
 

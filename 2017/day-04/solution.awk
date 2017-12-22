@@ -1,3 +1,4 @@
+#!/usr/bin/awk -f
 function word2key(word, a, i, n, result)
 {
     n = split(word, a, "")

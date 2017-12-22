@@ -1,3 +1,4 @@
+#!/usr/bin/env groovy
 void doRotate(List<String> list, String arg) {
 	def amount = Integer.valueOf(arg.substring(1))
 
