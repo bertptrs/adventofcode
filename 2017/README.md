@@ -17,6 +17,7 @@ The current plan, in no particular order:
 - [x] Groovy - [Day 16](./day-16/solution.groovy)
 - [x] Haskell - [Day 15](./day-15/solution.hs)
 - [ ] Java
+- [x] Julia - [Day 22](./day-22/solution.jl)
 - [x] Kotlin - [Day 10](./day-10/solution.kt)
 - [x] Lex - [Day 09](./day-09/solution.l)
 - [x] Lua - [Day 18](./day-18/solution.lua)
@@ -25,14 +26,11 @@ The current plan, in no particular order:
 - [ ] Objective C
 - [x] Perl - [Day 05](./day-05/solution.pl)
 - [x] PHP - [Day 19](./day-19/solution.php)
-- [ ] Prolog
 - [ ] Python
 - [x] R - [Day 20](./day-20/solution.r)
 - [x] Ruby - [Day 08](./day-08/solution.rb)
 - [x] Rust - [Day 14](./day-14/solution.rs)
 - [x] Scala - [Day 11](./day-11/solution.scala)
-- [ ] Scheme
-- [ ] SQL
 - [x] Swift - [Day 17](./day-17/solution.swift)
 
-… and then I will need some more. But that will come in time.
+… and then I will be done!
