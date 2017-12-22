@@ -1,3 +1,4 @@
+#!/usr/bin/env clojure
 (defn lower_root [n] (int (Math/floor (Math/sqrt n))))
 
 (defn box_size [n] (
