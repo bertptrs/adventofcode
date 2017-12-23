@@ -8,7 +8,7 @@ The current plan, in no particular order:
 
 - [x] AWK - [Day 04](./day-04/solution.awk)
 - [x] Bash/shell script - [Day 02](./day-02/solution.sh)
-- [ ] C
+- [c] C - [Day 23](./day-23/solution.c)
 - [x] C++ - [Day 01](./day-01/solution.cpp)
 - [x] C# - [Day 07](./day-07/solution.cs)
 - [x] Clojure - [Day 03](./day-03/solution.clj)
