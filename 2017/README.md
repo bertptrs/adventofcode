@@ -16,7 +16,7 @@ The current plan, in no particular order:
 - [x] Go - [Day 13](./day-13/solution.go)
 - [x] Groovy - [Day 16](./day-16/solution.groovy)
 - [x] Haskell - [Day 15](./day-15/solution.hs)
-- [ ] Java
+- [x] Java - [Day 24](./day-24/solution.java)
 - [x] Julia - [Day 22](./day-22/solution.jl)
 - [x] Kotlin - [Day 10](./day-10/solution.kt)
 - [x] Lex - [Day 09](./day-09/solution.l)
