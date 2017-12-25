@@ -3,6 +3,7 @@ import fileinput
 import re
 
 def read_action(it):
+    next(it)
     to_write = 1 if "1" in next(it) else 0
     offset = 1 if "right" in next(it) else -1
     goto = next(it).strip()[-2]
@@ -23,14 +24,7 @@ def read_input():
             continue
 
         state = line[-2]
-        next(in_iter)
-
-        if_0 = read_action(in_iter)
-        next(in_iter)
-
-        if_1 = read_action(in_iter)
-
-        states[state] = (if_0, if_1)
+        states[state] = (read_action(in_iter), read_action(in_iter))
 
     return initial, runs, states
 
