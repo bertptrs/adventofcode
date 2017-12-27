@@ -16,7 +16,7 @@ genB' n = filter (divisible 8) $ genB n
 main :: IO ()
 main = do
     let aStart = 618
-    let bStart = 814
+        bStart = 814
 
     print $ length $ filter judge $ take 40000000 $ drop 1 $ zip (genA aStart) (genB bStart)
     print $ length $ filter judge $ take 5000000 $ zip (genA' aStart) (genB' bStart)
