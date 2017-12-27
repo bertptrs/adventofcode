@@ -2,4 +2,4 @@ all: solution
 	./$<
 
 solution: solution.hs
-	ghc $< -o $@
+	ghc -dynamic $< -o $@
