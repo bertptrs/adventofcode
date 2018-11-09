@@ -1,0 +1,7 @@
+[package]
+name = "aoc-2018"
+version = "0.1.0"
+authors = ["Bert Peters <bert@bertptrs.nl>"]
+
+[dependencies]
+clap = "2.32"
