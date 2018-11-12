@@ -1,4 +1,6 @@
 use std::io;
+use std::ops;
+use std::cmp;
 
 /// Apply Erathostenes's sieve to the supplied array
 ///
@@ -30,11 +32,11 @@ pub fn prime_sieve(dest: &mut[bool]) {
 }
 
 /// Greatest common divisor
-pub fn gcd(a: i32, b: i32) -> i32 {
+pub fn gcd<T: ops::Rem<Output = T> + cmp::PartialOrd + std::convert::From<i32> + Copy>(a: T, b: T) -> T {
     if a < b {
         gcd(b, a)
     } else {
-        if a % b == 0 {
+        if a % b == T::from(0) {
             b
         } else {
             gcd(a % b, b)
@@ -43,7 +45,7 @@ pub fn gcd(a: i32, b: i32) -> i32 {
 }
 
 /// Least common multiple
-pub fn lcm(a: i32, b: i32) -> i32 {
+pub fn lcm<T: ops::Rem<Output = T> + ops::Mul<Output = T> + ops::Div<Output = T> + cmp::PartialOrd + std::convert::From<i32> + Copy>(a: T, b: T) -> T {
     a * b / gcd(a, b)
 }
 
