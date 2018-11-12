@@ -38,15 +38,15 @@ fn main() {
     let day: i32 = (&matches.value_of("day").unwrap()).parse()
         .expect("Invalid int");
     let mut implementation = get_impl(day);
-    let data: Box<io::Read> = match matches.value_of("input") {
+    let mut data: Box<io::Read> = match matches.value_of("input") {
         Some(filename) => { Box::new(fs::File::open(filename).unwrap()) }
         None => { Box::new(io::stdin()) }
     };
 
     if matches.is_present("part2") {
-        implementation.part2(data)
+        println!("{}", implementation.part2(&mut data));
     } else {
-        implementation.part1(data)
+        println!("{}", implementation.part1(&mut data));
     }
 }
 

@@ -35,10 +35,10 @@ pub fn prime_sieve(dest: &mut[bool]) {
 /// be easily run from the main program.
 pub trait Solution {
     /// Solve the first part of the day
-    fn part1(&mut self, input: Box<io::Read>);
+    fn part1(&mut self, input: &mut io::Read) -> String;
 
     /// Solve the second part of the day
-    fn part2(&mut self, input: Box<io::Read>);
+    fn part2(&mut self, input: &mut io::Read) -> String;
 }
 
 #[cfg(test)]
