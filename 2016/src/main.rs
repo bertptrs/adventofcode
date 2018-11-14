@@ -10,6 +10,7 @@ pub mod day1;
 pub mod day12;
 pub mod day15;
 pub mod day16;
+pub mod day23;
 
 fn get_impl(day: i32) -> Box<common::Solution> {
     match day {
@@ -17,6 +18,7 @@ fn get_impl(day: i32) -> Box<common::Solution> {
         12 => { Box::new(day12::Day12::new()) }
         15 => { Box::new(day15::Day15::new()) }
         16 => { Box::new(day16::Day16::new()) }
+        23 => { Box::new(day23::Day23::new()) }
         _ => {
             panic!("Unimplemented day {}", day)
         }
