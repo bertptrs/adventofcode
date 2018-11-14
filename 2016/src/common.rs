@@ -101,33 +101,72 @@ impl AssemBunnyCPU {
         let mut iptr: i32 = 0;
 
         while iptr < self.instructions.len() as i32 {
-            let ref instruction = self.instructions[iptr as usize];
-            match instruction[0].as_ref() {
-                "cpy" => {
-                    let val = self.get_value(&instruction[1]);
-                    let dest = register_num(&instruction[2]).unwrap();
-                    self.registers[dest] = val;
-                },
-                "jnz" => {
-                    let val = self.get_value(&instruction[1]);
-                    if val != 0 {
-                        let jump: i32 = instruction[2].parse().unwrap();
-                        iptr += jump;
-                        continue;
-                    }
-                },
-                "inc" => {
-                    let dest = register_num(&instruction[1]).unwrap();
-                    self.registers[dest] += 1;
-                },
-                "dec" => {
-                    let dest = register_num(&instruction[1]).unwrap();
-                    self.registers[dest] -= 1;
-                },
-                _ => panic!("Invalid instruction: {:?}", instruction),
+            let mut instruction_target = 0;
+            let mut new_instruction = Vec::new();
+            {
+                let ref instruction = self.instructions[iptr as usize];
+                match instruction[0].as_ref() {
+                    "cpy" => {
+                        let val = self.get_value(&instruction[1]);
+                        match register_num(&instruction[2]) {
+                            Some(num) => { self.registers[num] = val; },
+                            None => {
+                                // Invalid instruction generated.
+                            },
+                        }
+                    },
+                    "jnz" => {
+                        let val = self.get_value(&instruction[1]);
+                        if val != 0 {
+                            let jump: i32 = self.get_value(&instruction[2]);
+                            iptr += jump;
+                            continue;
+                        }
+                    },
+                    "inc" => {
+                        match register_num(&instruction[1]) {
+                            Some(num) => { self.registers[num] += 1 },
+                            None => {
+                                // Invalid instruction generated.
+                            },
+                        }
+                    },
+                    "dec" => {
+                        match register_num(&instruction[1]) {
+                            Some(num) => { self.registers[num] -= 1; },
+                            None => {
+                                // Invalid instruction generated.
+                            },
+                        }
+                    },
+                    "tgl" => {
+                        instruction_target = (iptr + self.get_value(&instruction[1])) as usize;
+                        if instruction_target < self.instructions.len() {
+                            new_instruction = self.instructions[instruction_target].clone();
+                            new_instruction[0] = String::from(match new_instruction.len() {
+                                2 => match new_instruction[0].as_str() {
+                                    "inc" => "dec",
+                                    _ => "inc",
+                                }
+                                3 => match new_instruction[0].as_str() {
+                                    "jnz" => "cpy",
+                                    _ => "jnz",
+                                },
+                                _ => panic!("Cannot toggle instruction {}", instruction_target),
+                            });
+                        }
+                    },
+                    _ => panic!("Invalid instruction: {:?}", instruction),
+                }
             }
             iptr += 1;
+
+            // Check if we need to override an instruction
+            if new_instruction.len() != 0 {
+                self.instructions[instruction_target] = new_instruction;
+            }
         }
+
 
         self.get_value("a")
     }
