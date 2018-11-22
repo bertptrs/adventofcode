@@ -59,7 +59,9 @@ pub trait Solution {
     fn part1(&mut self, input: &mut io::Read) -> String;
 
     /// Solve the second part of the day
-    fn part2(&mut self, input: &mut io::Read) -> String;
+    fn part2(&mut self, _input: &mut io::Read) -> String {
+        panic!("Not implemented yet.");
+    }
 }
 
 #[derive(Default)]
