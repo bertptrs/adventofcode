@@ -1,6 +1,7 @@
 extern crate clap;
 extern crate regex;
 extern crate itertools;
+extern crate permutohedron;
 use clap::{Arg, App};
 use std::fs;
 use std::io;
@@ -11,6 +12,7 @@ pub mod day12;
 pub mod day15;
 pub mod day16;
 pub mod day23;
+pub mod day24;
 
 fn get_impl(day: i32) -> Box<common::Solution> {
     match day {
@@ -19,6 +21,7 @@ fn get_impl(day: i32) -> Box<common::Solution> {
         15 => { Box::new(day15::Day15::new()) }
         16 => { Box::new(day16::Day16::new()) }
         23 => { Box::new(day23::Day23::new()) }
+        24 => { Box::new(day24::Day24::new()) }
         _ => {
             panic!("Unimplemented day {}", day)
         }
