@@ -8,6 +8,7 @@ use std::io;
 
 pub mod common;
 pub mod day1;
+pub mod day2;
 pub mod day12;
 pub mod day15;
 pub mod day16;
@@ -18,6 +19,7 @@ pub mod day25;
 fn get_impl(day: &str) -> Box<common::Solution> {
     match day.parse() {
         Ok(1) => { Box::new(day1::Day1::new()) }
+        Ok(2) => { Box::new(day2::Day2::new()) }
         Ok(12) => { Box::new(day12::Day12::new()) }
         Ok(15) => { Box::new(day15::Day15::new()) }
         Ok(16) => { Box::new(day16::Day16::new()) }
