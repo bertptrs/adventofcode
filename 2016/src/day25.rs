@@ -19,12 +19,11 @@ impl common::Solution for Day25 {
         let initial = 0b101010101010 - 362 * 7;
         println!("Initial value: {}", initial);
         sender_program(initial);
-        unreachable!();
     }
 }
 
 /// This function is an approximation of what the original code is doing.
-pub fn sender_program(mut a: i32) {
+pub fn sender_program(mut a: i32) -> ! {
     // Placeholder variables
     let mut b;
     let mut d;
