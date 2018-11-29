@@ -26,8 +26,8 @@ impl common::Solution for Day25 {
 /// This function is an approximation of what the original code is doing.
 pub fn sender_program(mut a: i32) {
     // Placeholder variables
-    let mut b = 0;
-    let mut d = 0;
+    let mut b;
+    let mut d;
 
     d = a;
     d += 362 * 7;
