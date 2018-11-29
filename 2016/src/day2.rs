@@ -108,7 +108,7 @@ mod tests {
     use super::*;
     use common::Solution;
 
-    const SAMPLE: &str = "ULL
+    const SAMPLE: &[u8] = b"ULL
 RRDDD
 LURDL
 UUUUD";
@@ -116,13 +116,13 @@ UUUUD";
     #[test]
     fn test_part1() {
         let mut instance = Day2::new();
-        assert_eq!("1985", instance.part1(&mut SAMPLE.as_bytes()));
+        assert_eq!("1985", instance.part1(&mut SAMPLE));
     }
 
     #[test]
     fn test_part2() {
         let mut instance = Day2::new();
-        assert_eq!("5DB3", instance.part2(&mut SAMPLE.as_bytes()));
+        assert_eq!("5DB3", instance.part2(&mut SAMPLE));
     }
 
 }
