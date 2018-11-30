@@ -1,5 +1,4 @@
 use common;
-use itertools::Itertools;
 use std::io::prelude::*;
 use std::io::BufReader;
 
@@ -36,10 +35,7 @@ impl Day21 {
 
     fn find(&self, search: &str) -> usize {
         let c = search.chars().next().unwrap();
-        match self.password.iter().find_position(|&&x| x == c) {
-            Some((pos, _)) => pos,
-            _ => panic!("Char not in password: {}", c)
-        }
+        self.password.iter().position(|&x| x == c).unwrap()
     }
 
     fn reverse_range(&mut self, pos_1: usize, pos_2: usize)
