@@ -12,6 +12,7 @@ pub mod day2;
 pub mod day12;
 pub mod day15;
 pub mod day16;
+pub mod day21;
 pub mod day23;
 pub mod day24;
 pub mod day25;
@@ -23,6 +24,7 @@ fn get_impl(day: &str) -> Box<common::Solution> {
         Ok(12) => { Box::new(day12::Day12::new()) }
         Ok(15) => { Box::new(day15::Day15::new()) }
         Ok(16) => { Box::new(day16::Day16::new()) }
+        Ok(21) => { Box::new(day21::Day21::new()) }
         Ok(23) => { Box::new(day23::Day23::new()) }
         Ok(24) => { Box::new(day24::Day24::new()) }
         Ok(25) => { Box::new(day25::Day25::new()) }
