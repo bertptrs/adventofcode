@@ -13,4 +13,4 @@ cache: cargo
 
 # Custom directory, for the correct year
 before_script:
-    - cd 2016
+    - cd 2018
