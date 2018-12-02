@@ -5,10 +5,12 @@ use std::io;
 
 pub mod common;
 pub mod day01;
+pub mod day02;
 
 fn get_impl(day: &str) -> Box<common::Solution> {
     match day.parse() {
-        Ok(1) => { Box::new(day01::Day01::new()) }
+        Ok(1) => Box::new(day01::Day01::new()),
+        Ok(2) => Box::new(day02::Day02::new()),
         Ok(val) => panic!("Unimplemented day {}", val),
         _ => panic!("Invalid number"),
     }
@@ -54,8 +56,8 @@ mod tests {
     #[test]
     fn test_get_impl() {
         // Verify that we can load all days
-        let last_implemented = 1;
-        for d in 1..(last_implemented + 1) {
+        let last_implemented = 2;
+        for d in 1..=last_implemented {
             get_impl(&format!("{}", d));
         }
     }
