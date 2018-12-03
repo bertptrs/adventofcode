@@ -1,5 +1,4 @@
 use std::collections::HashMap;
-use std::collections::HashSet;
 use std::io;
 use std::io::BufRead;
 use std::ops::Range;
@@ -17,12 +16,16 @@ struct Claim {
 
 impl Claim {
 
-    pub fn xrange(&self) -> Range<usize> {
+    fn xrange(&self) -> Range<usize> {
         self.x..(self.x + self.width)
     }
 
-    pub fn yrange(&self) -> Range<usize> {
+    fn yrange(&self) -> Range<usize> {
         self.y..(self.y + self.height)
+    }
+
+    pub fn range(&self) -> impl Iterator<Item=(usize, usize)> {
+        iproduct!(self.xrange(), self.yrange())
     }
 }
 
@@ -56,21 +59,24 @@ impl Day03 {
             self.claims.push(claim);
         }
     }
+
+    fn get_claims(&self) -> HashMap<(usize, usize), i32> {
+        let mut claims = HashMap::new();
+        for claim in &self.claims {
+            for coordinate in claim.range() {
+                *claims.entry(coordinate).or_insert(0) += 1;
+            }
+        }
+
+        claims
+    }
 }
 
 
 impl common::Solution for Day03 {
     fn part1(&mut self, input: &mut io::Read) -> String {
         self.read_claims(input);
-        let mut claim_map = HashMap::new();
-
-        for claim in &self.claims {
-            for x in claim.xrange() {
-                for y in claim.yrange() {
-                    *claim_map.entry((x, y)).or_insert(0) += 1;
-                }
-            }
-        }
+        let claim_map = self.get_claims();
 
         let multi_claim = claim_map.values()
             .filter(|&&x| x > 1)
@@ -81,25 +87,12 @@ impl common::Solution for Day03 {
 
     fn part2(&mut self, input: &mut io::Read) -> String {
         self.read_claims(input);
-        let mut claim_map: HashMap<(usize, usize), Vec<usize>> = HashMap::new();
-        let mut overlaps: Vec<HashSet<usize>> = Vec::new();
-        overlaps.resize(self.claims.len(), HashSet::new());
+        let claims = self.get_claims();
 
-        for (idx, claim) in self.claims.iter().enumerate() {
-            for x in claim.xrange() {
-                for y in claim.yrange() {
-                    let entry = claim_map.entry((x, y)).or_insert(Vec::new());
-                    for claim in entry.iter() {
-                        overlaps[*claim].insert(idx);
-                        overlaps[idx].insert(*claim);
-                    }
+        let uncontested = self.claims.iter()
+            .position(|x| x.range().all(|x| *claims.get(&x).unwrap() == 1))
+            .unwrap();
 
-                    &entry.push(idx);
-                }
-            }
-        }
-
-        let uncontested = overlaps.iter().position(|x| x.is_empty()).unwrap();
         format!("{}", uncontested + 1)
     }
 }
