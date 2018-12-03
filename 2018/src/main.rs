@@ -1,4 +1,5 @@
 extern crate clap;
+extern crate regex;
 use clap::{Arg, App};
 use std::fs;
 use std::io;
@@ -6,11 +7,13 @@ use std::io;
 pub mod common;
 pub mod day01;
 pub mod day02;
+pub mod day03;
 
 fn get_impl(day: &str) -> Box<common::Solution> {
     match day.parse() {
         Ok(1) => Box::new(day01::Day01::new()),
         Ok(2) => Box::new(day02::Day02::new()),
+        Ok(3) => Box::new(day03::Day03::new()),
         Ok(val) => panic!("Unimplemented day {}", val),
         _ => panic!("Invalid number"),
     }
