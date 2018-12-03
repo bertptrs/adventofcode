@@ -1,6 +1,7 @@
 extern crate clap;
 extern crate chrono;
 extern crate regex;
+#[macro_use] extern crate itertools;
 use clap::{Arg, App};
 use std::fs;
 use std::io;
