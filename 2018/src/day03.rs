@@ -48,10 +48,10 @@ impl Day03 {
             let matched = matcher.captures(&line).unwrap();
 
             let claim = Claim{
-                x: matched.get(2).unwrap().as_str().parse().unwrap(),
-                y: matched.get(3).unwrap().as_str().parse().unwrap(),
-                width: matched.get(4).unwrap().as_str().parse().unwrap(),
-                height: matched.get(5).unwrap().as_str().parse().unwrap(),
+                x: matched[2].parse().unwrap(),
+                y: matched[3].parse().unwrap(),
+                width: matched[4].parse().unwrap(),
+                height: matched[5].parse().unwrap(),
             };
             self.claims.push(claim);
         }
