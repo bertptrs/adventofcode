@@ -6,3 +6,4 @@ authors = ["Bert Peters <bert@bertptrs.nl>"]
 [dependencies]
 clap = "2.32"
 regex = "1.1.0"
+chrono = "0.4.6"
