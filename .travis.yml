@@ -3,10 +3,12 @@ rust:
     - stable
     - beta
     - nightly
+    - 1.28.0 # Ubuntu Bionic and Xenial
 
 matrix:
     allow_failures:
         - rust: nightly
+        - 1.28.0
     fast_finish: true
 
 cache: cargo
