@@ -13,6 +13,9 @@ impl Day05 {
     fn reduce(mut data: Vec<u8>) -> usize {
         let mut dptr = 0;
         for iptr in 0..data.len() {
+            // This originally had a nice comparison
+            // data[iptr] != data[dptr - 1] && data[iptr].eq_ignore_ascii_case(data[dptr - 1])
+            // However this is way faster, and does about the same
             if dptr > 0 && (data[iptr] ^ data[dptr - 1]) == 32 {
                 dptr -= 1;
             } else {
