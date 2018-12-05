@@ -52,7 +52,7 @@ mod tests {
     use common::Solution;
     use day05::Day05;
 
-    const SAMPLE_INPUT: &[u8] = b"dabAcCaCBAcCcaDA\n";
+    const SAMPLE_INPUT: &[u8] = include_bytes!("samples/05");
 
     #[test]
     fn sample_part1() {
