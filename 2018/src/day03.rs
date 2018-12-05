@@ -103,9 +103,7 @@ mod tests {
 
     use super::*;
 
-    const SAMPLE_INPUT: &[u8] = b"#1 @ 1,3: 4x4
-#2 @ 3,1: 4x4
-#3 @ 5,5: 2x2";
+    const SAMPLE_INPUT: &[u8] = include_bytes!("samples/03");
 
     #[test]
     fn sample_part1() {
