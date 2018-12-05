@@ -1,10 +1,13 @@
-extern crate clap;
 extern crate chrono;
-extern crate regex;
+extern crate clap;
 #[macro_use] extern crate itertools;
-use clap::{Arg, App};
+extern crate regex;
+
 use std::fs;
 use std::io;
+use std::time::Instant;
+
+use clap::{App, Arg};
 
 pub mod common;
 pub mod day01;
@@ -43,6 +46,10 @@ fn main() {
              .long("input")
              .help("Optional input file, stdin otherwise")
              .takes_value(true))
+        .arg(Arg::with_name("time")
+             .short("t")
+             .long("time")
+             .help("Print the time for the result"))
         .get_matches();
 
     let mut implementation = get_impl(matches.value_of("day").unwrap());
@@ -51,11 +58,16 @@ fn main() {
         None => { Box::new(io::stdin()) }
     };
 
-    if matches.is_present("part2") {
-        println!("{}", implementation.part2(&mut data));
+    let begin = Instant::now();
+    let result = if matches.is_present("part2") {
+        implementation.part2(&mut data)
     } else {
-        println!("{}", implementation.part1(&mut data));
+        implementation.part1(&mut data)
+    };
+    if matches.is_present("time") {
+        eprintln!("Duration: {:?}", Instant::now().duration_since(begin));
     }
+    println!("{}", result);
 }
 
 #[cfg(test)]
