@@ -29,6 +29,25 @@ pub fn prime_sieve(dest: &mut[bool]) {
     }
 }
 
+/// Trim ascii whitespace from a byte vector.
+///
+/// This method does no allocations, guaranteed.
+pub fn trim_back(input: &mut Vec<u8>) {
+    let mut to_truncate = 0;
+    for b in input.iter().rev() {
+        if b.is_ascii_whitespace() {
+            to_truncate += 1;
+        } else {
+            break;
+        }
+    }
+
+    if to_truncate > 0 {
+        let new_len = input.len() - to_truncate;
+        input.truncate(new_len);
+    }
+}
+
 /// Solution trait
 ///
 /// Every day's solution should implement this function so that it can
