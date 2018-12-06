@@ -1,10 +1,10 @@
-use std::collections::HashMap;
 use std::collections::HashSet;
 use std::io::BufRead;
 use std::io::BufReader;
 use std::io::Read;
 
 use common::Solution;
+use common::GroupingCount;
 
 #[derive(Copy, Clone, Debug)]
 struct Coordinate {
@@ -124,13 +124,9 @@ impl Solution for Day06 {
             infinite.extend([grid[y][0], grid[y][self.xmax]].iter().filter_map(claim_filter));
         }
 
-        let mut counts = HashMap::new();
-
-        for instance in grid.iter().flat_map(|x| x.iter())
+        let counts = grid.iter().flat_map(|x| x.iter())
             .filter_map(claim_filter)
-            .filter(|x| !infinite.contains(x)) {
-            *counts.entry(instance).or_insert(0) += 1;
-        }
+            .filter(|x| !infinite.contains(x)).grouping_count();
 
         format!("{}", counts.values().max().unwrap())
     }

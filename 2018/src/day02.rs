@@ -3,16 +3,11 @@ use std::io;
 use std::io::prelude::*;
 
 use common;
+use common::GroupingCount;
 
 /// Count the occurrence characters in a string.
-fn count_chars(word: &str) -> HashMap<char, u32> {
-    let mut counts: HashMap<char, u32> = HashMap::new();
-
-    for c in word.chars() {
-        *counts.entry(c).or_insert(0) += 1;
-    }
-
-    counts
+fn count_chars(word: &str) -> HashMap<char, usize> {
+    word.chars().grouping_count()
 }
 
 /// Compute the number of different positions between two strings.
