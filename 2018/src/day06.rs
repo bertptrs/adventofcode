@@ -68,14 +68,17 @@ impl Day06 {
         self.ymax = my;
     }
 
+    fn range(&self) -> impl Iterator<Item=Coordinate> {
+        iproduct!(0..=self.xmax, 0..=self.ymax)
+            .map(|x| Coordinate::from(x))
+    }
+
     fn compute_claim_grid(&self) -> Vec<Vec<Claim>> {
         let mut grid = vec![vec![Claim::None; self.xmax + 1]; self.ymax + 1];
 
-        for coordinate in iproduct!(0..=self.xmax, 0..=self.ymax) {
+        for coordinate in self.range() {
             let mut cur_dist = usize::max_value();
             let mut cur_best = None;
-
-            let coordinate = Coordinate::from(coordinate);
 
             for (i, point) in self.points.iter().enumerate() {
                 let dist = point.manhattan(&coordinate);
@@ -98,8 +101,7 @@ impl Day06 {
     pub fn part2_with_limit(&mut self, input: &mut Read, limit: usize) -> usize {
         self.read_points(input);
 
-        iproduct!(0..=self.xmax, 0..=self.ymax)
-            .map(|x| Coordinate::from(x))
+        self.range()
             .map(|x| self.points.iter().map(|y| y.manhattan(&x)).sum::<usize>())
             .filter(|x| x < &limit)
             .count()
