@@ -145,7 +145,7 @@ mod tests {
     use common::Solution;
     use day06::Day06;
 
-    const SAMPLE_INPUT: &[u8] = include_bytes!("samples/06");
+    const SAMPLE_INPUT: &[u8] = include_bytes!("samples/06.txt");
 
     #[test]
     fn sample_part1() {

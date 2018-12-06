@@ -103,7 +103,7 @@ mod tests {
 
     use super::*;
 
-    const SAMPLE_INPUT: &[u8] = include_bytes!("samples/03");
+    const SAMPLE_INPUT: &[u8] = include_bytes!("samples/03.txt");
 
     #[test]
     fn sample_part1() {
