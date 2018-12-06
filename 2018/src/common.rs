@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+use std::hash::Hash;
 use std::io;
 
 /// Apply Erathostenes's sieve to the supplied array
@@ -7,7 +9,7 @@ use std::io;
 /// * `dest` - the destination slice to fill with the sieve. This is
 ///   assumed to be filled with "true" before being handed to this
 ///   method.
-pub fn prime_sieve(dest: &mut[bool]) {
+pub fn prime_sieve(dest: &mut [bool]) {
     if dest.len() >= 1 {
         dest[0] = false;
     }
@@ -20,7 +22,7 @@ pub fn prime_sieve(dest: &mut[bool]) {
 
     for i in 1..(limit + 1) {
         if !dest[i] {
-            continue
+            continue;
         }
 
         for j in ((i * i)..(dest.len())).step_by(i) {
@@ -45,6 +47,35 @@ pub fn trim_back(input: &mut Vec<u8>) {
     if to_truncate > 0 {
         let new_len = input.len() - to_truncate;
         input.truncate(new_len);
+    }
+}
+
+
+/// An interface to count elements in particular categories.
+pub trait GroupingCount {
+    /// The type of the categories under inspection
+    type Type;
+
+    /// Count the occurrence of all possible values.
+    ///
+    /// This method will return a map from a value to its occurrence rate.
+    fn grouping_count(&mut self) -> HashMap<Self::Type, usize>;
+}
+
+impl<T> GroupingCount for T
+    where T: Iterator,
+          T::Item: Eq + Hash {
+    type Type = T::Item;
+
+    fn grouping_count(&mut self) -> HashMap<Self::Type, usize>
+    {
+        let mut counts = HashMap::new();
+
+        for element in self {
+            *counts.entry(element).or_insert(0) += 1;
+        }
+
+        counts
     }
 }
 
@@ -78,5 +109,13 @@ mod tests {
         ];
 
         assert_eq!(output, input);
+    }
+
+    #[test]
+    fn test_grouping_count() {
+        let result = [1, 1, 2, 2, 3, 1].iter().grouping_count();
+        assert_eq!(3, result[&1]);
+        assert_eq!(2, result[&2]);
+        assert_eq!(1, result[&3]);
     }
 }

@@ -3,8 +3,10 @@ use std::io;
 use std::io::BufRead;
 use std::ops::Range;
 
-use common;
 use regex;
+
+use common;
+use common::GroupingCount;
 
 #[derive(Copy, Clone, Debug)]
 struct Claim {
@@ -60,15 +62,10 @@ impl Day03 {
         }
     }
 
-    fn get_claims(&self) -> HashMap<(usize, usize), i32> {
-        let mut claims = HashMap::new();
-        for claim in &self.claims {
-            for coordinate in claim.range() {
-                *claims.entry(coordinate).or_insert(0) += 1;
-            }
-        }
-
-        claims
+    fn get_claims(&self) -> HashMap<(usize, usize), usize> {
+        self.claims.iter()
+            .flat_map(|x| x.range())
+            .grouping_count()
     }
 }
 
