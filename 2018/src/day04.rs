@@ -119,7 +119,7 @@ mod tests {
     use common::Solution;
     use day04::Day04;
 
-    const SAMPLE_INPUT: &[u8] = include_bytes!("samples/04");
+    const SAMPLE_INPUT: &[u8] = include_bytes!("samples/04.txt");
 
     #[test]
     fn sample_part1() {
