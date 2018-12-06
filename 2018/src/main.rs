@@ -15,6 +15,7 @@ pub mod day02;
 pub mod day03;
 pub mod day04;
 pub mod day05;
+pub mod day06;
 
 fn get_impl(day: &str) -> Box<common::Solution> {
     match day.parse() {
@@ -23,6 +24,7 @@ fn get_impl(day: &str) -> Box<common::Solution> {
         Ok(3) => Box::new(day03::Day03::new()),
         Ok(4) => Box::new(day04::Day04::new()),
         Ok(5) => Box::new(day05::Day05::new()),
+        Ok(6) => Box::new(day06::Day06::new()),
         Ok(val) => panic!("Unimplemented day {}", val),
         _ => panic!("Invalid number"),
     }
@@ -77,7 +79,7 @@ mod tests {
     #[test]
     fn test_get_impl() {
         // Verify that we can load all days
-        let last_implemented = 5;
+        let last_implemented = 6;
         for d in 1..=last_implemented {
             get_impl(&format!("{}", d));
         }
