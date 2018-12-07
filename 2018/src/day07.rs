@@ -1,5 +1,8 @@
+use std::cmp::Ordering;
 use std::cmp::Reverse;
+use std::collections::BinaryHeap;
 use std::collections::HashMap;
+use std::collections::HashSet;
 use std::io::BufRead;
 use std::io::BufReader;
 use std::io::Read;
@@ -7,11 +10,28 @@ use std::io::Read;
 use regex::Regex;
 
 use common::Solution;
-use std::collections::HashSet;
-use std::collections::BinaryHeap;
 
 fn append_edge(target: &mut HashMap<char, Vec<char>>, source: char, dest: char) {
     target.entry(source).or_insert(Vec::new()).push(dest);
+}
+
+#[derive(Debug, Eq, PartialEq)]
+struct Worker {
+    time: usize,
+    work: char,
+}
+
+impl Ord for Worker {
+    fn cmp(&self, other: &Self) -> Ordering {
+        other.time.cmp(&self.time)
+            .then(other.work.cmp(&self.work))
+    }
+}
+
+impl PartialOrd for Worker {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        Some(self.cmp(other))
+    }
 }
 
 #[derive(Default, Debug)]
@@ -39,6 +59,49 @@ impl Day07 {
             append_edge(&mut self.backward, b, a);
         }
     }
+
+    fn part2_parametrized(&mut self, input: &mut Read, base_time: usize, max_workers: usize) -> usize {
+        self.read_edges(input);
+        let mut starting_points: BinaryHeap<Reverse<char>> = self.forward.keys()
+            .filter(|&x| !self.backward.contains_key(x))
+            .map(|&x| Reverse(x)).collect();
+
+        let mut workers: BinaryHeap<Worker> = BinaryHeap::new();
+        let mut finished = HashSet::new();
+        let mut time = 0;
+
+        while !starting_points.is_empty() || !workers.is_empty() {
+            while workers.len() < max_workers && !starting_points.is_empty() {
+                let Reverse(to_start) = starting_points.pop().unwrap();
+                workers.push(Worker {
+                    time: time + base_time + ((to_start as u8) - b'A' + 1) as usize,
+                    work: to_start,
+                });
+            }
+
+            time = workers.peek().unwrap().time;
+
+            while let Some(worker) = workers.pop() {
+                if worker.time == time {
+                    let c = worker.work;
+                    finished.insert(c);
+
+                    if let Some(dependents) = self.forward.get(&c) {
+                        for d in dependents {
+                            if self.backward.get(d).unwrap().iter().all(|x| finished.contains(x)) {
+                                starting_points.push(Reverse(*d));
+                            }
+                        }
+                    }
+                } else {
+                    workers.push(worker);
+                    break;
+                }
+            }
+        }
+
+        time
+    }
 }
 
 impl Solution for Day07 {
@@ -48,7 +111,7 @@ impl Solution for Day07 {
         let mut result = String::new();
         let mut finished = HashSet::new();
 
-        let mut starting_points: BinaryHeap<Reverse<char>> = self.forward.keys().filter(|&x| !self.backward.contains_key(x))
+        let mut starting_points: BinaryHeap<_> = self.forward.keys().filter(|&x| !self.backward.contains_key(x))
             .map(|&x| Reverse(x)).collect();
 
         while let Some(Reverse(c)) = starting_points.pop() {
@@ -68,7 +131,7 @@ impl Solution for Day07 {
     }
 
     fn part2(&mut self, input: &mut Read) -> String {
-        unimplemented!()
+        format!("{}", self.part2_parametrized(input, 60, 5))
     }
 }
 
@@ -83,5 +146,11 @@ mod tests {
     pub fn sample_part1() {
         let mut instance = Day07::new();
         assert_eq!("CABDFE", instance.part1(&mut SAMPLE_INPUT));
+    }
+
+    #[test]
+    pub fn sample_part2() {
+        let mut instance = Day07::new();
+        assert_eq!(15, instance.part2_parametrized(&mut SAMPLE_INPUT, 0, 2));
     }
 }
