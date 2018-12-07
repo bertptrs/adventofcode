@@ -2,7 +2,6 @@ use std::cmp::Ordering;
 use std::cmp::Reverse;
 use std::collections::BinaryHeap;
 use std::collections::HashMap;
-use std::collections::HashSet;
 use std::io::BufRead;
 use std::io::BufReader;
 use std::io::Read;
@@ -63,7 +62,6 @@ impl Day07 {
             .map(|&x| Reverse(x)).collect();
 
         let mut workers: BinaryHeap<Worker> = BinaryHeap::new();
-        let mut finished = HashSet::new();
         let mut time = 0;
 
         while !starting_points.is_empty() || !workers.is_empty() {
@@ -80,7 +78,6 @@ impl Day07 {
             while let Some(worker) = workers.pop() {
                 if worker.time == time {
                     let c = worker.work;
-                    finished.insert(c);
 
                     if let Some(dependents) = self.forward.get(&c) {
                         for d in dependents {
@@ -108,14 +105,12 @@ impl Solution for Day07 {
         self.read_edges(input);
 
         let mut result = String::new();
-        let mut finished = HashSet::new();
 
         let mut starting_points: BinaryHeap<_> = self.forward.keys().filter(|&x| !self.dep_count.contains_key(x))
             .map(|&x| Reverse(x)).collect();
 
         while let Some(Reverse(c)) = starting_points.pop() {
             result.push(c);
-            finished.insert(c);
 
             if let Some(dependents) = self.forward.get(&c) {
                 for d in dependents {
