@@ -11,10 +11,6 @@ use regex::Regex;
 
 use common::Solution;
 
-fn append_edge(target: &mut HashMap<char, Vec<char>>, source: char, dest: char) {
-    target.entry(source).or_insert(Vec::new()).push(dest);
-}
-
 #[derive(Debug, Eq, PartialEq)]
 struct Worker {
     time: usize,
@@ -37,7 +33,7 @@ impl PartialOrd for Worker {
 #[derive(Default, Debug)]
 pub struct Day07 {
     forward: HashMap<char, Vec<char>>,
-    backward: HashMap<char, Vec<char>>,
+    dep_count: HashMap<char, usize>,
 }
 
 impl Day07 {
@@ -55,15 +51,15 @@ impl Day07 {
             let a = groups[1].chars().next().unwrap();
             let b = groups[2].chars().next().unwrap();
 
-            append_edge(&mut self.forward, a, b);
-            append_edge(&mut self.backward, b, a);
+            self.forward.entry(a).or_insert(Vec::new()).push(b);
+            *self.dep_count.entry(b).or_insert(0) += 1;
         }
     }
 
     fn part2_parametrized(&mut self, input: &mut Read, base_time: usize, max_workers: usize) -> usize {
         self.read_edges(input);
         let mut starting_points: BinaryHeap<Reverse<char>> = self.forward.keys()
-            .filter(|&x| !self.backward.contains_key(x))
+            .filter(|&x| !self.dep_count.contains_key(x))
             .map(|&x| Reverse(x)).collect();
 
         let mut workers: BinaryHeap<Worker> = BinaryHeap::new();
@@ -88,8 +84,11 @@ impl Day07 {
 
                     if let Some(dependents) = self.forward.get(&c) {
                         for d in dependents {
-                            if self.backward.get(d).unwrap().iter().all(|x| finished.contains(x)) {
+                            let mut entry = self.dep_count.get_mut(d).unwrap();
+                            if *entry == 1 {
                                 starting_points.push(Reverse(*d));
+                            } else {
+                                *entry -= 1;
                             }
                         }
                     }
@@ -111,7 +110,7 @@ impl Solution for Day07 {
         let mut result = String::new();
         let mut finished = HashSet::new();
 
-        let mut starting_points: BinaryHeap<_> = self.forward.keys().filter(|&x| !self.backward.contains_key(x))
+        let mut starting_points: BinaryHeap<_> = self.forward.keys().filter(|&x| !self.dep_count.contains_key(x))
             .map(|&x| Reverse(x)).collect();
 
         while let Some(Reverse(c)) = starting_points.pop() {
@@ -120,8 +119,11 @@ impl Solution for Day07 {
 
             if let Some(dependents) = self.forward.get(&c) {
                 for d in dependents {
-                    if self.backward.get(d).unwrap().iter().all(|x| finished.contains(x)) {
+                    let mut entry = self.dep_count.get_mut(d).unwrap();
+                    if *entry == 1 {
                         starting_points.push(Reverse(*d));
+                    } else {
+                        *entry -= 1;
                     }
                 }
             }
