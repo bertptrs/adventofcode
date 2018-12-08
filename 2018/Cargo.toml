@@ -2,6 +2,7 @@
 name = "aoc-2018"
 version = "0.1.0"
 authors = ["Bert Peters <bert@bertptrs.nl>"]
+description = "Implementation of the problems of Advent of Code 2018"
 
 [dependencies]
 clap = "2.32"
