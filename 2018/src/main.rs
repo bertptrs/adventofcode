@@ -1,23 +1,14 @@
 extern crate chrono;
 extern crate clap;
-#[macro_use] extern crate itertools;
-extern crate regex;
+extern crate aoc_2018;
 
 use std::fs;
 use std::io;
 use std::time::Instant;
 
-use clap::{App, Arg};
+use aoc_2018::*;
 
-pub mod common;
-pub mod day01;
-pub mod day02;
-pub mod day03;
-pub mod day04;
-pub mod day05;
-pub mod day06;
-pub mod day07;
-pub mod day08;
+use clap::{App, Arg};
 
 fn get_impl(day: &str) -> Box<common::Solution> {
     match day.parse() {
@@ -39,23 +30,23 @@ fn main() {
         .version("2018")
         .author("Bert Peters <bert@bertptrs.nl>")
         .arg(Arg::with_name("day")
-             .value_name("DAY")
-             .help("Number of the day to execute")
-             .required(true)
-             .takes_value(true))
+            .value_name("DAY")
+            .help("Number of the day to execute")
+            .required(true)
+            .takes_value(true))
         .arg(Arg::with_name("part2")
-             .short("2")
-             .help("Whether to run part 2")
-             .long("part2"))
+            .short("2")
+            .help("Whether to run part 2")
+            .long("part2"))
         .arg(Arg::with_name("input")
-             .short("i")
-             .long("input")
-             .help("Optional input file, stdin otherwise")
-             .takes_value(true))
+            .short("i")
+            .long("input")
+            .help("Optional input file, stdin otherwise")
+            .takes_value(true))
         .arg(Arg::with_name("time")
-             .short("t")
-             .long("time")
-             .help("Print the time for the result"))
+            .short("t")
+            .long("time")
+            .help("Print the time for the result"))
         .get_matches();
 
     let mut implementation = get_impl(matches.value_of("day").unwrap());
