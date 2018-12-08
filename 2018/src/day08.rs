@@ -42,8 +42,7 @@ fn total2(items: &[usize]) -> (usize, usize) {
         }
 
         let total = items[start..(start + meta_entries)].iter()
-            .filter(|&&x| x <= values.len())
-            .map(|&x| values[x - 1])
+            .filter_map(|&x| values.get(x - 1))
             .sum();
 
         (total, start + meta_entries)
