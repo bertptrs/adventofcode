@@ -1,53 +1,31 @@
-use std::cell::Cell;
+use std::collections::VecDeque;
 use std::io::Read;
-
-use intrusive_collections::{LinkedList, LinkedListLink};
 
 use common::Solution;
 
-struct Marble {
-    link: LinkedListLink,
-    value: Cell<usize>,
-}
-
-impl Marble {
-    pub fn new(value: usize) -> Box<Self> {
-        Box::new(Marble {
-            link: LinkedListLink::new(),
-            value: Cell::new(value),
-        })
-    }
-}
-
-intrusive_adapter!(MarbleAdapter = Box<Marble>: Marble { link: LinkedListLink });
-
 fn winning_marbles(elves: usize, marbles: usize) -> usize {
     let mut scores = vec![0usize; elves];
-    let mut state: LinkedList<_> = LinkedList::new(MarbleAdapter::new());
-    state.push_front(Marble::new(0));
-    let mut current = state.front_mut();
+    let mut state = VecDeque::new();
+    state.push_front(0);
 
     for marble in 1..=marbles {
         if marble % 23 == 0 {
             let player = marble % elves;
+
             for _ in 0..7 {
-                current.move_prev();
-                if current.is_null() {
-                    current.move_prev();
-                }
+                let c = state.pop_back().unwrap();
+                state.push_front(c);
             }
 
-            let to_remove = current.get().unwrap().value.get();
+            let removed = state.pop_back().unwrap();
+            scores[player] += removed + marble;
 
-            scores[player] += marble + to_remove;
-            current.remove();
+            let c = state.pop_front().unwrap();
+            state.push_back(c);
         } else {
-            current.move_next();
-            if current.is_null() {
-                current.move_next();
-            }
-            current.insert_after(Marble::new(marble));
-            current.move_next();
+            let c = state.pop_front().unwrap();
+            state.push_back(c);
+            state.push_back(marble);
         }
     }
 
