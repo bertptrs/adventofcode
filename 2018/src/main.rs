@@ -6,24 +6,9 @@ use std::fs;
 use std::io;
 use std::time::Instant;
 
-use aoc_2018::*;
+use aoc_2018::get_impl;
 
 use clap::Arg;
-
-fn get_impl(day: u32) -> Box<common::Solution> {
-    match day {
-        1 => Box::new(day01::Day01::new()),
-        2 => Box::new(day02::Day02::new()),
-        3 => Box::new(day03::Day03::new()),
-        4 => Box::new(day04::Day04::new()),
-        5 => Box::new(day05::Day05::new()),
-        6 => Box::new(day06::Day06::new()),
-        7 => Box::new(day07::Day07::new()),
-        8 => Box::new(day08::Day08::new()),
-        9 => Box::new(day09::Day09::new()),
-        val => panic!("Unimplemented day {}", val),
-    }
-}
 
 fn main() {
     let matches = app_from_crate!()
@@ -63,18 +48,4 @@ fn main() {
         eprintln!("Duration: {:?}", Instant::now().duration_since(begin));
     }
     println!("{}", result);
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn test_get_impl() {
-        // Verify that we can load all days
-        let last_implemented = 8;
-        for d in 1..=last_implemented {
-            get_impl(d);
-        }
-    }
 }
