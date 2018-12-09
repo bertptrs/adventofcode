@@ -24,8 +24,7 @@ fn distance(a: &str, b: &str) -> usize {
 }
 
 #[derive(Default)]
-pub struct Day02 {
-}
+pub struct Day02 {}
 
 impl Day02 {
     pub fn new() -> Day02 {

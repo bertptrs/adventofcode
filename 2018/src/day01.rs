@@ -1,6 +1,7 @@
 use std::collections::HashSet;
 use std::io;
 use std::io::prelude::*;
+
 use common;
 
 pub struct Day01 {}
@@ -46,8 +47,9 @@ impl common::Solution for Day01 {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use common::Solution;
+
+    use super::*;
 
     #[test]
     fn samples_part1() {
@@ -74,6 +76,4 @@ mod tests {
         assert_eq!("5", instance.part2(&mut sample3.as_bytes()));
         assert_eq!("14", instance.part2(&mut sample4.as_bytes()));
     }
-
-
 }

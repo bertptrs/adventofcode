@@ -1,14 +1,15 @@
-extern crate chrono;
-#[macro_use] extern crate clap;
 extern crate aoc_2018;
+extern crate chrono;
+#[macro_use]
+extern crate clap;
 
 use std::fs;
 use std::io;
 use std::time::Instant;
 
-use aoc_2018::get_impl;
-
 use clap::Arg;
+
+use aoc_2018::get_impl;
 
 fn main() {
     let matches = app_from_crate!()
