@@ -3,8 +3,8 @@ use std::io::BufRead;
 use std::io::BufReader;
 use std::io::Read;
 
-use common::Solution;
 use common::GroupingCount;
+use common::Solution;
 
 #[derive(Copy, Clone, Debug)]
 struct Coordinate {

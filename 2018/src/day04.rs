@@ -1,14 +1,14 @@
+use std::collections::HashMap;
 use std::io;
 use std::io::BufRead;
 
 use chrono::DateTime;
 use chrono::offset::TimeZone;
 use chrono::offset::Utc;
+use chrono::Timelike;
 use regex::Regex;
 
 use common;
-use std::collections::HashMap;
-use chrono::Timelike;
 
 #[derive(Debug, PartialEq, PartialOrd, Ord, Eq, Copy, Clone)]
 enum EventType {
@@ -37,7 +37,7 @@ impl Day04 {
         self.events.clear();
         let reader = io::BufReader::new(input);
 
-        let scanner = Regex::new(r"^\[([^\]]+)\] (Guard #(\d+)|falls asleep|wakes up)").unwrap();
+        let scanner = Regex::new(r"^\[([^]]+)] (Guard #(\d+)|falls asleep|wakes up)").unwrap();
 
         for line in reader.lines() {
             let line = line.unwrap();
@@ -59,7 +59,7 @@ impl Day04 {
         self.events.sort_unstable();
     }
 
-    fn get_sleeps(&self) -> HashMap<usize, [u32;60]> {
+    fn get_sleeps(&self) -> HashMap<usize, [u32; 60]> {
         let mut sleeps = HashMap::new();
         let mut guard: Option<usize> = None;
         let mut sleep_start: Option<DateTime<Utc>> = None;
@@ -70,12 +70,12 @@ impl Day04 {
                 EventType::SHIFT(val) => {
                     guard = Some(*val);
                     sleep_start = None;
-                },
+                }
                 EventType::SLEEP => {
                     sleep_start = Some(event.time.clone());
-                },
+                }
                 EventType::WAKE => {
-                    let mut minutes = sleeps.entry(guard.unwrap()).or_insert([0u32;60]);
+                    let mut minutes = sleeps.entry(guard.unwrap()).or_insert([0u32; 60]);
                     for m in sleep_start.unwrap().minute()..event.time.minute() {
                         minutes[m as usize] += 1;
                     }
@@ -86,7 +86,7 @@ impl Day04 {
         sleeps
     }
 
-    fn format_results(sleepers: HashMap<usize, [u32;60]>, scores: HashMap<usize, u32>) -> String {
+    fn format_results(sleepers: HashMap<usize, [u32; 60]>, scores: HashMap<usize, u32>) -> String {
         let (best_sleeper, _) = scores.iter().max_by(|&(_, a), &(_, b)| a.cmp(b)).unwrap();
 
         let best_minute = sleepers[best_sleeper].iter().enumerate()

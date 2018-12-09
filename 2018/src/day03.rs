@@ -17,7 +17,6 @@ struct Claim {
 }
 
 impl Claim {
-
     fn xrange(&self) -> Range<usize> {
         self.x..(self.x + self.width)
     }
@@ -52,7 +51,7 @@ impl Day03 {
             let line = line.unwrap();
             let matched = matcher.captures(&line).unwrap();
 
-            let claim = Claim{
+            let claim = Claim {
                 x: matched[2].parse().unwrap(),
                 y: matched[3].parse().unwrap(),
                 width: matched[4].parse().unwrap(),
