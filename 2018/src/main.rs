@@ -20,6 +20,7 @@ fn get_impl(day: u32) -> Box<common::Solution> {
         6 => Box::new(day06::Day06::new()),
         7 => Box::new(day07::Day07::new()),
         8 => Box::new(day08::Day08::new()),
+        9 => Box::new(day09::Day09::new()),
         val => panic!("Unimplemented day {}", val),
     }
 }
