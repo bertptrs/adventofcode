@@ -5,7 +5,7 @@ use common::Solution;
 
 fn winning_marbles(elves: usize, marbles: usize) -> usize {
     let mut scores = vec![0usize; elves];
-    let mut state = VecDeque::new();
+    let mut state = VecDeque::with_capacity(marbles);
     state.push_front(0);
 
     for marble in 1..=marbles {
