@@ -1,4 +1,5 @@
 extern crate chrono;
+#[macro_use] extern crate intrusive_collections;
 #[macro_use] extern crate itertools;
 extern crate regex;
 
