@@ -72,12 +72,27 @@ impl Day10 {
             _ => panic!("Input does not make sense."),
         }
     }
+
+    fn underestimate_time(&self) -> i32 {
+        let (lower, upper) = match self.points.iter().enumerate().minmax_by_key(|(_, (_1, y))| y) {
+            MinMaxResult::MinMax((x, (_, _)), (y, (_, _))) => (x, y),
+            _ => panic!("Input does not make sense"),
+        };
+
+        // Letters are probably less than 100 in height
+        let dist = self.points[upper].1 - self.points[lower].1 - 100;
+        let speed = self.speeds[lower].1 - self.speeds[upper].1;
+
+        dist.checked_div(speed).unwrap_or(1).max(1)
+    }
 }
 
 impl Solution for Day10 {
     fn part1(&mut self, input: &mut Read) -> String {
         self.read_inputs(input);
-        let mut prev = i32::MAX;
+        let mut prev = self.height();
+        let initial = self.underestimate_time();
+        self.run(initial);
         let mut height = self.height();
         while height < prev {
             prev = height;
@@ -90,16 +105,18 @@ impl Solution for Day10 {
 
     fn part2(&mut self, input: &mut Read) -> String {
         self.read_inputs(input);
-        let mut prev = i32::MAX;
+        let mut prev = self.height();
+        let mut steps = self.underestimate_time();
+        self.run(steps);
         let mut height = self.height();
-        let mut steps = -1;
+
         while height < prev {
             steps += 1;
             prev = height;
             self.run(1);
             height = self.height();
         }
-        format!("{}", steps)
+        format!("{}", steps - 1)
     }
 }
 
