@@ -12,8 +12,8 @@ use common::Solution;
 
 #[derive(Default)]
 pub struct Day10 {
-    points: Vec<(i32, i32)>,
-    speeds: Vec<(i32, i32)>,
+    points: Vec<i32>,
+    speeds: Vec<i32>,
 }
 
 impl Day10 {
@@ -29,18 +29,20 @@ impl Day10 {
             let line = line.unwrap();
             let groups = matcher.captures(&line).unwrap();
 
-            self.points.push((groups[1].parse().unwrap(), groups[2].parse().unwrap()));
-            self.speeds.push((groups[3].parse().unwrap(), groups[4].parse().unwrap()));
+            self.points.push(groups[1].parse().unwrap());
+            self.points.push(groups[2].parse().unwrap());
+            self.speeds.push(groups[3].parse().unwrap());
+            self.speeds.push(groups[4].parse().unwrap());
         }
     }
 
     fn print_state(&self) -> String {
-        let points: HashSet<_> = self.points.iter().collect();
-        let (xmin, xmax) = match self.points.iter().map(|&(x, _)| x).minmax() {
+        let points: HashSet<_> = self.points.iter().tuples().collect();
+        let (xmin, xmax) = match points.iter().map(|&(x, _)| *x).minmax() {
             MinMaxResult::MinMax(x, y) => (x, y),
             _ => unreachable!(),
         };
-        let (ymin, ymax) = match self.points.iter().map(|&(_, y)| y).minmax() {
+        let (ymin, ymax) = match points.iter().map(|&(_, y)| *y).minmax() {
             MinMaxResult::MinMax(x, y) => (x, y),
             _ => unreachable!(),
         };
@@ -49,7 +51,7 @@ impl Day10 {
 
         for y in ymin..=ymax {
             for x in xmin..=xmax {
-                let c = if points.contains(&(x, y)) { '#' } else { '.' };
+                let c = if points.contains(&(&x, &y)) { '#' } else { '.' };
                 buffer.push(c);
             }
 
@@ -60,28 +62,27 @@ impl Day10 {
     }
 
     fn run(&mut self, time_step: i32) {
-        for ((x, y), (dx, dy)) in self.points.iter_mut().zip(self.speeds.iter()) {
+        for (x, dx) in self.points.iter_mut().zip(self.speeds.iter()) {
             *x += dx * time_step;
-            *y += dy * time_step;
         }
     }
 
     fn height(&self) -> i32 {
-        match self.points.iter().map(|&(_, y)| y).minmax() {
+        match self.points.iter().skip(1).step(2).minmax() {
             MinMaxResult::MinMax(x, y) => { y - x + 1 }
             _ => panic!("Input does not make sense."),
         }
     }
 
     fn underestimate_time(&self) -> i32 {
-        let (lower, upper) = match self.points.iter().enumerate().minmax_by_key(|(_, (_1, y))| y) {
-            MinMaxResult::MinMax((x, (_, _)), (y, (_, _))) => (x, y),
+        let (lower, upper) = match self.points.iter().enumerate().skip(1).step(2).minmax_by_key(|&(_, y)| y) {
+            MinMaxResult::MinMax((x, _), (y, _)) => (x, y),
             _ => panic!("Input does not make sense"),
         };
 
         // Letters are probably less than 100 in height
-        let dist = self.points[upper].1 - self.points[lower].1 - 100;
-        let speed = self.speeds[lower].1 - self.speeds[upper].1;
+        let dist = self.points[upper] - self.points[lower] - 100;
+        let speed = self.speeds[lower] - self.speeds[upper];
 
         dist.checked_div(speed).unwrap_or(1).max(1)
     }
