@@ -12,12 +12,15 @@ fn power_at(serial: i32, (x, y): (i32, i32)) -> i32 {
     power_level - 5
 }
 
-#[derive(Default)]
-pub struct Day11 {}
+pub struct Day11 {
+    power_grid: [[i32; 300]; 300],
+}
 
 impl Day11 {
     pub fn new() -> Self {
-        Default::default()
+        Day11 {
+            power_grid: [[0i32; 300]; 300],
+        }
     }
 
     fn read_serial(&self, input: &mut Read) -> i32 {
@@ -26,29 +29,63 @@ impl Day11 {
         data.trim().parse().unwrap()
     }
 
-    fn best(&self, serial: i32, size: i32) -> (i32, i32, i32) {
-        let mut best_coordinates: Option<(i32, i32)> = None;
-        let mut best_result = i32::MIN;
+    fn compute_summed_area(&mut self, serial: i32) {
+        self.power_grid[0][0] = power_at(serial, (1, 1));
+        for x in 1..300 {
+            self.power_grid[0][x] = self.power_grid[0][x - 1] + power_at(serial, (x as i32 + 1, 1));
+        }
 
-        let mut slide = vec![0i32;size as usize];
-        let mut running_sum = 0;
-        for y in 1..=(301 - size) {
-            for x in 1..=300 {
-                let new_sum = (y..(y+size)).map(|y| power_at(serial, (x, y))).sum();
-                running_sum -= slide[(x % size) as usize];
-                running_sum += new_sum;
-                slide[(x % size) as usize] = new_sum;
+        for y in 1..300 {
+            self.power_grid[y][0] = self.power_grid[y - 1][0] + power_at(serial, (y as i32 + 1, 1));
 
-                if x >= size {
-                    if running_sum > best_result {
-                        best_result = running_sum;
-                        best_coordinates = Some((x + 1 - size, y));
-                    }
+            for x in 1..300 {
+                let mut power = power_at(serial, (x as i32 + 1, y as i32 + 1));
+                power += self.power_grid[y - 1][x];
+                power += self.power_grid[y][x - 1];
+                power -= self.power_grid[y - 1][x - 1];
+                self.power_grid[y][x] = power;
+            }
+        }
+    }
+
+    fn best(&self, size: usize) -> (usize, usize, i32) {
+        let mut best_coordinates = (1, 1);
+        let mut best_result = self.power_grid[size - 1][size - 1];
+
+        // First row
+        for x in 0..(300 - size) {
+            let score = self.power_grid[size - 1][x + size] - self.power_grid[size - 1][x];
+            if score > best_result {
+                best_result = score;
+                best_coordinates = (x + 1, 1);
+            }
+        }
+
+        // First column
+        for y in 0..(300 - size) {
+            let score = self.power_grid[y + size][size - 1] - self.power_grid[y][size - 1];
+            if score > best_result {
+                best_result = score;
+                best_coordinates = (1, y + 1);
+            }
+        }
+
+        // Remaining tiles
+        for y in 0..(300 - size) {
+            for x in 0..(300 - size) {
+                let a = self.power_grid[y][x];
+                let b = self.power_grid[y][x + size];
+                let c = self.power_grid[y + size][x];
+                let d = self.power_grid[y + size][x + size];
+                let score = d + a - b - c;
+                if score > best_result {
+                    best_result = score;
+                    best_coordinates = (x + 2, y + 2);
                 }
             }
         }
 
-        let (x, y) = best_coordinates.unwrap();
+        let (x, y) = best_coordinates;
 
         (x, y, best_result)
     }
@@ -57,17 +94,19 @@ impl Day11 {
 impl Solution for Day11 {
     fn part1(&mut self, input: &mut Read) -> String {
         let serial = self.read_serial(input);
-        let (x, y, _) = self.best(serial, 3);
+        self.compute_summed_area(serial);
+        let (x, y, _) = self.best(3);
 
         format!("{},{}", x, y)
     }
 
     fn part2(&mut self, input: &mut Read) -> String {
         let serial = self.read_serial(input);
+        self.compute_summed_area(serial);
         let mut best_result = 0;
         let mut best_option = None;
         for size in 1..=300 {
-            let (x, y, result) = self.best(serial, size);
+            let (x, y, result) = self.best(size);
             if result > best_result {
                 best_result = result;
                 best_option = Some((x, y, size));
