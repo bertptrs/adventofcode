@@ -1,3 +1,4 @@
+use std::i32;
 use std::io::Read;
 
 use common::Solution;
@@ -27,7 +28,7 @@ impl Day11 {
 
     fn best(&self, serial: i32, size: i32) -> (i32, i32, i32) {
         let mut best_coordinates: Option<(i32, i32)> = None;
-        let mut best_result = 0;
+        let mut best_result = i32::MIN;
 
         let mut slide = vec![0i32;size as usize];
         let mut running_sum = 0;
@@ -70,8 +71,6 @@ impl Solution for Day11 {
             if result > best_result {
                 best_result = result;
                 best_option = Some((x, y, size));
-            } else if result < best_result {
-                break;
             }
         }
         let (x, y, size) = best_option.unwrap();
