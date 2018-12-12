@@ -78,7 +78,7 @@ impl Day12 {
     }
 
     fn simulate(&self, state: &State) -> State {
-        let mut new_state = Vec::new();
+        let mut new_state = Vec::with_capacity(state.len() + 8);
         let mut index = 0;
         let mut last_idx = None;
         for &(idx, b) in state {
