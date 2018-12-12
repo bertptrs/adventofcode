@@ -45,15 +45,12 @@ impl Day12 {
     }
 
     fn read_input(&mut self, input: &mut Read) -> State {
-        let mut state = Vec::new();
+        let state;
         let mut reader = BufReader::new(input);
         {
             let mut line = String::new();
             reader.read_line(&mut line).unwrap();
-
-            for (idx, c) in line.trim().chars().skip("initial state: ".len()).enumerate() {
-                state.push((idx as i64, char_bool(c)));
-            }
+            state = state_from_string(&line["initial state:".len()..line.len()].trim(), 0);
         }
 
         for line in reader.lines() {
