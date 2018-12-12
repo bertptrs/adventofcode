@@ -1,8 +1,12 @@
+use std::collections::HashMap;
 use std::io::BufRead;
 use std::io::BufReader;
 use std::io::Read;
+use std::iter::FromIterator;
 
 use common::Solution;
+
+type State = Vec<(i64, bool)>;
 
 #[derive(Default, Debug)]
 pub struct Day12 {
@@ -17,15 +21,22 @@ fn char_bool(c: char) -> bool {
     }
 }
 
-fn print_state(state: &[(i32, bool)]) {
+fn print_state(state: &State) -> String {
+    let mut buf = String::with_capacity(state.len());
     for &(_, b) in state {
         if b {
-            print!("#");
+            buf.push('#');
         } else {
-            print!(".");
+            buf.push('.');
         }
     }
-    println!();
+    buf
+}
+
+fn state_from_string(representation: &str, offset: i64) -> State {
+    Vec::from_iter(representation.chars()
+        .enumerate()
+        .map(|(i, c)| (i as i64 + offset, char_bool(c))))
 }
 
 impl Day12 {
@@ -33,7 +44,7 @@ impl Day12 {
         Default::default()
     }
 
-    fn read_input(&mut self, input: &mut Read) -> Vec<(i32, bool)> {
+    fn read_input(&mut self, input: &mut Read) -> State {
         let mut state = Vec::new();
         let mut reader = BufReader::new(input);
         {
@@ -41,7 +52,7 @@ impl Day12 {
             reader.read_line(&mut line).unwrap();
 
             for (idx, c) in line.trim().chars().skip("initial state: ".len()).enumerate() {
-                state.push((idx as i32, char_bool(c)));
+                state.push((idx as i64, char_bool(c)));
             }
         }
 
@@ -66,7 +77,7 @@ impl Day12 {
         state
     }
 
-    fn simulate(&self, state: &[(i32, bool)]) -> Vec<(i32, bool)> {
+    fn simulate(&self, state: &State) -> State {
         let mut new_state = Vec::new();
         let mut index = 0;
         let mut last_idx = None;
@@ -101,38 +112,56 @@ impl Day12 {
 
         new_state
     }
+
+    fn simulate_n(&self, mut state: State, n: usize) -> State {
+        for _ in 0..n {
+            state = self.simulate(&state);
+        }
+        state
+    }
+
+    fn sum(&self, state: &State) -> i64 {
+        state.iter()
+            .filter(|&&(_, x)| x)
+            .map(|&(i, _)| i)
+            .sum()
+    }
 }
 
 impl Solution for Day12 {
     fn part1(&mut self, input: &mut Read) -> String {
         let mut state = self.read_input(input);
-        print_state(&state);
-        for _ in 1..=20 {
-            state = self.simulate(&state);
-        }
+        state = self.simulate_n(state, 20);
 
-        let total: i32 = state.iter()
-            .filter(|&&(_, x)| x)
-            .map(|&(i, _)| i)
-            .sum();
-
-        format!("{}", total)
+        format!("{}", self.sum(&state))
     }
 
     fn part2(&mut self, input: &mut Read) -> String {
         // Note: this is way too slow
         let mut state = self.read_input(input);
-        print_state(&state);
-        for _ in 1..=50000000000i64 {
+        let mut seen = HashMap::new();
+        let mut time = 1i64;
+        const TARGET_TIME: i64 = 50000000000;
+
+        loop {
             state = self.simulate(&state);
+            let &(offset, _) = state.first().unwrap();
+            let representation = print_state(&state);
+            if let Some((o_offset, o_time)) = seen.get(&representation) {
+                let remaining_time = TARGET_TIME - o_time;
+                let cycle_length = time - o_time;
+                let iterations_skipped = remaining_time / cycle_length;
+                let remainder = remaining_time % cycle_length;
+                let new_offset = o_offset + iterations_skipped * (offset - o_offset);
+
+                state = state_from_string(&representation, new_offset);
+                state = self.simulate_n(state, remainder as usize);
+
+                return format!("{}", self.sum(&state));
+            }
+            seen.insert(representation, (offset, time));
+            time += 1;
         }
-
-        let total: i32 = state.iter()
-            .filter(|&&(_, x)| x)
-            .map(|&(i, _)| i)
-            .sum();
-
-        format!("{}", total)
     }
 }
 
