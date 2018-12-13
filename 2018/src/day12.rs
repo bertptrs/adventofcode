@@ -77,29 +77,12 @@ impl Day12 {
     fn simulate(&self, state: &State) -> State {
         let mut new_state = Vec::with_capacity(state.len() + 8);
         let mut index = 0;
-        let mut last_idx = None;
         for &(idx, b) in state {
-            index = (index << 1) & 0x1f;
-            if b {
-                index |= 1;
-            }
-
-            if self.productions[index] {
-                new_state.push((idx - 2, true));
-            } else if !new_state.is_empty() {
-                new_state.push((idx - 2, false));
-            }
-            last_idx = Some(idx);
+            index = self.advance_state(&mut new_state, index, idx, b)
         }
-        if let Some(idx) = last_idx {
+        if let Some((idx, _)) = state.last() {
             for i in 1..=4 {
-                index = (index << 1) & 0x1f;
-
-                if self.productions[index] {
-                    new_state.push((idx + i - 2, true));
-                } else if !new_state.is_empty() {
-                    new_state.push((idx + i - 2, false));
-                }
+                index = self.advance_state(&mut new_state, index, idx + i, false);
             }
         }
 
@@ -108,6 +91,17 @@ impl Day12 {
         new_state.truncate(new_len);
 
         new_state
+    }
+
+    fn advance_state(&self, new_state: &mut State, mut index: usize, idx: i64, b: bool) -> usize {
+        index = (index << 1) & 0x1f | b as usize;
+        if self.productions[index] {
+            new_state.push((idx - 2, true));
+        } else if !new_state.is_empty() {
+            new_state.push((idx - 2, false));
+        }
+
+        index
     }
 
     fn simulate_n(&self, mut state: State, n: usize) -> State {
