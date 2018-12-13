@@ -51,8 +51,7 @@ impl Direction {
 #[derive(Default, Debug)]
 pub struct Day13 {
     grid: Vec<Vec<char>>,
-    carts: Vec<(Coordinate, Direction, usize)>,
-    alive: Vec<bool>,
+    carts: Vec<(Coordinate, Direction, usize, bool)>,
 }
 
 impl Day13 {
@@ -61,7 +60,7 @@ impl Day13 {
     }
 
     fn alive(&self) -> usize {
-        self.alive.iter().filter(|&&x| x).count()
+        self.carts.iter().filter(|(_, _, _, x)| *x).count()
     }
 
     fn read_input(&mut self, input: &mut Read) {
@@ -74,64 +73,69 @@ impl Day13 {
                     '^' | 'v' => {
                         current.push('|');
                         let direction = Direction::from_char(c);
-                        self.carts.push(((x, y), direction, 0));
+                        self.carts.push(((x, y), direction, 0, true));
                     }
                     '>' | '<' => {
                         current.push('-');
                         let direction = Direction::from_char(c);
-                        self.carts.push(((x, y), direction, 0));
+                        self.carts.push(((x, y), direction, 0, true));
                     }
                     other => current.push(other),
                 }
             }
             self.grid.push(current);
         }
-        self.alive.resize(self.carts.len(), true);
     }
 
     fn simulate(&mut self) -> Option<Coordinate> {
         let mut collision = None;
-        for (coordinate, direction, turns) in self.carts.iter_mut() {
-            *coordinate = direction.run(*coordinate);
-            let &mut(x, y) = coordinate;
-            *direction = match self.grid[y][x] {
-                '|' | '-' => *direction,
-                '+' => {
-                    let new_dir = match turns {
-                        0 => direction.counter_clockwise(),
-                        1 => *direction,
-                        2 => direction.clockwise(),
-                        _ => unreachable!(),
-                    };
-
-                    *turns = (*turns + 1) % 3;
-                    new_dir
-
-                },
-                '/' => match *direction {
-                    Direction::North | Direction::South => direction.clockwise(),
-                    Direction::West | Direction::East => direction.counter_clockwise(),
-                },
-                '\\' => match *direction {
-                    Direction::North | Direction::South => direction.counter_clockwise() ,
-                    Direction::West | Direction::East => direction.clockwise(),
-                },
-                val => panic!("Invalid tile to be on: {}", val),
-            };
-        }
-
+        self.carts.sort_unstable_by_key(|&((x, y), _, _ , _)| (y, x));
         for i in 0..self.carts.len() {
-            for j in (i + 1)..self.carts.len() {
-                if !self.alive[i] {
+            {
+                let (coordinate, direction, turns, alive) = self.carts.get_mut(i).unwrap();
+                if !*alive {
+                    continue;
+                }
+                *coordinate = direction.run(*coordinate);
+                let &mut (x, y) = coordinate;
+                *direction = match self.grid[y][x] {
+                    '|' | '-' => *direction,
+                    '+' => {
+                        let new_dir = match turns {
+                            0 => direction.counter_clockwise(),
+                            1 => *direction,
+                            2 => direction.clockwise(),
+                            _ => unreachable!(),
+                        };
+
+                        *turns = (*turns + 1) % 3;
+                        new_dir
+                    },
+                    '/' => match *direction {
+                        Direction::North | Direction::South => direction.clockwise(),
+                        Direction::West | Direction::East => direction.counter_clockwise(),
+                    },
+                    '\\' => match *direction {
+                        Direction::North | Direction::South => direction.counter_clockwise(),
+                        Direction::West | Direction::East => direction.clockwise(),
+                    },
+                    val => panic!("Invalid tile to be on: {}", val),
+                };
+            }
+            for j in 0..self.carts.len() {
+                if i == j {
+                    continue;
+                }
+                if !self.carts[i].3 {
                     break;
                 }
-                if !self.alive[j] {
+                if !self.carts[j].3 {
                     continue;
                 }
 
                 if self.carts[i].0 == self.carts[j].0 {
-                    self.alive[i] = false;
-                    self.alive[j] = false;
+                    self.carts[i].3 = false;
+                    self.carts[j].3 = false;
                     collision = Some(self.carts[i].0);
                 }
             }
@@ -155,12 +159,11 @@ impl Solution for Day13 {
     fn part2(&mut self, input: &mut Read) -> String {
         self.read_input(input);
         while self.alive() > 1 {
-            println!("{}", self.alive());
             self.simulate();
         }
 
-        for (i, ((x, y), _, _)) in self.carts.iter().enumerate() {
-            if self.alive[i] {
+        for &((x, y), _, _, alive) in &self.carts {
+            if alive {
                 return format!("{},{}", x, y)
             }
         }
