@@ -22,21 +22,13 @@ fn char_bool(c: char) -> bool {
 }
 
 fn print_state(state: &State) -> String {
-    let mut buf = String::with_capacity(state.len());
-    for &(_, b) in state {
-        if b {
-            buf.push('#');
-        } else {
-            buf.push('.');
-        }
-    }
-    buf
+    state.iter().map(|(_, x)| if *x { '#' } else { '.' }).collect()
 }
 
 fn state_from_string(representation: &str, offset: i64) -> State {
-    Vec::from_iter(representation.chars()
-        .enumerate()
-        .map(|(i, c)| (i as i64 + offset, char_bool(c))))
+    representation.chars().enumerate()
+        .map(|(i, c)| (i as i64 + offset, char_bool(c)))
+        .collect()
 }
 
 impl Day12 {
@@ -47,11 +39,9 @@ impl Day12 {
     fn read_input(&mut self, input: &mut Read) -> State {
         let state;
         let mut reader = BufReader::new(input);
-        {
-            let mut line = String::new();
-            reader.read_line(&mut line).unwrap();
-            state = state_from_string(&line["initial state:".len()..line.len()].trim(), 0);
-        }
+        let mut line = String::new();
+        reader.read_line(&mut line).unwrap();
+        state = state_from_string(&line["initial state:".len()..line.len()].trim(), 0);
 
         for line in reader.lines() {
             let line = line.unwrap();
@@ -62,10 +52,7 @@ impl Day12 {
 
             let mut index = 0;
             for c in line.chars().take(5) {
-                index <<= 1;
-                if char_bool(c) {
-                    index |= 1;
-                }
+                index = (index << 1) | char_bool(c) as usize;
             }
 
             self.productions[index] = char_bool(line.chars().last().unwrap());
