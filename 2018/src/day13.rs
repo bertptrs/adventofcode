@@ -1,3 +1,4 @@
+use std::cmp::Ordering;
 use std::io::BufRead;
 use std::io::BufReader;
 use std::io::Read;
@@ -48,10 +49,45 @@ impl Direction {
     }
 }
 
-#[derive(Default, Debug)]
+#[derive(Copy, Clone, Eq, PartialEq)]
+struct Cart {
+    coordinate: Coordinate,
+    direction: Direction,
+    turns: u8,
+    alive: bool,
+}
+
+impl Cart {
+    pub fn new(coordinate: Coordinate, direction: Direction) -> Self {
+        Cart {
+            coordinate,
+            direction,
+            turns: 0,
+            alive: true,
+        }
+    }
+}
+
+impl Ord for Cart {
+    fn cmp(&self, other: &Self) -> Ordering {
+        let (sx, sy) = self.coordinate;
+        let (ox, oy) = other.coordinate;
+
+        (sy, sx).cmp(&(oy, ox))
+    }
+}
+
+impl PartialOrd for Cart {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        Some(self.cmp(other))
+    }
+}
+
+
+#[derive(Default)]
 pub struct Day13 {
     grid: Vec<Vec<char>>,
-    carts: Vec<(Coordinate, Direction, usize, bool)>,
+    carts: Vec<Cart>,
 }
 
 impl Day13 {
@@ -60,7 +96,7 @@ impl Day13 {
     }
 
     fn alive(&self) -> usize {
-        self.carts.iter().filter(|(_, _, _, x)| *x).count()
+        self.carts.iter().filter(|x| x.alive).count()
     }
 
     fn read_input(&mut self, input: &mut Read) {
@@ -73,12 +109,12 @@ impl Day13 {
                     '^' | 'v' => {
                         current.push('|');
                         let direction = Direction::from_char(c);
-                        self.carts.push(((x, y), direction, 0, true));
+                        self.carts.push(Cart::new((x, y), direction));
                     }
                     '>' | '<' => {
                         current.push('-');
                         let direction = Direction::from_char(c);
-                        self.carts.push(((x, y), direction, 0, true));
+                        self.carts.push(Cart::new((x, y), direction));
                     }
                     other => current.push(other),
                 }
@@ -89,54 +125,56 @@ impl Day13 {
 
     fn simulate(&mut self) -> Option<Coordinate> {
         let mut collision = None;
-        self.carts.sort_unstable_by_key(|&((x, y), _, _ , _)| (y, x));
+        self.carts.sort_unstable();
         for i in 0..self.carts.len() {
-            {
-                let (coordinate, direction, turns, alive) = self.carts.get_mut(i).unwrap();
-                if !*alive {
-                    continue;
-                }
-                *coordinate = direction.run(*coordinate);
-                let &mut (x, y) = coordinate;
-                *direction = match self.grid[y][x] {
-                    '|' | '-' => *direction,
-                    '+' => {
-                        let new_dir = match turns {
-                            0 => direction.counter_clockwise(),
-                            1 => *direction,
-                            2 => direction.clockwise(),
-                            _ => unreachable!(),
-                        };
-
-                        *turns = (*turns + 1) % 3;
-                        new_dir
-                    },
-                    '/' => match *direction {
-                        Direction::North | Direction::South => direction.clockwise(),
-                        Direction::West | Direction::East => direction.counter_clockwise(),
-                    },
-                    '\\' => match *direction {
-                        Direction::North | Direction::South => direction.counter_clockwise(),
-                        Direction::West | Direction::East => direction.clockwise(),
-                    },
-                    val => panic!("Invalid tile to be on: {}", val),
-                };
+            if !self.carts[i].alive {
+                continue;
             }
+            let current_direction = self.carts[i].direction;
+
+            self.carts[i].coordinate = current_direction.run(self.carts[i].coordinate);
+            let (x, y) = self.carts[i].coordinate;
+            let current_direction = self.carts[i].direction;
+            self.carts[i].direction = match self.grid[y][x] {
+                '|' | '-' => current_direction,
+                '+' => {
+                    let turns = self.carts[i].turns;
+                    let new_dir = match turns {
+                        0 => current_direction.counter_clockwise(),
+                        1 => current_direction,
+                        2 => current_direction.clockwise(),
+                        _ => unreachable!(),
+                    };
+
+                    self.carts[i].turns = (turns + 1) % 3;
+                    new_dir
+                }
+                '/' => match current_direction {
+                    Direction::North | Direction::South => current_direction.clockwise(),
+                    Direction::West | Direction::East => current_direction.counter_clockwise(),
+                },
+                '\\' => match current_direction {
+                    Direction::North | Direction::South => current_direction.counter_clockwise(),
+                    Direction::West | Direction::East => current_direction.clockwise(),
+                },
+                val => panic!("Invalid tile to be on: {}", val),
+            };
+
             for j in 0..self.carts.len() {
                 if i == j {
                     continue;
                 }
-                if !self.carts[i].3 {
+                if !self.carts[i].alive {
                     break;
                 }
-                if !self.carts[j].3 {
+                if !self.carts[j].alive {
                     continue;
                 }
 
-                if self.carts[i].0 == self.carts[j].0 {
-                    self.carts[i].3 = false;
-                    self.carts[j].3 = false;
-                    collision = Some(self.carts[i].0);
+                if self.carts[i].coordinate == self.carts[j].coordinate {
+                    self.carts[i].alive = false;
+                    self.carts[j].alive = false;
+                    collision = Some(self.carts[i].coordinate);
                 }
             }
         }
@@ -162,9 +200,10 @@ impl Solution for Day13 {
             self.simulate();
         }
 
-        for &((x, y), _, _, alive) in &self.carts {
-            if alive {
-                return format!("{},{}", x, y)
+        for cart in &self.carts {
+            if cart.alive {
+                let (x, y) = cart.coordinate;
+                return format!("{},{}", x, y);
             }
         }
         unreachable!()
