@@ -2,6 +2,7 @@ use std::i32;
 use std::io::Read;
 
 use common::Solution;
+use common::read_single_input;
 
 fn power_at(serial: i32, (x, y): (i32, i32)) -> i32 {
     let rack_id = x + 10;
@@ -21,12 +22,6 @@ impl Day11 {
         Day11 {
             power_grid: [[0i32; 300]; 300],
         }
-    }
-
-    fn read_serial(&self, input: &mut Read) -> i32 {
-        let mut data = String::new();
-        input.read_to_string(&mut data).unwrap();
-        data.trim().parse().unwrap()
     }
 
     fn compute_summed_area(&mut self, serial: i32) {
@@ -93,7 +88,7 @@ impl Day11 {
 
 impl Solution for Day11 {
     fn part1(&mut self, input: &mut Read) -> String {
-        let serial = self.read_serial(input);
+        let serial = read_single_input(input);
         self.compute_summed_area(serial);
         let (x, y, _) = self.best(3);
 
@@ -101,7 +96,7 @@ impl Solution for Day11 {
     }
 
     fn part2(&mut self, input: &mut Read) -> String {
-        let serial = self.read_serial(input);
+        let serial = read_single_input(input);
         self.compute_summed_area(serial);
         let mut best_result = 0;
         let mut best_option = None;

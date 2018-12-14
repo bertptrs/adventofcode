@@ -2,7 +2,6 @@ use std::collections::HashMap;
 use std::io::BufRead;
 use std::io::BufReader;
 use std::io::Read;
-use std::iter::FromIterator;
 
 use common::Solution;
 
