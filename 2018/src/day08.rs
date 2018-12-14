@@ -1,6 +1,7 @@
 use std::io::Read;
 
 use common::Solution;
+use common::read_single_input;
 
 #[derive(Default)]
 pub struct Day08 {}
@@ -58,8 +59,7 @@ impl Day08 {
 
 impl Solution for Day08 {
     fn part1(&mut self, input: &mut Read) -> String {
-        let mut data = String::new();
-        input.read_to_string(&mut data).unwrap();
+        let data: String = read_single_input(input);
 
         let data: Vec<usize> = data.trim().split(" ").map(|x| x.parse().unwrap()).collect();
         let (result, _) = total1(&data);
@@ -68,8 +68,7 @@ impl Solution for Day08 {
     }
 
     fn part2(&mut self, input: &mut Read) -> String {
-        let mut data = String::new();
-        input.read_to_string(&mut data).unwrap();
+        let data: String = read_single_input(input);
 
         let data: Vec<usize> = data.trim().split(" ").map(|x| x.parse().unwrap()).collect();
         let (result, _) = total2(&data);
