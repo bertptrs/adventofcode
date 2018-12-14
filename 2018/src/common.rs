@@ -1,6 +1,8 @@
 use std::collections::HashMap;
 use std::hash::Hash;
 use std::io;
+use std::io::Read;
+use std::str::FromStr;
 
 /// Apply Erathostenes's sieve to the supplied array
 ///
@@ -48,6 +50,19 @@ pub fn trim_back(input: &mut Vec<u8>) {
         let new_len = input.len() - to_truncate;
         input.truncate(new_len);
     }
+}
+
+/// Read the entire input as one value.
+///
+/// This function loads the input into a string and then attempts to parse it.
+pub fn read_single_input<T>(input: &mut Read) -> T
+    where T: FromStr,
+          <T as FromStr>::Err: std::fmt::Debug
+{
+    let mut buf = String::new();
+    input.read_to_string(&mut buf).unwrap();
+
+    buf.trim().parse().unwrap()
 }
 
 
