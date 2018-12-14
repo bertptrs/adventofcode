@@ -8,15 +8,14 @@ fn skill_after(n: usize) -> u64 {
     let mut elves = [0, 1];
 
     while state.len() < n + 10 {
-        let result: u8 = elves.iter().map(|x| state[*x]).sum();
+        let result = state[elves[0]] + state[elves[1]];
         if result >= 10 {
             state.push(result / 10);
         }
         state.push(result % 10);
 
-        for elf in elves.iter_mut() {
-            *elf = (*elf + state[*elf] as usize + 1) % state.len();
-        }
+        elves[0] = (elves[0] + state[elves[0]] as usize + 1) % state.len();
+        elves[1] = (elves[1] + state[elves[1]] as usize + 1) % state.len();
     }
 
     let mut skill = 0;
@@ -36,14 +35,13 @@ fn update_current(mut current: usize, by: usize, base: usize) -> usize {
 }
 
 fn find_first(n: usize, len: usize) -> usize {
-    println!("{} {}", n, len);
     let mut state = vec![3u8, 7];
     let mut elves = [0, 1];
     let mut current = 37;
     let mod_base = 10usize.pow(len as u32);
 
     loop {
-        let result: u8 = elves.iter().map(|x| state[*x]).sum();
+        let result = state[elves[0]] + state[elves[1]];
         if result >= 10 {
             current = update_current(current, result as usize / 10, mod_base);
             if current == n {
@@ -57,9 +55,8 @@ fn find_first(n: usize, len: usize) -> usize {
         }
         state.push(result % 10);
 
-        for elf in elves.iter_mut() {
-            *elf = (*elf + state[*elf] as usize + 1) % state.len();
-        }
+        elves[0] = (elves[0] + state[elves[0]] as usize + 1) % state.len();
+        elves[1] = (elves[1] + state[elves[1]] as usize + 1) % state.len();
     }
 }
 
