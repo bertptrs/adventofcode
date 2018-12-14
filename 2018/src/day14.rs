@@ -45,13 +45,13 @@ fn find_first(n: usize, len: usize) -> usize {
         if result >= 10 {
             current = update_current(current, result as usize / 10, mod_base);
             if current == n {
-                return state.len() - 5;
+                return state.len() - len + 1;
             }
             state.push(result / 10);
         }
         current = update_current(current, result as usize % 10, mod_base);
         if current == n {
-            return state.len() - 5 + 1;
+            return state.len() - len + 1;
         }
         state.push(result % 10);
 
