@@ -1,25 +1,50 @@
 use std::io::Read;
 
-use common::Solution;
 use common::read_single_input;
+use common::Solution;
+
+struct ResultStream {
+    elves: [usize; 2],
+    state: Vec<u8>,
+    next: usize,
+}
+
+impl ResultStream {
+    pub fn new() -> Self {
+        ResultStream {
+            elves: [0, 1],
+            state: vec![3, 7],
+            next: 0,
+        }
+    }
+}
+
+impl Iterator for ResultStream {
+    type Item = u8;
+
+    fn next(&mut self) -> Option<<Self as Iterator>::Item> {
+        let state = &mut self.state;
+        if self.next == state.len() {
+            let elves = &mut self.elves;
+            let n = state[elves[0]] + state[elves[1]];
+            if n >= 10 {
+                state.push(1);
+            }
+            state.push(n % 10);
+
+            elves[0] = (elves[0] + 1 + state[elves[0]] as usize) % state.len();
+            elves[1] = (elves[1] + 1 + state[elves[1]] as usize) % state.len();
+        };
+        let n = Some(state[self.next]);
+        self.next += 1;
+        n
+    }
+}
 
 fn skill_after(n: usize) -> u64 {
-    let mut state = vec![3u8, 7];
-    let mut elves = [0, 1];
-
-    while state.len() < n + 10 {
-        let result = state[elves[0]] + state[elves[1]];
-        if result >= 10 {
-            state.push(result / 10);
-        }
-        state.push(result % 10);
-
-        elves[0] = (elves[0] + state[elves[0]] as usize + 1) % state.len();
-        elves[1] = (elves[1] + state[elves[1]] as usize + 1) % state.len();
-    }
-
+    let state = ResultStream::new();
     let mut skill = 0;
-    for d in state.into_iter().skip(n).take(10) {
+    for d in state.skip(n).take(10) {
         skill *= 10;
         skill += d as u64;
     }
@@ -27,37 +52,18 @@ fn skill_after(n: usize) -> u64 {
     skill
 }
 
-fn update_current(mut current: usize, by: usize, base: usize) -> usize {
-    current *= 10;
-    current %= base;
-    current += by;
-    current
-}
-
 fn find_first(n: usize, len: usize) -> usize {
-    let mut state = vec![3u8, 7];
-    let mut elves = [0, 1];
-    let mut current = 37;
     let mod_base = 10usize.pow(len as u32);
+    let mut current = 0;
 
-    loop {
-        let result = state[elves[0]] + state[elves[1]];
-        if result >= 10 {
-            current = update_current(current, result as usize / 10, mod_base);
-            if current == n {
-                return state.len() - len + 1;
-            }
-            state.push(result / 10);
-        }
-        current = update_current(current, result as usize % 10, mod_base);
+    for (i, b) in ResultStream::new().enumerate() {
+        current = (current * 10) % mod_base;
+        current += b as usize;
         if current == n {
-            return state.len() - len + 1;
+            return i - len + 1;
         }
-        state.push(result % 10);
-
-        elves[0] = (elves[0] + state[elves[0]] as usize + 1) % state.len();
-        elves[1] = (elves[1] + state[elves[1]] as usize + 1) % state.len();
     }
+    unreachable!();
 }
 
 
