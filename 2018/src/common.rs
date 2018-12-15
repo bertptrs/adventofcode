@@ -3,6 +3,8 @@ use std::hash::Hash;
 use std::io;
 use std::io::Read;
 use std::str::FromStr;
+use std::ops::Add;
+use std::ops::Sub;
 
 /// Apply Erathostenes's sieve to the supplied array
 ///
@@ -63,6 +65,15 @@ pub fn read_single_input<T>(input: &mut Read) -> T
     input.read_to_string(&mut buf).unwrap();
 
     buf.trim().parse().unwrap()
+}
+
+/// Compute the manhattan distance between two points of arbitrary type.
+pub fn manhattan_distance<T>(a: (T, T), b: (T, T)) -> T
+where T: Copy + Add<Output=T> + Sub<Output=T> + Ord
+{
+    let (xa, ya) = a;
+    let (xb, yb) = b;
+    xa.max(xb) + ya.max(yb) - xa.min(xb) - ya.min(yb)
 }
 
 
