@@ -57,20 +57,13 @@ impl Day15 {
             for (x, c) in line.chars().enumerate() {
                 match c {
                     '#' => { current[x] = true; }
-                    'G' => {
+                    'E' | 'G' => {
                         self.units.push(Unit {
                             pos: (y, x),
-                            faction: 'G',
+                            faction: c,
                             ..Default::default()
                         });
-                        self.alive[1] += 1;
-                    }
-                    'E' => {
-                        self.units.push(Unit {
-                            pos: (y, x),
-                            ..Default::default()
-                        });
-                        self.alive[0] += 1;
+                        self.alive[if c == 'E' { 0 } else { 1 }] += 1;
                     }
                     '.' => {}
                     c => panic!("Invalid tile {}!", c),
@@ -84,7 +77,7 @@ impl Day15 {
         let initial = self.units[unit].pos;
         let faction = self.units[unit].faction;
 
-        let positions: HashSet<Coordinate> = self.units.iter()
+        let enemy_positions: HashSet<Coordinate> = self.units.iter()
             .filter(|x| x.faction != faction && x.is_alive())
             .map(|x| x.pos).collect();
 
@@ -93,7 +86,7 @@ impl Day15 {
             .map(|x| x.pos).collect();
 
         let mut todo = VecDeque::new();
-        let mut prev = HashMap::new();
+        let mut prev: HashMap<Coordinate, Coordinate> = HashMap::new();
 
         todo.push_back(initial);
 
@@ -107,24 +100,11 @@ impl Day15 {
 
             for pos in &next {
                 if !prev.contains_key(pos) && !self.walls[pos.0][pos.1] {
-                    prev.insert(*pos, (y, x));
-                    if positions.contains(pos) {
-                        if (y, x) == initial {
-                            return None;
-                        }
-
-                        let mut next_pos = *pos;
-                        // Found the nearest enemy
-                        while let Some(prev_pos) = prev.get(&next_pos) {
-                            if *prev_pos != initial {
-                                next_pos = *prev_pos;
-                            } else {
-                                break;
-                            }
-                        }
-
-                        return Some(next_pos);
-                    } else if !all_positions.contains(pos) {
+                    if enemy_positions.contains(pos) {
+                        return prev.remove(&(y, x));
+                    } else if !all_positions.contains(pos) {;
+                        let prev_step = *prev.get(&(y, x)).unwrap_or(pos);
+                        prev.insert(*pos, prev_step);
                         todo.push_back(*pos);
                     }
                 }
@@ -173,7 +153,7 @@ impl Day15 {
                 if target.hp == 0 {
                     match target.faction {
                         'E' => { self.alive[0] -= 1 }
-                        'G' => { self.alive[1] -= 1 },
+                        'G' => { self.alive[1] -= 1 }
                         _ => panic!(),
                     };
                 }
@@ -216,8 +196,6 @@ impl Solution for Day15 {
         let mut rounds = 0;
         while self.simulate() {
             rounds += 1;
-            //println!("Result after round {}: ", rounds);
-            //self.print();
         }
         let result: usize = rounds * self.units.iter().map(|x| x.hp as usize)
             .sum::<usize>();
