@@ -4,29 +4,10 @@ use std::io::BufReader;
 use std::io::Read;
 
 use common::GroupingCount;
+use common::manhattan_distance;
 use common::Solution;
 
-#[derive(Copy, Clone, Debug)]
-struct Coordinate {
-    x: usize,
-    y: usize,
-}
-
-impl Coordinate {
-    pub fn manhattan(&self, other: &Coordinate) -> usize {
-        self.x.max(other.x) + self.y.max(other.y)
-            - self.x.min(other.x) - self.y.min(other.y)
-    }
-}
-
-impl From<(usize, usize)> for Coordinate {
-    fn from((x, y): (usize, usize)) -> Self {
-        Coordinate {
-            x,
-            y,
-        }
-    }
-}
+type Coordinate = (usize, usize);
 
 #[derive(Copy, Clone, Debug)]
 enum Claim {
@@ -59,7 +40,7 @@ impl Day06 {
             let mut parts = line.split(", ");
             let x = parts.next().unwrap().parse().unwrap();
             let y = parts.next().unwrap().parse().unwrap();
-            self.points.push(Coordinate { x, y });
+            self.points.push((x, y));
             mx = mx.max(x);
             my = my.max(y);
         }
@@ -70,18 +51,17 @@ impl Day06 {
 
     fn range(&self) -> impl Iterator<Item=Coordinate> {
         iproduct!(0..=self.xmax, 0..=self.ymax)
-            .map(|x| Coordinate::from(x))
     }
 
     fn compute_claim_grid(&self) -> Vec<Vec<Claim>> {
         let mut grid = vec![vec![Claim::None; self.xmax + 1]; self.ymax + 1];
 
-        for coordinate in self.range() {
+        for (x, y) in self.range() {
             let mut cur_dist = usize::max_value();
             let mut cur_best = None;
 
             for (i, point) in self.points.iter().enumerate() {
-                let dist = point.manhattan(&coordinate);
+                let dist = manhattan_distance(*point, (x, y));
                 if dist < cur_dist {
                     cur_dist = dist;
                     cur_best = Some(i);
@@ -90,7 +70,7 @@ impl Day06 {
                 }
             }
 
-            grid[coordinate.y][coordinate.x] = match cur_best {
+            grid[y][x] = match cur_best {
                 Some(id) => Claim::Some(id),
                 None => Claim::Multi,
             };
@@ -102,7 +82,7 @@ impl Day06 {
         self.read_points(input);
 
         self.range()
-            .map(|x| self.points.iter().map(|y| y.manhattan(&x)).sum::<usize>())
+            .map(|x| self.points.iter().map(|y| manhattan_distance(x, *y)).sum::<usize>())
             .filter(|x| x < &limit)
             .count()
     }
