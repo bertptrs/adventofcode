@@ -11,7 +11,7 @@ use common::Solution;
 
 type Coordinate = (usize, usize);
 
-#[derive(Debug, Eq, PartialEq, Ord, PartialOrd)]
+#[derive(Debug, Eq, PartialEq, Ord, PartialOrd, Copy, Clone)]
 struct Unit {
     pos: Coordinate,
     hp: u8,
@@ -190,6 +190,20 @@ impl Day15 {
             println!("{}{}", buf, unit_buf);
         }
     }
+
+    fn return_score(&self, rounds: usize) -> String {
+        let result: usize = rounds * self.units.iter().map(|x| x.hp as usize)
+            .sum::<usize>();
+        format!("{}", result)
+    }
+
+    fn set_elf_power(&mut self, power: u8) {
+        for unit in self.units.iter_mut() {
+            if unit.faction == 'E' {
+                unit.power = power;
+            }
+        }
+    }
 }
 
 impl Solution for Day15 {
@@ -199,16 +213,35 @@ impl Solution for Day15 {
         while self.simulate() {
             rounds += 1;
         }
-        let result: usize = rounds * self.units.iter().map(|x| x.hp as usize)
-            .sum::<usize>();
-
-        format!("{}", result)
+        self.return_score(rounds)
     }
 
-    fn part2(&mut self, _input: &mut Read) -> String {
-        unimplemented!()
+    fn part2(&mut self, input: &mut Read) -> String {
+        self.read_input(input);
+        let backup = self.units.clone();
+        let starting_elves = self.alive[0];
+        let starting_goblins = self.alive[1];
+
+        for power in 4..=255 {
+            self.units = backup.clone();
+            self.alive[0] = starting_elves;
+            self.alive[1] = starting_goblins;
+
+            self.set_elf_power(power);
+            let mut rounds = 0;
+            while self.simulate() {
+                rounds += 1;
+            }
+
+            if self.alive[0] == starting_elves {
+                return self.return_score(rounds);
+            }
+
+        }
+        unreachable!()
     }
 }
+
 
 #[cfg(test)]
 mod tests {
@@ -224,7 +257,7 @@ mod tests {
         include_bytes!("samples/15.6.txt"),
     ];
 
-    const SAMPLE_OUTPUT: [&str; 6] = [
+    const SAMPLE1_OUTPUT: [&str; 6] = [
         "27730",
         "36334",
         "39514",
@@ -235,9 +268,26 @@ mod tests {
 
     #[test]
     fn sample_part1() {
-        for (input, output) in SAMPLE_INPUT.iter().zip(SAMPLE_OUTPUT.iter()) {
+        for (input, output) in SAMPLE_INPUT.iter().zip(SAMPLE1_OUTPUT.iter()) {
             let mut instance = Day15::new();
             assert_eq!(*output, instance.part1(&mut input.as_ref()));
+        }
+    }
+
+    #[test]
+    fn sample_part2() {
+        let indices = [0, 2, 3, 4, 5];
+        let outputs = [
+            "4988",
+            "31284",
+            "3478",
+            "6474",
+            "1140",
+        ];
+
+        for (&input, output) in indices.iter().zip(outputs.iter()) {
+            let mut instance = Day15::new();
+            assert_eq!(*output, instance.part2(&mut SAMPLE_INPUT[input]));
         }
     }
 }
