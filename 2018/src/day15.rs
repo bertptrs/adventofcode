@@ -1,6 +1,7 @@
+use std::cmp::Reverse;
+use std::collections::BinaryHeap;
 use std::collections::HashMap;
 use std::collections::HashSet;
-use std::collections::VecDeque;
 use std::io::BufRead;
 use std::io::BufReader;
 use std::io::Read;
@@ -85,12 +86,12 @@ impl Day15 {
             .filter(|x| x.is_alive())
             .map(|x| x.pos).collect();
 
-        let mut todo = VecDeque::new();
+        let mut todo = BinaryHeap::new();
         let mut prev: HashMap<Coordinate, Coordinate> = HashMap::new();
 
-        todo.push_back(initial);
+        todo.push(Reverse((0, initial)));
 
-        while let Some((y, x)) = todo.pop_front() {
+        while let Some(Reverse((d, (y, x)))) = todo.pop() {
             let next = [
                 (y - 1, x),
                 (y, x - 1),
@@ -102,10 +103,11 @@ impl Day15 {
                 if !prev.contains_key(pos) && !self.walls[pos.0][pos.1] {
                     if enemy_positions.contains(pos) {
                         return prev.remove(&(y, x));
-                    } else if !all_positions.contains(pos) {;
+                    } else if !all_positions.contains(pos) {
+                        ;
                         let prev_step = *prev.get(&(y, x)).unwrap_or(pos);
                         prev.insert(*pos, prev_step);
-                        todo.push_back(*pos);
+                        todo.push(Reverse((d + 1, *pos)));
                     }
                 }
             }
