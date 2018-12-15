@@ -5,6 +5,7 @@ use std::io::Read;
 use std::str::FromStr;
 use std::ops::Add;
 use std::ops::Sub;
+use std::fmt::Debug;
 
 /// Apply Erathostenes's sieve to the supplied array
 ///
@@ -59,7 +60,7 @@ pub fn trim_back(input: &mut Vec<u8>) {
 /// This function loads the input into a string and then attempts to parse it.
 pub fn read_single_input<T>(input: &mut Read) -> T
     where T: FromStr,
-          <T as FromStr>::Err: std::fmt::Debug
+          <T as FromStr>::Err: Debug
 {
     let mut buf = String::new();
     input.read_to_string(&mut buf).unwrap();
