@@ -222,7 +222,9 @@ impl Solution for Day15 {
         let starting_elves = self.alive[0];
         let starting_goblins = self.alive[1];
 
-        for power in 4..=255 {
+        let mut power = 4;
+
+        loop {
             self.units = backup.clone();
             self.alive[0] = starting_elves;
             self.alive[1] = starting_goblins;
@@ -237,8 +239,11 @@ impl Solution for Day15 {
                 return self.return_score(rounds);
             }
 
+            let to_kill = 200 / power;
+            while to_kill == 200 / power {
+                power += 1;
+            }
         }
-        unreachable!()
     }
 }
 
