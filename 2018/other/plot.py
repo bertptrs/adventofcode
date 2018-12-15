@@ -10,7 +10,6 @@ import io
 import re
 import subprocess
 import matplotlib.pyplot as plt
-import numpy as np
 
 
 def get_args():
@@ -30,7 +29,6 @@ def cloc_usage(src_dir):
     data = io.StringIO(output, newline='')
 
     reader = csv.reader(data, dialect='unix')
-    days = []
     values = []
 
     for line in reader:
@@ -40,23 +38,19 @@ def cloc_usage(src_dir):
         match = re.search(r"\d+", line[1])
         if match:
             day = int(match.group(0))
-            days.append(day)
-            values.append(list(int(x) for x in line[2:]))
+            values.append([day] + [int(x) for x in line[2:]])
 
-    data = list(zip(days, values))
-    data.sort()
+    values.sort()
+    values = tuple(zip(*values))
 
-    days, values = list(zip(*data))
-    values = np.array(values)
-
-    return days, values
+    return values[0], values[1:]
 
 
 def main():
     args = get_args()
     days, values = cloc_usage(args.source)
 
-    for sequence in values.transpose():
+    for sequence in values:
         plt.plot(days, sequence)
 
     plt.xlabel('Day')
