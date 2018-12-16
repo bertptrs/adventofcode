@@ -1,3 +1,4 @@
+use std::collections::HashSet;
 use std::io::BufRead;
 use std::io::BufReader;
 use std::io::Read;
@@ -6,7 +7,7 @@ use regex::Regex;
 
 use common::Solution;
 
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone, Debug, Hash, Eq, PartialEq)]
 enum OpCode {
     ADDR,
     ADDI,
@@ -24,6 +25,21 @@ enum OpCode {
     EQIR,
     EQRI,
     EQRR,
+}
+
+impl OpCode {
+    fn valid(&self, op: &[i32; 4], before: &[i32; 4], after: &[i32; 4]) -> bool {
+        let mut cpu: CPU = Default::default();
+
+        cpu.registers.copy_from_slice(before);
+        if let Ok(val) = cpu.execute(self, &op[1..4]) {
+            if val == after[op[3] as usize] {
+                return true;
+            }
+        }
+
+        return false;
+    }
 }
 
 const OP_LIST: [OpCode; 16] = [
@@ -45,6 +61,7 @@ const OP_LIST: [OpCode; 16] = [
     OpCode::EQRR,
 ];
 
+#[derive(Debug)]
 enum CPUErr {
     InvalidRegister(i32),
 }
@@ -55,7 +72,7 @@ struct CPU {
 }
 
 impl CPU {
-    pub fn execute(&mut self, op: OpCode, var: &[i32]) -> Result<i32, CPUErr> {
+    pub fn execute(&mut self, op: &OpCode, var: &[i32]) -> Result<i32, CPUErr> {
         use self::OpCode::*;
         let res = match op {
             ADDR => self.reg(var[0])? + self.reg(var[1])?,
@@ -118,6 +135,66 @@ impl Day16 {
             false
         }
     }
+
+    fn determine_options(&mut self, mut reader: &mut BufReader<&mut Read>) -> [HashSet<OpCode>; 16] {
+        let mut mappings: [HashSet<OpCode>; 16] = [
+            HashSet::new(), HashSet::new(), HashSet::new(), HashSet::new(),
+            HashSet::new(), HashSet::new(), HashSet::new(), HashSet::new(),
+            HashSet::new(), HashSet::new(), HashSet::new(), HashSet::new(),
+            HashSet::new(), HashSet::new(), HashSet::new(), HashSet::new(),
+        ];
+        let mut before = [0; 4];
+        let mut op = [0; 4];
+        let mut after = [0; 4];
+        while self.read(&mut reader, &mut before) {
+            self.read(&mut reader, &mut op);
+            self.read(&mut reader, &mut after);
+            reader.read_line(&mut self.buf).unwrap_or(0);
+
+            if mappings[op[0] as usize].is_empty() {
+                mappings[op[0] as usize].extend(OP_LIST.iter()
+                    .filter(|x| x.valid(&op, &before, &after))
+                    .map(|x| *x));
+            } else {
+                for option in OP_LIST.iter()
+                    .filter(|x| !x.valid(&op, &before, &after)) {
+                    mappings[op[0] as usize].remove(option);
+                }
+                continue;
+            }
+        }
+        mappings
+    }
+
+    fn determine_mapping(&self, mut options: [HashSet<OpCode>; 16]) -> [OpCode; 16] {
+        let mut mapping: [Option<OpCode>; 16] = [None; 16];
+        let mut determined = 0;
+
+        while determined < mapping.len() {
+            for op in mapping.iter() {
+                if let Some(op) = op {
+                    for option in options.iter_mut() {
+                        option.remove(op);
+                    }
+                }
+            }
+
+            for (idx, option) in options.iter_mut().enumerate() {
+                if option.len() == 1 {
+                    mapping[idx] = option.drain().next();
+                    option.clear();
+                    determined += 1;
+                }
+            }
+        }
+
+        let mut actual_mapping = [OpCode::ADDI; 16];
+        for (i, op) in mapping.iter().enumerate() {
+            actual_mapping[i] = op.unwrap();
+        }
+
+        actual_mapping
+    }
 }
 
 impl Solution for Day16 {
@@ -127,8 +204,6 @@ impl Solution for Day16 {
         let mut before = [0; 4];
         let mut op = [0; 4];
         let mut after = [0; 4];
-
-        let mut cpu: CPU = Default::default();
         let mut counter = 0;
 
         while self.read(&mut reader, &mut before) {
@@ -136,16 +211,9 @@ impl Solution for Day16 {
             self.read(&mut reader, &mut after);
             reader.read_line(&mut self.buf).unwrap_or(0);
 
-            let mut valid = 0;
-
-            for option in &OP_LIST {
-                cpu.registers = before;
-                if let Ok(val) = cpu.execute(*option, &op[1..4]) {
-                    if val == after[op[3] as usize] {
-                        valid += 1;
-                    }
-                }
-            }
+            let valid = OP_LIST.iter()
+                .filter(|x| x.valid(&op, &before, &after))
+                .count();
 
             if valid >= 3 {
                 counter += 1;
@@ -154,10 +222,26 @@ impl Solution for Day16 {
         format!("{}", counter)
     }
 
-    fn part2(&mut self, _input: &mut Read) -> String {
-        unimplemented!()
+    fn part2(&mut self, input: &mut Read) -> String {
+        let mut reader = BufReader::new(input);
+
+        let mappings = self.determine_options(&mut reader);
+        let mapping = self.determine_mapping(mappings);
+
+        let mut op = [0; 4];
+        // Skip a line
+        reader.read_line(&mut self.buf).unwrap();
+
+        let mut cpu: CPU = Default::default();
+
+        while self.read(&mut reader, &mut op) {
+            cpu.execute(&mapping[op[0] as usize], &op[1..4]).unwrap();
+        }
+
+        format!("{}", cpu.registers[0])
     }
 }
+
 
 #[cfg(test)]
 mod tests {
@@ -166,10 +250,7 @@ mod tests {
 
     #[test]
     fn sample_part1() {
-        let input: &[u8] = b"Before: [3, 2, 1, 1]
-9 2 1 2
-After:  [3, 2, 2, 1]
-";
+        let input: &[u8] = include_bytes!("samples/16.txt");
         let mut instance = Day16::new();
         assert_eq!("1", instance.part1(&mut input.as_ref()));
     }
