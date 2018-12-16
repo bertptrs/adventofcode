@@ -1,11 +1,21 @@
 # Advent of Code 2018
 
+[![Build Status](https://travis-ci.org/bertptrs/adventofcode.svg?branch=master)](https://travis-ci.org/bertptrs/adventofcode)
+
 Once again, I will be attempting to complete the challenges in Rust.
 However, this this I will be focussing on having idiomatic code and
 having everything in a single executable.
 
 To run day 1: `cargo run -- 1`. Other options can be seen with the
 `--help` flag. The program will by default read its input from stdin.
+
+## Correctness
+
+All of this year's solution implementations have some semblance of unit
+tests, all coming from the examples given in the problem statement.
+These tests are checked by travis (if you haven't noticed the shiny
+button above) on stable, beta and nightly Rust, as well as the version
+of Rust that Ubuntu Xenial ships.
 
 ## Simulations
 
