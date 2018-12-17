@@ -88,9 +88,9 @@ mod tests {
     fn test_count_letters() {
         let result = count_chars("abcaba");
 
-        assert_eq!(3, *result.get(&'a').unwrap());
-        assert_eq!(2, *result.get(&'b').unwrap());
-        assert_eq!(1, *result.get(&'c').unwrap())
+        assert_eq!(3, result[&'a']);
+        assert_eq!(2, result[&'b']);
+        assert_eq!(1, result[&'c']);
     }
 
     #[test]

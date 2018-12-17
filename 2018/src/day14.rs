@@ -46,7 +46,7 @@ fn skill_after(n: usize) -> u64 {
     let mut skill = 0;
     for d in state.skip(n).take(10) {
         skill *= 10;
-        skill += d as u64;
+        skill += u64::from(d);
     }
 
     skill

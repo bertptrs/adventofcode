@@ -72,7 +72,7 @@ impl Day04 {
                     sleep_start = None;
                 }
                 EventType::SLEEP => {
-                    sleep_start = Some(event.time.clone());
+                    sleep_start = Some(event.time);
                 }
                 EventType::WAKE => {
                     let mut minutes = sleeps.entry(guard.unwrap()).or_insert([0u32; 60]);
@@ -86,7 +86,7 @@ impl Day04 {
         sleeps
     }
 
-    fn format_results(sleepers: HashMap<usize, [u32; 60]>, scores: HashMap<usize, u32>) -> String {
+    fn format_results(sleepers: &HashMap<usize, [u32; 60]>, scores: &HashMap<usize, u32>) -> String {
         let (best_sleeper, _) = scores.iter().max_by(|&(_, a), &(_, b)| a.cmp(b)).unwrap();
 
         let best_minute = sleepers[best_sleeper].iter().enumerate()
@@ -102,7 +102,7 @@ impl common::Solution for Day04 {
         let sleepers = self.get_sleeps();
         let scores: HashMap<usize, u32> = sleepers.iter().map(|(k, v)| (*k, v.iter().sum())).collect();
 
-        Day04::format_results(sleepers, scores)
+        Day04::format_results(&sleepers, &scores)
     }
 
     fn part2(&mut self, input: &mut io::Read) -> String {
@@ -110,7 +110,7 @@ impl common::Solution for Day04 {
         let sleepers = self.get_sleeps();
         let scores: HashMap<usize, u32> = sleepers.iter().map(|(k, v)| (*k, *v.iter().max().unwrap())).collect();
 
-        Day04::format_results(sleepers, scores)
+        Day04::format_results(&sleepers, &scores)
     }
 }
 

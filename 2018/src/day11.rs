@@ -86,6 +86,12 @@ impl Day11 {
     }
 }
 
+impl Default for Day11 {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl Solution for Day11 {
     fn part1(&mut self, input: &mut Read) -> String {
         let serial = read_single_input(input);

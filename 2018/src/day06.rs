@@ -83,7 +83,7 @@ impl Day06 {
 
         self.range()
             .map(|x| self.points.iter().map(|y| manhattan_distance(x, *y)).sum::<usize>())
-            .filter(|x| x < &limit)
+            .filter(|&x| x < limit)
             .count()
     }
 }
@@ -100,10 +100,11 @@ impl Solution for Day06 {
         self.read_points(input);
         let grid = self.compute_claim_grid();
         let mut infinite: HashSet<usize> = HashSet::new();
-        infinite.extend(grid[0].iter().filter_map(claim_filter));
-        infinite.extend(grid[self.ymax].iter().filter_map(claim_filter));
-        for y in 0..=self.ymax {
-            infinite.extend([grid[y][0], grid[y][self.xmax]].iter().filter_map(claim_filter));
+        infinite.extend(grid.first().unwrap().iter().filter_map(claim_filter));
+        infinite.extend(grid.last().unwrap().iter().filter_map(claim_filter));
+        for row in grid.iter().take(self.ymax) {
+            infinite.extend([row.first().unwrap(), row.last().unwrap()].iter()
+                .cloned().filter_map(claim_filter));
         }
 
         let counts = grid.iter().flat_map(|x| x.iter())

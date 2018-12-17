@@ -4,11 +4,12 @@ use std::io::prelude::*;
 
 use common;
 
+#[derive(Default)]
 pub struct Day01 {}
 
 impl Day01 {
     pub fn new() -> Day01 {
-        Day01 {}
+        Default::default()
     }
 }
 
