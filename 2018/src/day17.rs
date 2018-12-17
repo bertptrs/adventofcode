@@ -1,12 +1,13 @@
+use std::collections::HashSet;
+use std::io::BufRead;
+use std::io::BufReader;
 use std::io::Read;
 
-use common::Solution;
-use std::collections::HashSet;
-use regex::Regex;
-use std::io::BufReader;
-use std::io::BufRead;
 use itertools::Itertools;
 use itertools::MinMaxResult;
+use regex::Regex;
+
+use common::Solution;
 
 type Coordinate = (usize, usize);
 
@@ -41,7 +42,7 @@ impl Day17 {
                     for y in a..=b {
                         self.clays.insert((fixed, y));
                     }
-                },
+                }
                 "y" => {
                     for x in a..=b {
                         self.clays.insert((x, fixed));
@@ -55,9 +56,33 @@ impl Day17 {
             MinMaxResult::MinMax(a, b) => {
                 self.ymin = *a;
                 self.ymax = *b;
-            },
+            }
             _ => panic!(),
         };
+    }
+
+    fn support_end<T>(&mut self, center: usize, range: T, y: usize) -> (usize, bool)
+        where T: Iterator<Item=usize>
+    {
+        let mut prev = center;
+        for x in range {
+            let pos = (x, y);
+            if self.clays.contains(&pos) {
+                return (prev, true);
+            }
+
+            prev = x;
+            let below = (x, y + 1);
+            self.descend(below);
+            if !self.is_supported(&below) {
+                return (x, false);
+            }
+        }
+        unreachable!();
+    }
+
+    fn is_supported(&self, pos: &Coordinate) -> bool {
+        self.clays.contains(pos) || self.contained.contains(pos)
     }
 
     fn descend(&mut self, pos: Coordinate) {
@@ -71,49 +96,16 @@ impl Day17 {
 
         self.descend(below);
 
-        if self.clays.contains(&below) || self.contained.contains(&below) {
-            let mut contained = true;
+        if self.is_supported(&below) {
+            let (right, right_contained) = self.support_end(x, (x + 1).., y);
+            let (left, left_contained) = self.support_end(x, (0..x).rev(), y);
 
-            let mut layer = vec![pos];
+            let range = (left..=right).map(|x| (x, y));
 
-            let mut nx = x + 1;
-            loop {
-                let npos = (nx, y);
-                if self.clays.contains(&npos) {
-                    break;
-                }
-                layer.push(npos);
-
-                let nbelow = (nx, y + 1);
-                self.descend(nbelow);
-                if !self.clays.contains(&nbelow) && !self.contained.contains(&nbelow) {
-                    contained = false;
-                    break;
-                }
-
-                nx += 1;
-            }
-            let mut nx = x - 1;
-            loop {
-                let npos = (nx, y);
-                if self.clays.contains(&npos) {
-                    break;
-                }
-                layer.push(npos);
-
-                let nbelow = (nx, y + 1);
-                self.descend(nbelow);
-                if !self.clays.contains(&nbelow) && !self.contained.contains(&nbelow) {
-                    contained = false;
-                    break;
-                }
-                nx -= 1;
-            }
-
-            if contained {
-                self.contained.extend(layer);
+            if left_contained && right_contained {
+                self.contained.extend(range);
             } else {
-                self.flowing.extend(layer);
+                self.flowing.extend(range);
             }
         } else {
             self.flowing.insert(pos);
@@ -127,9 +119,8 @@ impl Solution for Day17 {
 
         self.descend((500, 0));
 
-        let result = self.contained.iter()
-            .chain(self.flowing.iter())
-            .filter(|&&(_, y)| y >= self.ymin && y <= self.ymax).count();
+        let result = self.contained.len()
+            + self.flowing.len() - self.ymin;
         format!("{}", result)
     }
 
@@ -138,16 +129,14 @@ impl Solution for Day17 {
 
         self.descend((500, 0));
 
-        let result = self.contained.iter()
-            .filter(|&&(_, y)| y >= self.ymin && y <= self.ymax).count();
-        format!("{}", result)
+        format!("{}", self.contained.len())
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use day17::Day17;
     use common::Solution;
+    use day17::Day17;
 
     const SAMPLE_INPUT: &[u8] = include_bytes!("samples/17.txt");
 
@@ -162,5 +151,4 @@ mod tests {
         let mut instance = Day17::new();
         assert_eq!("29", instance.part2(&mut SAMPLE_INPUT));
     }
-
 }
