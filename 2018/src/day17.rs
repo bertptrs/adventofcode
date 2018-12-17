@@ -60,33 +60,6 @@ impl Day17 {
         };
     }
 
-    #[allow(unused)]
-    fn map(&self) {
-        let (xmin, xmax) = match self.clays.iter().map(|(x, _)| *x).minmax() {
-            MinMaxResult::MinMax(a, b) => (a, b),
-            _ => panic!(),
-        };
-
-        println!("{}, {} to {}, {}", xmin, self.ymin, xmax, self.ymax);
-
-        for y in self.ymin..=self.ymax {
-            let mut buf = String::with_capacity(xmax - xmin + 1);
-            for x in xmin..=xmax {
-                let pos = (x, y);
-                if self.clays.contains(&pos) {
-                    buf.push('#');
-                } else if self.contained.contains(&pos) {
-                    buf.push('~');
-                } else if self.flowing.contains(&pos) {
-                    buf.push('|');
-                } else {
-                    buf.push(' ');
-                }
-            }
-            println!("{}", buf);
-        }
-    }
-
     fn descend(&mut self, pos: Coordinate) {
         let (x, y) = pos;
 
@@ -152,25 +125,21 @@ impl Solution for Day17 {
     fn part1(&mut self, input: &mut Read) -> String {
         self.read_input(input);
 
-
         self.descend((500, 0));
 
-        let range_filter = |&&(_, y): &&(usize, usize)| y >= self.ymin && y <= self.ymax;
-
-        let result = self.contained.iter().filter(range_filter).count()
-            + self.flowing.iter().filter(range_filter).count();
+        let result = self.contained.iter()
+            .chain(self.flowing.iter())
+            .filter(|&&(_, y)| y >= self.ymin && y <= self.ymax).count();
         format!("{}", result)
     }
 
     fn part2(&mut self, input: &mut Read) -> String {
         self.read_input(input);
 
-
         self.descend((500, 0));
 
-        let range_filter = |&&(_, y): &&(usize, usize)| y >= self.ymin && y <= self.ymax;
-
-        let result = self.contained.iter().filter(range_filter).count();
+        let result = self.contained.iter()
+            .filter(|&&(_, y)| y >= self.ymin && y <= self.ymax).count();
         format!("{}", result)
     }
 }
