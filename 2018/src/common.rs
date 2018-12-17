@@ -15,7 +15,7 @@ use std::fmt::Debug;
 ///   assumed to be filled with "true" before being handed to this
 ///   method.
 pub fn prime_sieve(dest: &mut [bool]) {
-    if dest.len() >= 1 {
+    if !dest.is_empty() {
         dest[0] = false;
     }
 
@@ -25,7 +25,7 @@ pub fn prime_sieve(dest: &mut [bool]) {
 
     let limit = (dest.len() as f64).sqrt() as usize;
 
-    for i in 1..(limit + 1) {
+    for i in 1..=limit {
         if !dest[i] {
             continue;
         }

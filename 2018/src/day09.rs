@@ -43,9 +43,9 @@ impl Day09 {
     fn read_input(input: &mut Read) -> (usize, usize) {
         let mut data = String::new();
         input.read_to_string(&mut data).unwrap();
-        let mut parts = data.split(" ");
+        let mut parts = data.split(' ');
         let elves = parts.next().unwrap().parse().unwrap();
-        let marbles = parts.skip(5).next().unwrap().parse().unwrap();
+        let marbles = parts.nth(5).unwrap().parse().unwrap();
 
         (elves, marbles)
     }

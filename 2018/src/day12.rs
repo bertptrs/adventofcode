@@ -20,7 +20,7 @@ fn char_bool(c: char) -> bool {
     }
 }
 
-fn print_state(state: &State) -> String {
+fn print_state(state: &[(i64, bool)]) -> String {
     state.iter().map(|(_, x)| if *x { '#' } else { '.' }).collect()
 }
 
@@ -60,7 +60,7 @@ impl Day12 {
         state
     }
 
-    fn simulate(&self, state: &State) -> State {
+    fn simulate(&self, state: &[(i64, bool)]) -> State {
         let mut new_state = Vec::with_capacity(state.len() + 8);
         let mut index = 0;
         for &(idx, b) in state {
@@ -97,7 +97,7 @@ impl Day12 {
         state
     }
 
-    fn sum(&self, state: &State) -> i64 {
+    fn sum(&self, state: &[(i64, bool)]) -> i64 {
         state.iter()
             .filter(|&&(_, x)| x)
             .map(|&(i, _)| i)
@@ -118,7 +118,7 @@ impl Solution for Day12 {
         let mut state = self.read_input(input);
         let mut seen = HashMap::new();
         let mut time = 1i64;
-        const TARGET_TIME: i64 = 50000000000;
+        const TARGET_TIME: i64 = 50_000_000_000;
 
         loop {
             state = self.simulate(&state);

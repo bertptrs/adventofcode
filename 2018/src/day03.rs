@@ -86,7 +86,7 @@ impl common::Solution for Day03 {
         let claims = self.get_claims();
 
         let uncontested = self.claims.iter()
-            .position(|x| x.range().all(|x| *claims.get(&x).unwrap() == 1))
+            .position(|x| x.range().all(|x| claims[&x] == 1))
             .unwrap();
 
         format!("{}", uncontested + 1)

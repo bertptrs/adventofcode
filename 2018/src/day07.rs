@@ -50,7 +50,7 @@ impl Day07 {
             let a = groups[1].chars().next().unwrap();
             let b = groups[2].chars().next().unwrap();
 
-            self.forward.entry(a).or_insert(Vec::new()).push(b);
+            self.forward.entry(a).or_insert_with(Vec::new).push(b);
             *self.dep_count.entry(b).or_insert(0) += 1;
         }
     }

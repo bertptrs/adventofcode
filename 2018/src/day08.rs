@@ -61,7 +61,7 @@ impl Solution for Day08 {
     fn part1(&mut self, input: &mut Read) -> String {
         let data: String = read_single_input(input);
 
-        let data: Vec<usize> = data.trim().split(" ").map(|x| x.parse().unwrap()).collect();
+        let data: Vec<usize> = data.trim().split(' ').map(|x| x.parse().unwrap()).collect();
         let (result, _) = total1(&data);
 
         format!("{}", result)
@@ -70,7 +70,7 @@ impl Solution for Day08 {
     fn part2(&mut self, input: &mut Read) -> String {
         let data: String = read_single_input(input);
 
-        let data: Vec<usize> = data.trim().split(" ").map(|x| x.parse().unwrap()).collect();
+        let data: Vec<usize> = data.trim().split(' ').map(|x| x.parse().unwrap()).collect();
         let (result, _) = total2(&data);
 
         format!("{}", result)

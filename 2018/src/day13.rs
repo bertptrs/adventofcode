@@ -25,7 +25,7 @@ impl Direction {
             _ => panic!("Invalid direction {}", c),
         }
     }
-    pub fn clockwise(&self) -> Self {
+    pub fn clockwise(self) -> Self {
         match self {
             Direction::North => Direction::East,
             Direction::East => Direction::South,
@@ -34,11 +34,11 @@ impl Direction {
         }
     }
 
-    pub fn counter_clockwise(&self) -> Self {
-        return self.clockwise().clockwise().clockwise();
+    pub fn counter_clockwise(self) -> Self {
+        self.clockwise().clockwise().clockwise()
     }
 
-    pub fn run(&self, pos: Coordinate) -> Coordinate {
+    pub fn run(self, pos: Coordinate) -> Coordinate {
         let (x, y) = pos;
         match self {
             Direction::North => (x, y - 1),

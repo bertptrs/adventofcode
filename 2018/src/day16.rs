@@ -28,7 +28,7 @@ enum OpCode {
 }
 
 impl OpCode {
-    fn valid(&self, op: &[i32; 4], before: &[i32; 4], after: &[i32; 4]) -> bool {
+    fn valid(self, op: &[i32; 4], before: &[i32; 4], after: &[i32; 4]) -> bool {
         let mut cpu: CPU = Default::default();
 
         cpu.registers.copy_from_slice(before);
@@ -38,7 +38,7 @@ impl OpCode {
             }
         }
 
-        return false;
+        false
     }
 }
 
@@ -72,7 +72,7 @@ struct CPU {
 }
 
 impl CPU {
-    pub fn execute(&mut self, op: &OpCode, var: &[i32]) -> Result<i32, CPUErr> {
+    pub fn execute(&mut self, op: OpCode, var: &[i32]) -> Result<i32, CPUErr> {
         use self::OpCode::*;
         let res = match op {
             ADDR => self.reg(var[0])? + self.reg(var[1])?,
@@ -121,7 +121,7 @@ impl Day16 {
 
     fn read(&mut self, reader: &mut BufRead, target: &mut [i32; 4]) -> bool {
         self.buf.clear();
-        if let Err(_) = reader.read_line(&mut self.buf) {
+        if reader.read_line(&mut self.buf).is_err() {
             return false;
         }
 
@@ -154,7 +154,7 @@ impl Day16 {
             if mappings[op[0] as usize].is_empty() {
                 mappings[op[0] as usize].extend(OP_LIST.iter()
                     .filter(|x| x.valid(&op, &before, &after))
-                    .map(|x| *x));
+                    .cloned());
             } else {
                 for option in OP_LIST.iter()
                     .filter(|x| !x.valid(&op, &before, &after)) {
@@ -197,6 +197,12 @@ impl Day16 {
     }
 }
 
+impl Default for Day16 {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl Solution for Day16 {
     fn part1(&mut self, input: &mut Read) -> String {
         let mut reader = BufReader::new(input);
@@ -235,7 +241,7 @@ impl Solution for Day16 {
         let mut cpu: CPU = Default::default();
 
         while self.read(&mut reader, &mut op) {
-            cpu.execute(&mapping[op[0] as usize], &op[1..4]).unwrap();
+            cpu.execute(mapping[op[0] as usize], &op[1..4]).unwrap();
         }
 
         format!("{}", cpu.registers[0])
