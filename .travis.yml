@@ -18,7 +18,7 @@ before_script:
     - cd 2018
 
 # After success on stable, run benchmark
-after_succes:
+after_success:
     - if [ "$TRAVIS_RUST_VERSION" == "stable" ]; then
           cargo bench;
       fi
