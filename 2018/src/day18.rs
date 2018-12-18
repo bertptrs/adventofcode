@@ -1,11 +1,11 @@
+use std::collections::HashMap;
 use std::io::BufRead;
 use std::io::BufReader;
 use std::io::Read;
+use std::mem::swap;
 
 use common::GroupingCount;
 use common::Solution;
-use std::mem::swap;
-use std::collections::HashMap;
 
 #[derive(Copy, Clone, Hash, Eq, PartialEq, Debug)]
 enum Tile {
