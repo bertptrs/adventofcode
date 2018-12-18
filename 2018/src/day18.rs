@@ -12,10 +12,11 @@ enum Tile {
     Tree,
     Lumber,
     Open,
+    Invalid,
 }
 
 impl Tile {
-    pub fn next(self, counts: &[usize; 3]) -> Self {
+    pub fn next(self, counts: &[usize; 4]) -> Self {
         match self {
             Tile::Open => {
                 if counts[Tile::Tree as usize] >= 3 {
@@ -38,6 +39,7 @@ impl Tile {
                     Tile::Open
                 }
             }
+            Tile::Invalid => Tile::Invalid,
         }
     }
 }
@@ -48,7 +50,7 @@ impl From<char> for Tile {
             '|' => Tile::Tree,
             '#' => Tile::Lumber,
             '.' => Tile::Open,
-            _ => panic!("Invalid tile '{}'", c)
+            _ => Tile::Invalid
         }
     }
 }
@@ -59,6 +61,7 @@ impl From<Tile> for char {
             Tile::Tree => '|',
             Tile::Lumber => '#',
             Tile::Open => '.',
+            Tile::Invalid => 'X',
         }
     }
 }
@@ -98,7 +101,7 @@ impl Day18 {
             let ymax = if y < height - 1 { y + 1 } else { y };
 
             for x in 0..self.width {
-                let mut counts = [0; 3];
+                let mut counts = [0; 4];
                 let xmin = if x > 0 { x - 1 } else { x };
                 let xmax = if x < width - 1 { x + 1 } else { x };
 
