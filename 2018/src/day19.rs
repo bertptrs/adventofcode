@@ -28,8 +28,8 @@ impl Day19 {
                 let mut parts = line.split(' ');
                 let opcode = OpCode::from(parts.next().unwrap());
                 let mut operands = [0; 3];
-                for i in 0..3 {
-                    operands[i] = parts.next().unwrap().parse().unwrap();
+                for (target, part) in operands.iter_mut().zip(parts) {
+                    *target = part.parse().unwrap();
                 }
 
                 self.program.push((opcode, operands));

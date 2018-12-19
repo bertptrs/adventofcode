@@ -6,8 +6,8 @@ use std::io::Read;
 use regex::Regex;
 
 use common::Solution;
-use cpu::OpCode;
 use cpu::CPU;
+use cpu::OpCode;
 
 pub struct Day16 {
     matcher: Regex,
@@ -17,7 +17,7 @@ pub struct Day16 {
 impl Day16 {
     pub fn new() -> Self {
         Day16 {
-            matcher: Regex::new(r"(\d+),? (\d+),? (\d+),? (\d+)").unwrap(),
+            matcher: Regex::new(r"\d+").unwrap(),
             buf: String::new(),
         }
     }
@@ -28,15 +28,14 @@ impl Day16 {
             return false;
         }
 
-        if let Some(captures) = self.matcher.captures(&self.buf) {
-            for (target, cap) in target.iter_mut().zip(captures.iter().skip(1)) {
-                *target = cap.unwrap().as_str().parse().unwrap();
-            }
+        let mut found = false;
 
-            true
-        } else {
-            false
+        for (target, num) in target.iter_mut().zip(self.matcher.find_iter(&self.buf)) {
+            *target = num.as_str().parse().unwrap();
+            found = true
         }
+
+        found
     }
 
     fn determine_options(&mut self, mut reader: &mut BufReader<&mut Read>) -> [HashSet<OpCode>; 16] {
@@ -49,9 +48,9 @@ impl Day16 {
         let mut before = [0; 6];
         let mut op = [0; 4];
         let mut after = [0; 6];
-        while self.read(&mut reader, &mut before[..4]) {
+        while self.read(&mut reader, &mut before) {
             self.read(&mut reader, &mut op);
-            self.read(&mut reader, &mut after[..4]);
+            self.read(&mut reader, &mut after);
             reader.read_line(&mut self.buf).unwrap_or(0);
 
             if mappings[op[0] as usize].is_empty() {
@@ -114,9 +113,9 @@ impl Solution for Day16 {
         let mut after = [0; 6];
         let mut counter = 0;
 
-        while self.read(&mut reader, &mut before[..4]) {
+        while self.read(&mut reader, &mut before) {
             self.read(&mut reader, &mut op);
-            self.read(&mut reader, &mut after[..4]);
+            self.read(&mut reader, &mut after);
             reader.read_line(&mut self.buf).unwrap_or(0);
 
             let valid = OpCode::values()
