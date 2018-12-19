@@ -70,8 +70,9 @@ day_bench!(day15, 15);
 day_bench!(day16, 16);
 day_bench!(day17, 17);
 day_bench!(day18, 18);
+day_bench!(day19, 19);
 
 benchmark_main!(day01, day02, day03, day04, day05,
                 day06, day07, day08, day09, day10,
                 day11, day12, day13, day14, day15,
-                day16, day17, day18);
+                day16, day17, day18, day19);
