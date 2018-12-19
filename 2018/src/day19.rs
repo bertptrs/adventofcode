@@ -63,12 +63,10 @@ impl Solution for Day19 {
         assert_eq!(self.ip, 3);
 
         while (cpu.registers[3] as usize) < self.program.len() {
-            if cpu.registers[3] == 3 {
+            if cpu.registers[3] == 1 {
                 let reg = &mut cpu.registers;
-                if reg[5] % reg[1] == 0 {
-                    reg[0] += reg[1];
-                }
-                reg[3] = 12;
+                reg[0] = (1..=reg[5]).filter(|&x| reg[5] % x == 0).sum();
+                reg[3] = 16;
             }
             let (opcode, operands) = &self.program[cpu.registers[self.ip] as usize];
             cpu.execute(*opcode, operands).unwrap();
