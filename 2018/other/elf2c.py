@@ -1,7 +1,10 @@
 #!/usr/bin/env python3
 import argparse
+import os
 import string
+import tempfile
 import textwrap
+import shlex
 import sys
 
 
@@ -23,7 +26,7 @@ def footer():
     return textwrap.dedent('''\
                 program_end:
                 printf("[%d, %d, %d, %d, %d, %d]", a, b, c, d, e, f);
-            }''')
+            }\n''')
 
 
 def reg_name(num):
@@ -142,20 +145,32 @@ def compile(lines):
 
         code.append(code_line)
 
-    print(preamble())
-    print('\n'.join(code))
-    print(footer())
+    return preamble() + '\n'.join(code) + footer()
 
 
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('file')
+    parser.add_argument('-t', '--transpile-only', action='store_true')
+    parser.add_argument('-o')
 
     args = parser.parse_args()
     with open(args.file, 'rt') as f:
-        compile(f)
+        code = compile(f)
 
-    pass
+    if args.transpile_only:
+        print(code)
+        return
+
+    with tempfile.NamedTemporaryFile('wt', delete=True, suffix='.c') as f:
+        f.write(code)
+        f.flush()
+        command = 'gcc -Wall -Wextra -O3'
+        if args.o:
+            command += ' -o ' + shlex.quote(args.o)
+
+        command += ' ' + shlex.quote(f.name)
+        os.system(command)
 
 
 if __name__ == '__main__':
