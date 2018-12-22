@@ -5,6 +5,7 @@ use std::io::BufRead;
 use std::io::BufReader;
 use std::io::Read;
 
+use common::manhattan_distance;
 use common::Solution;
 
 type Coordinate = (usize, usize);
@@ -104,11 +105,11 @@ impl Solution for Day22 {
 
         let mut todo = BinaryHeap::new();
         let mut visited: HashSet<State> = HashSet::new();
-        todo.push((Reverse(0), State { pos: (0, 0), climbing: false, torch: true }));
-
         let target_state = State { pos: target, climbing: false, torch: true };
 
-        while let Some((Reverse(dist), state)) = todo.pop() {
+        todo.push((Reverse(manhattan_distance((0, 0), target)), Reverse(0), State { pos: (0, 0), climbing: false, torch: true }));
+
+        while let Some((Reverse(approx), Reverse(dist), state)) = todo.pop() {
             if visited.contains(&state) {
                 continue;
             }
@@ -131,7 +132,7 @@ impl Solution for Day22 {
                     continue;
                 }
 
-                todo.push((Reverse(dist + 7), state));
+                todo.push((Reverse(approx + 7), Reverse(dist + 7), state));
             }
 
             let xmin = if x == 0 { 0 } else { x - 1 };
@@ -146,11 +147,10 @@ impl Solution for Day22 {
                     };
 
                     if !visited.contains(&new_state) && new_state.is_valid(table[yn][xn]) && (x == xn || y == yn) {
-                        todo.push((Reverse(dist + 1), new_state));
+                        todo.push((Reverse(dist + 1 + manhattan_distance(target, new_state.pos)), Reverse(dist + 1), new_state));
                     }
                 }
             }
-            //println!("{} {:?} {:?}", dist, &state, &todo);
         }
         unreachable!();
     }
