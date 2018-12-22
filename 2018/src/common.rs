@@ -1,11 +1,36 @@
 use std::collections::HashMap;
+use std::fmt::Debug;
 use std::hash::Hash;
 use std::io;
 use std::io::Read;
-use std::str::FromStr;
 use std::ops::Add;
 use std::ops::Sub;
-use std::fmt::Debug;
+use std::str::FromStr;
+
+/// Utility trait for things representing coordinates.
+///
+/// This is implemented by default for any simple pair-tuple
+pub trait Point {
+    type CoordType;
+
+    /// Compute the manhattan distance between this and another.
+    ///
+    /// The distance will always be >= 0.
+    fn manhattan(self, other: Self) -> Self::CoordType;
+}
+
+impl<T> Point for (T, T)
+    where T: Add<Output=T> + Sub<Output=T> + Copy + Ord
+{
+    type CoordType = T;
+
+    fn manhattan(self, other: Self) -> T {
+        let (xa, ya) = self;
+        let (xb, yb) = other;
+        xa.max(xb) + ya.max(yb) - xa.min(xb) - ya.min(yb)
+    }
+}
+
 
 /// Apply Erathostenes's sieve to the supplied array
 ///
@@ -67,16 +92,6 @@ pub fn read_single_input<T>(input: &mut Read) -> T
 
     buf.trim().parse().unwrap()
 }
-
-/// Compute the manhattan distance between two points of arbitrary type.
-pub fn manhattan_distance<T>(a: (T, T), b: (T, T)) -> T
-where T: Copy + Add<Output=T> + Sub<Output=T> + Ord
-{
-    let (xa, ya) = a;
-    let (xb, yb) = b;
-    xa.max(xb) + ya.max(yb) - xa.min(xb) - ya.min(yb)
-}
-
 
 /// An interface to count elements in particular categories.
 pub trait GroupingCount {

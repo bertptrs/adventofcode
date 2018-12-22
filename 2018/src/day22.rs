@@ -5,7 +5,7 @@ use std::io::BufRead;
 use std::io::BufReader;
 use std::io::Read;
 
-use common::manhattan_distance;
+use common::Point;
 use common::Solution;
 
 type Coordinate = (usize, usize);
@@ -107,7 +107,7 @@ impl Solution for Day22 {
         let mut visited: HashSet<State> = HashSet::new();
         let target_state = State { pos: target, climbing: false, torch: true };
 
-        todo.push((Reverse(manhattan_distance((0, 0), target)), Reverse(0), State { pos: (0, 0), climbing: false, torch: true }));
+        todo.push((Reverse((0, 0).manhattan(target)), Reverse(0), State { pos: (0, 0), climbing: false, torch: true }));
 
         while let Some((Reverse(approx), Reverse(dist), state)) = todo.pop() {
             if visited.contains(&state) {
@@ -147,7 +147,7 @@ impl Solution for Day22 {
                     };
 
                     if !visited.contains(&new_state) && new_state.is_valid(table[yn][xn]) && (x == xn || y == yn) {
-                        todo.push((Reverse(dist + 1 + manhattan_distance(target, new_state.pos)), Reverse(dist + 1), new_state));
+                        todo.push((Reverse(dist + 1 + target.manhattan(new_state.pos)), Reverse(dist + 1), new_state));
                     }
                 }
             }

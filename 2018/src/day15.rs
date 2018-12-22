@@ -6,7 +6,7 @@ use std::io::BufRead;
 use std::io::BufReader;
 use std::io::Read;
 
-use common::manhattan_distance;
+use common::Point;
 use common::Solution;
 
 type Coordinate = (usize, usize);
@@ -122,7 +122,7 @@ impl Day15 {
         let to_attack = self.units.iter()
             .enumerate()
             .filter(|(_, x)| x.faction != faction && x.is_alive())
-            .filter(|(_, x)| manhattan_distance(x.pos, initial) == 1)
+            .filter(|(_, x)| x.pos.manhattan(initial) == 1)
             .min_by(|&(_, a), &(_, b)| a.hp.cmp(&b.hp).then(a.pos.cmp(&b.pos)));
 
         if let Some((index, _)) = to_attack {
