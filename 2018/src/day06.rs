@@ -4,7 +4,7 @@ use std::io::BufReader;
 use std::io::Read;
 
 use common::GroupingCount;
-use common::manhattan_distance;
+use common::Point;
 use common::Solution;
 
 type Coordinate = (usize, usize);
@@ -61,7 +61,7 @@ impl Day06 {
             let mut cur_best = None;
 
             for (i, point) in self.points.iter().enumerate() {
-                let dist = manhattan_distance(*point, (x, y));
+                let dist = point.manhattan((x, y));
                 if dist < cur_dist {
                     cur_dist = dist;
                     cur_best = Some(i);
@@ -82,7 +82,7 @@ impl Day06 {
         self.read_points(input);
 
         self.range()
-            .map(|x| self.points.iter().map(|y| manhattan_distance(x, *y)).sum::<usize>())
+            .map(|x| self.points.iter().map(|y| y.manhattan(x)).sum::<usize>())
             .filter(|&x| x < limit)
             .count()
     }
