@@ -50,7 +50,7 @@ impl Solution for Day19 {
             cpu.registers[self.ip] += 1;
         }
 
-        format!("{}", cpu.registers[0])
+        cpu.registers[0].to_string()
     }
 
     fn part2(&mut self, input: &mut Read) -> String {
@@ -73,7 +73,7 @@ impl Solution for Day19 {
             cpu.registers[self.ip] += 1;
         }
 
-        format!("{}", cpu.registers[0])
+        cpu.registers[0].to_string()
     }
 }
 

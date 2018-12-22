@@ -95,7 +95,7 @@ impl Solution for Day22 {
 
         let result: usize = table.iter().flat_map(|x| x.iter())
             .sum();
-        format!("{}", result)
+        result.to_string()
     }
 
     fn part2(&mut self, input: &mut Read) -> String {
@@ -115,7 +115,7 @@ impl Solution for Day22 {
             }
             visited.insert(state);
             if state == target_state {
-                return format!("{}", dist);
+                return dist.to_string();
             }
 
             let (x, y) = state.pos;

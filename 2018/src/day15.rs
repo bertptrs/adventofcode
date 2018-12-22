@@ -194,7 +194,7 @@ impl Day15 {
     fn return_score(&self, rounds: usize) -> String {
         let result: usize = rounds * self.units.iter().map(|x| x.hp as usize)
             .sum::<usize>();
-        format!("{}", result)
+        result.to_string()
     }
 
     fn set_elf_power(&mut self, power: u8) {

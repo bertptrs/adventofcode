@@ -138,7 +138,7 @@ impl Solution for Day20 {
         let pos = (0, 0);
 
         self.follow_directions(&[pos], &data[1..]);
-        format!("{}", self.distances().values().max().unwrap())
+        self.distances().values().max().unwrap().to_string()
     }
 
     fn part2(&mut self, input: &mut Read) -> String {
@@ -147,7 +147,7 @@ impl Solution for Day20 {
         let pos = (0, 0);
 
         self.follow_directions(&[pos], &data[1..]);
-        format!("{}", self.distances().values().filter(|&&x| x >= 1000).count())
+        self.distances().values().filter(|&&x| x >= 1000).count().to_string()
     }
 }
 

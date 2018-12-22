@@ -117,7 +117,7 @@ impl Solution for Day10 {
             self.run(1);
             height = self.height();
         }
-        format!("{}", steps - 1)
+        (steps - 1).to_string()
     }
 }
 

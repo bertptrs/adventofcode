@@ -111,11 +111,11 @@ impl Solution for Day06 {
             .filter_map(claim_filter)
             .filter(|x| !infinite.contains(x)).grouping_count();
 
-        format!("{}", counts.values().max().unwrap())
+        counts.values().max().unwrap().to_string()
     }
 
     fn part2(&mut self, input: &mut Read) -> String {
-        format!("{}", self.part2_with_limit(input, 10_000))
+        self.part2_with_limit(input, 10_000).to_string()
     }
 }
 

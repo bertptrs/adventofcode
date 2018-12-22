@@ -110,7 +110,7 @@ impl Solution for Day12 {
         let mut state = self.read_input(input);
         state = self.simulate_n(state, 20);
 
-        format!("{}", self.sum(&state))
+        self.sum(&state).to_string()
     }
 
     fn part2(&mut self, input: &mut Read) -> String {

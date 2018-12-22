@@ -50,7 +50,7 @@ impl common::Solution for Day02 {
             }
         }
 
-        return format!("{}", twos * threes);
+        (twos * threes).to_string()
     }
 
     fn part2(&mut self, input: &mut io::Read) -> String {
