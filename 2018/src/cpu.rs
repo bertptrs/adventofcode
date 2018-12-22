@@ -57,7 +57,7 @@ impl OpCode {
     }
 }
 
-impl From<&str> for OpCode {
+impl<'a> From<&'a str> for OpCode {
     fn from(name: &str) -> Self {
         match name {
             "addr" => OpCode::ADDR,
