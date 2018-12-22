@@ -100,7 +100,7 @@ impl Solution for Day22 {
 
     fn part2(&mut self, input: &mut Read) -> String {
         let (depth, target) = read_input(input);
-        let mut table = compute_table((target.0 + 100, target.1 + 100), depth);
+        let mut table = compute_table((target.0 + 200, target.1 + 200), depth);
         table[target.1][target.0] = 0;
 
         let mut todo = BinaryHeap::new();
@@ -138,8 +138,8 @@ impl Solution for Day22 {
             let xmin = if x == 0 { 0 } else { x - 1 };
             let ymin = if y == 0 { 0 } else { y - 1 };
 
-            for xn in xmin..=(x + 1).min(target.0 + 100) {
-                for yn in ymin..=(y + 1).min(target.1 + 100) {
+            for xn in xmin..=(x + 1) {
+                for yn in ymin..=(y + 1) {
                     let new_state = State {
                         pos: (xn, yn),
                         torch: state.torch,
