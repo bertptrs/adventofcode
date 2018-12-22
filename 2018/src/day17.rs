@@ -121,7 +121,7 @@ impl Solution for Day17 {
 
         let result = self.contained.len()
             + self.flowing.len() - self.ymin;
-        format!("{}", result)
+        result.to_string()
     }
 
     fn part2(&mut self, input: &mut Read) -> String {
@@ -129,7 +129,7 @@ impl Solution for Day17 {
 
         self.descend((500, 0));
 
-        format!("{}", self.contained.len())
+        self.contained.len().to_string()
     }
 }
 

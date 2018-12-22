@@ -55,13 +55,13 @@ impl Solution for Day09 {
     fn part1(&mut self, input: &mut Read) -> String {
         let (elves, marbles) = Day09::read_input(input);
 
-        format!("{}", winning_marbles(elves, marbles))
+        winning_marbles(elves, marbles).to_string()
     }
 
     fn part2(&mut self, input: &mut Read) -> String {
         let (elves, marbles) = Day09::read_input(input);
 
-        format!("{}", winning_marbles(elves, marbles * 100))
+        winning_marbles(elves, marbles * 100).to_string()
     }
 }
 

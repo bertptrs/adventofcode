@@ -92,7 +92,7 @@ impl Day04 {
         let best_minute = sleepers[best_sleeper].iter().enumerate()
             .max_by(|&(_, a), &(_, b)| a.cmp(b)).unwrap().0;
 
-        format!("{}", best_sleeper * (best_minute as usize))
+        (best_sleeper * (best_minute as usize)).to_string()
     }
 }
 

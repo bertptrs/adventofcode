@@ -21,7 +21,7 @@ impl common::Solution for Day01 {
             .map(|x| x.unwrap().parse::<i32>().unwrap())
             .sum();
 
-        format!("{}", sum)
+        sum.to_string()
     }
 
     fn part2(&mut self, input: &mut io::Read) -> String {
@@ -37,7 +37,7 @@ impl common::Solution for Day01 {
             for amount in &nums {
                 sum += amount;
                 if freqs.contains(&sum) {
-                    return format!("{}", sum);
+                    return sum.to_string();
                 } else {
                     freqs.insert(sum);
                 }

@@ -133,7 +133,7 @@ impl Day18 {
             .flat_map(|x| x.iter())
             .cloned().grouping_count();
 
-        format!("{}", result[&Tile::Tree] * result[&Tile::Lumber])
+        (result[&Tile::Tree] * result[&Tile::Lumber]).to_string()
     }
 }
 

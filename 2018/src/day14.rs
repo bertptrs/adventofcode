@@ -87,7 +87,7 @@ impl Solution for Day14 {
         input.read_to_string(&mut buf).unwrap();
 
         let input = buf.trim().parse().unwrap();
-        format!("{}", find_first(input, buf.trim().len()))
+        find_first(input, buf.trim().len()).to_string()
     }
 }
 

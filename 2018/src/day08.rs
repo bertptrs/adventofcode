@@ -64,7 +64,7 @@ impl Solution for Day08 {
         let data: Vec<usize> = data.trim().split(' ').map(|x| x.parse().unwrap()).collect();
         let (result, _) = total1(&data);
 
-        format!("{}", result)
+        result.to_string()
     }
 
     fn part2(&mut self, input: &mut Read) -> String {
@@ -73,7 +73,7 @@ impl Solution for Day08 {
         let data: Vec<usize> = data.trim().split(' ').map(|x| x.parse().unwrap()).collect();
         let (result, _) = total2(&data);
 
-        format!("{}", result)
+        result.to_string()
     }
 }
 

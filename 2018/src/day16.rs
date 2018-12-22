@@ -126,7 +126,7 @@ impl Solution for Day16 {
                 counter += 1;
             }
         }
-        format!("{}", counter)
+        counter.to_string()
     }
 
     fn part2(&mut self, input: &mut Read) -> String {
@@ -145,7 +145,7 @@ impl Solution for Day16 {
             cpu.execute(mapping[op[0] as usize], &op[1..4]).unwrap();
         }
 
-        format!("{}", cpu.registers[0])
+        cpu.registers[0].to_string()
     }
 }
 

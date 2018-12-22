@@ -52,17 +52,17 @@ impl Day21 {
 
 impl Solution for Day21 {
     fn part1(&mut self, _input: &mut Read) -> String {
-        format!("{}", ValidInputs::new(0).next().unwrap())
+        ValidInputs::new(0).next().unwrap().to_string()
     }
 
     fn part2(&mut self, _input: &mut Read) -> String {
         let inputs = ValidInputs::new(0);
         let mut seen = HashSet::new();
-        let mut last = None;
+        let mut last: Option<i64> = None;
 
         for input in inputs {
             if seen.contains(&input) {
-                return format!("{}", last.unwrap());
+                return last.unwrap().to_string();
             } else {
                 last = Some(input);
                 seen.insert(input);

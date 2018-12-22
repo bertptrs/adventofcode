@@ -34,7 +34,7 @@ impl common::Solution for Day05 {
         input.read_to_end(&mut data).expect("Can't read input!");
         common::trim_back(&mut data);
 
-        format!("{}", Day05::reduce(data))
+        Day05::reduce(data).to_string()
     }
 
     fn part2(&mut self, input: &mut Read) -> String {
@@ -46,7 +46,7 @@ impl common::Solution for Day05 {
             .map(Day05::reduce)
             .min().unwrap();
 
-        format!("{}", min_len)
+        min_len.to_string()
     }
 }
 

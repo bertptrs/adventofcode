@@ -78,7 +78,7 @@ impl common::Solution for Day03 {
             .filter(|&&x| x > 1)
             .count();
 
-        format!("{}", multi_claim)
+        multi_claim.to_string()
     }
 
     fn part2(&mut self, input: &mut io::Read) -> String {
@@ -89,7 +89,7 @@ impl common::Solution for Day03 {
             .position(|x| x.range().all(|x| claims[&x] == 1))
             .unwrap();
 
-        format!("{}", uncontested + 1)
+        (uncontested + 1).to_string()
     }
 }
 

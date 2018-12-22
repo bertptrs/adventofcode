@@ -128,7 +128,7 @@ impl Solution for Day07 {
     }
 
     fn part2(&mut self, input: &mut Read) -> String {
-        format!("{}", self.part2_parametrized(input, 60, 5))
+        self.part2_parametrized(input, 60, 5).to_string()
     }
 }
 
