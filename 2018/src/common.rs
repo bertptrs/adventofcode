@@ -31,6 +31,18 @@ impl<T> Point for (T, T)
     }
 }
 
+impl<T> Point for (T, T, T)
+    where T: Add<Output=T> + Sub<Output=T> + Copy + Ord
+{
+    type CoordType = T;
+
+    fn manhattan(self, other: Self) -> T {
+        let (xa, ya, za) = self;
+        let (xb, yb, zb) = other;
+        xa.max(xb) + ya.max(yb) + za.max(zb) - xa.min(xb) - ya.min(yb) - za.min(zb)
+    }
+}
+
 
 /// Apply Erathostenes's sieve to the supplied array
 ///
