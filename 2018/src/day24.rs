@@ -128,7 +128,7 @@ impl Day24 {
             }
             let damage = self.units.iter().map(|x| unit.damage_to(x)).collect_vec();
             let target = (0..self.units.len())
-                .filter(|&x| !is_targeted[x] && self.units[x].faction != unit.faction)
+                .filter(|&x| !is_targeted[x] && self.units[x].faction != unit.faction && self.units[x].is_alive())
                 .max_by(|&x, &y| {
                     damage[x].cmp(&damage[y])
                         .then(self.units[x].effective_power().cmp(&self.units[y].effective_power()))
@@ -136,14 +136,12 @@ impl Day24 {
                 });
 
             if let Some(target) = target {
-                println!("{} will attack {}, dealing {}", i, target, damage[target]);
                 targets[i] = Some(target);
                 is_targeted[target] = true;
             }
         }
 
         order.sort_unstable_by_key(|&x| Reverse(self.units[x].initiative));
-        println!("{:?}", order);
 
         for attacker in order {
             if !self.units[attacker].is_alive() {
@@ -155,7 +153,6 @@ impl Day24 {
                 let defender = &mut self.units[id];
 
                 let losses = damage / defender.hp;
-                println!("{} does {} damage to {}. Killed {}", attacker, damage, id, losses);
                 defender.count = defender.count.saturating_sub(losses);
             }
         }
