@@ -112,7 +112,7 @@ impl Day24 {
         }
     }
 
-    fn simulate(&mut self) {
+    fn simulate(&mut self) -> bool {
         let mut order: Vec<usize> = (0..self.units.len()).collect();
         order.sort_unstable_by_key(|&x| &self.units[x]);
         order.reverse();
@@ -120,6 +120,7 @@ impl Day24 {
         // select targets
         let mut targets: Vec<Option<usize>> = vec![None; self.units.len()];
         let mut is_targeted = vec![false; self.units.len()];
+        let mut changes = false;
 
         for &i in &order {
             let unit = &self.units[i];
@@ -153,9 +154,13 @@ impl Day24 {
                 let defender = &mut self.units[id];
 
                 let losses = damage / defender.hp;
-                defender.count = defender.count.saturating_sub(losses);
+                if losses > 0 {
+                    defender.count = defender.count.saturating_sub(losses);
+                    changes = true;
+                }
             }
         }
+        changes
     }
 
     fn both_alive(&self) -> bool {
@@ -174,21 +179,52 @@ impl Day24 {
 
         return false;
     }
+
+    fn full_simulation(&mut self) {
+        let mut changes = true;
+        while self.both_alive() && changes {
+            changes = self.simulate();
+        }
+    }
+
+    fn faction_won(&self, faction: char) -> bool {
+        if self.both_alive() {
+            false
+        } else {
+            self.units.iter().filter(|x| x.is_alive())
+                .all(|x| x.faction == faction)
+        }
+    }
 }
 
 impl Solution for Day24 {
     fn part1(&mut self, input: &mut Read) -> String {
         self.read_input(input);
-        while self.both_alive() {
-            self.simulate();
-        }
+        self.full_simulation();
 
         let result: u32 = self.units.iter().map(|x| x.count).sum();
         result.to_string()
     }
 
-    fn part2(&mut self, _input: &mut Read) -> String {
-        unimplemented!()
+    fn part2(&mut self, input: &mut Read) -> String {
+        self.read_input(input);
+        let original_count = self.units.iter().map(|x| x.count).collect_vec();
+
+        loop {
+            for (unit, count) in self.units.iter_mut().zip(original_count.iter()) {
+                unit.count = *count;
+                if unit.faction == 'D' {
+                    unit.power += 1;
+                }
+            }
+            println!("{:?}", self.units);
+
+            self.full_simulation();
+            if self.faction_won('D') {
+                let result: u32 = self.units.iter().map(|x| x.count).sum();
+                return result.to_string();
+            }
+        }
     }
 }
 
@@ -203,5 +239,11 @@ mod tests {
     fn sample_part1() {
         let mut instance = Day24::new();
         assert_eq!("5216", instance.part1(&mut SAMPLE_INPUT))
+    }
+
+    #[test]
+    fn sample_part2() {
+        let mut instance = Day24::new();
+        assert_eq!("51", instance.part2(&mut SAMPLE_INPUT))
     }
 }
