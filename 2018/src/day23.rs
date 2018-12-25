@@ -42,7 +42,7 @@ fn bron_kerbosch1(graph: Graph, cliques: &mut Vec<NodeSet>, r: &mut NodeSet, p: 
     }
 
     let mut p_clone = p.clone();
-    let pivot = *p.union(&x).next().unwrap();
+    let pivot = *p.union(&x).max_by_key(|&&v| graph[v].len()).unwrap();
 
     for &v in p.difference(&graph[pivot]) {
         r.insert(v);
