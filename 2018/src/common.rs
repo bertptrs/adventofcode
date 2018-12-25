@@ -43,6 +43,21 @@ impl<T> Point for (T, T, T)
     }
 }
 
+impl<T> Point for [T; 4]
+where T: Default + Add<Output=T> + Sub<Output=T> + Copy + Ord
+{
+    type CoordType = T;
+
+    fn manhattan(self, other: Self) -> T {
+        let mut dist = T::default();
+
+        for (&a, b) in self.iter().zip(other.iter()) {
+            dist = dist + a.max(*b) - a.min(*b);
+        }
+        dist
+    }
+}
+
 
 /// Apply Erathostenes's sieve to the supplied array
 ///
