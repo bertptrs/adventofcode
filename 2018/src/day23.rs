@@ -5,9 +5,6 @@ use regex::Regex;
 use std::io::BufReader;
 use std::io::BufRead;
 use common::Point;
-use std::collections::VecDeque;
-use std::collections::HashSet;
-use std::collections::HashMap;
 
 type Coordinate = (i64, i64, i64);
 
