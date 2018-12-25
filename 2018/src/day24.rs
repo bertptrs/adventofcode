@@ -1,4 +1,3 @@
-use std::cmp::Ordering;
 use std::cmp::Reverse;
 use std::io::BufRead;
 use std::io::BufReader;
@@ -40,19 +39,6 @@ impl Group {
 
     pub fn effective_power(&self) -> u32 {
         self.power * self.count
-    }
-}
-
-impl Ord for Group {
-    fn cmp(&self, other: &Self) -> Ordering {
-        self.effective_power().cmp(&other.effective_power())
-            .then(other.initiative.cmp(&self.initiative))
-    }
-}
-
-impl PartialOrd for Group {
-    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        Some(self.cmp(other))
     }
 }
 
@@ -114,8 +100,7 @@ impl Day24 {
 
     fn simulate(&mut self) -> bool {
         let mut order: Vec<usize> = (0..self.units.len()).collect();
-        order.sort_unstable_by_key(|&x| &self.units[x]);
-        order.reverse();
+        order.sort_unstable_by_key(|&x| Reverse((self.units[x].effective_power(), self.units[x].initiative)));
 
         // select targets
         let mut targets: Vec<Option<usize>> = vec![None; self.units.len()];
@@ -130,11 +115,7 @@ impl Day24 {
             let damage = self.units.iter().map(|x| unit.damage_to(x)).collect_vec();
             let target = (0..self.units.len())
                 .filter(|&x| !is_targeted[x] && self.units[x].faction != unit.faction && self.units[x].is_alive())
-                .max_by(|&x, &y| {
-                    damage[x].cmp(&damage[y])
-                        .then(self.units[x].effective_power().cmp(&self.units[y].effective_power()))
-                        .then(self.units[x].initiative.cmp(&self.units[y].initiative))
-                });
+                .max_by_key(|&x| (damage[x], self.units[x].effective_power(), self.units[x].initiative));
 
             if let Some(target) = target {
                 targets[i] = Some(target);
@@ -208,23 +189,22 @@ impl Solution for Day24 {
 
     fn part2(&mut self, input: &mut Read) -> String {
         self.read_input(input);
-        let original_count = self.units.iter().map(|x| x.count).collect_vec();
+        let original = self.units.clone();
 
-        loop {
-            for (unit, count) in self.units.iter_mut().zip(original_count.iter()) {
-                unit.count = *count;
-                if unit.faction == 'D' {
-                    unit.power += 1;
-                }
+        for boost in 1.. {
+            self.units = original.clone();
+            for unit in self.units.iter_mut().filter(|unit| unit.faction == 'D') {
+                unit.power += boost;
             }
-            println!("{:?}", self.units);
 
             self.full_simulation();
+            let result: u32 = self.units.iter().map(|x| x.count).sum();
             if self.faction_won('D') {
                 let result: u32 = self.units.iter().map(|x| x.count).sum();
                 return result.to_string();
             }
         }
+        unreachable!();
     }
 }
 
