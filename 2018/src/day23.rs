@@ -1,12 +1,61 @@
+use std::collections::HashSet;
+use std::io::BufRead;
+use std::io::BufReader;
 use std::io::Read;
 
-use common::Solution;
 use regex::Regex;
-use std::io::BufReader;
-use std::io::BufRead;
+
 use common::Point;
+use common::Solution;
 
 type Coordinate = (i64, i64, i64);
+type Graph<'a> = &'a[HashSet<usize>];
+type NodeSet = HashSet<usize>;
+
+fn bron_kerbosch(graph: Graph) -> Vec<NodeSet> {
+    let mut cliques = Vec::new();
+
+    let mut r = HashSet::new();
+    let x = HashSet::new();
+    let p: NodeSet = (0..graph.len()).collect();
+
+    bron_kerbosch1(graph, &mut cliques, &mut r, p, x);
+
+    cliques
+}
+
+fn bron_kerbosch1(graph: Graph, cliques: &mut Vec<NodeSet>, r: &mut NodeSet, p: NodeSet, mut x: NodeSet) {
+    if p.is_empty() && x.is_empty() {
+        if cliques.is_empty() {
+            cliques.push(r.clone());
+            return;
+        }
+
+        let cur = cliques.first().unwrap().len();
+        if cur < r.len() {
+            cliques.clear();
+        }
+        if cur <= r.len() {
+            cliques.push(r.clone())
+        }
+        return;
+    }
+
+    let mut p_clone = p.clone();
+    let pivot = *p.union(&x).next().unwrap();
+
+    for &v in p.difference(&graph[pivot]) {
+        r.insert(v);
+        let p1: NodeSet = p_clone.intersection(&graph[v]).cloned().collect();
+        let x1: NodeSet = x.intersection(&graph[v]).cloned().collect();
+        bron_kerbosch1(graph, cliques, r, p1, x1);
+        r.remove(&v);
+
+        p_clone.remove(&v);
+        x.insert(v);
+    }
+}
+
 
 #[derive(Default)]
 pub struct Day23 {
@@ -35,12 +84,6 @@ impl Day23 {
             self.bots.push((ints[3], pos));
         }
     }
-
-    fn in_range(&self, pos: Coordinate) -> usize {
-        self.bots.iter()
-            .filter(|&&(range, other)| other.manhattan(pos) <= range)
-            .count()
-    }
 }
 
 impl Solution for Day23 {
@@ -55,21 +98,56 @@ impl Solution for Day23 {
         result.to_string()
     }
 
-    fn part2(&mut self, _input: &mut Read) -> String {
-        unimplemented!()
+    fn part2(&mut self, input: &mut Read) -> String {
+        self.read_input(input);
+        let mut neighbours = vec![HashSet::new(); self.bots.len()];
+
+        for (a, &(arad, ap)) in self.bots.iter().enumerate() {
+            for (b, &(brad, bp)) in self.bots.iter().enumerate() {
+                if b >= a {
+                    break;
+                }
+                if arad + brad >= ap.manhattan(bp) && a != b {
+                    neighbours[a].insert(b);
+                    neighbours[b].insert(a);
+                }
+            }
+        }
+
+        let cliques = bron_kerbosch(&neighbours);
+
+        let mut best = None;
+        for clique in cliques {
+            let dist = clique.iter().map(|&x| (0, 0, 0).manhattan(self.bots[x].1) - self.bots[x].0)
+                .max().unwrap();
+            if best.is_none() {
+                best = Some(dist);
+            } else {
+                best = Some(best.unwrap().min(dist));
+            }
+        }
+
+        best.unwrap().to_string()
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use day23::Day23;
     use common::Solution;
+    use day23::Day23;
 
     const SAMPLE1_INPUT: &[u8] = include_bytes!("samples/23.1.txt");
+    const SAMPLE2_INPUT: &[u8] = include_bytes!("samples/23.2.txt");
 
     #[test]
     fn sample_part1() {
         let mut instance = Day23::new();
         assert_eq!("7", instance.part1(&mut SAMPLE1_INPUT));
+    }
+
+    #[test]
+    fn sample_part2() {
+        let mut instance = Day23::new();
+        assert_eq!("36", instance.part2(&mut SAMPLE2_INPUT));
     }
 }
