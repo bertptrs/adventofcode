@@ -114,7 +114,7 @@ impl Day24 {
             }
             let damage = self.units.iter().map(|x| unit.damage_to(x)).collect_vec();
             let target = (0..self.units.len())
-                .filter(|&x| !is_targeted[x] && self.units[x].faction != unit.faction && self.units[x].is_alive())
+                .filter(|&x| !is_targeted[x] && self.units[x].faction != unit.faction && self.units[x].is_alive() && damage[x] > 0)
                 .max_by_key(|&x| (damage[x], self.units[x].effective_power(), self.units[x].initiative));
 
             if let Some(target) = target {
@@ -198,7 +198,6 @@ impl Solution for Day24 {
             }
 
             self.full_simulation();
-            let result: u32 = self.units.iter().map(|x| x.count).sum();
             if self.faction_won('D') {
                 let result: u32 = self.units.iter().map(|x| x.count).sum();
                 return result.to_string();
