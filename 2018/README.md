@@ -28,3 +28,11 @@ graph below. Can you guess which days had a large simulation?
 The code to produce this graph is included in the `other` directory, and
 should be compatible with most peoples repo set-ups, so you can share
 your pain. If it is not, please let me know.
+
+## Performance
+
+I benchmarked the performance of my implementations on stable rust
+(1.31.1 at the time of writing). The logarithmic runtime graph looks as
+follows:
+
+![Runtime by day](runtime.svg)
