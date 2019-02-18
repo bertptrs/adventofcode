@@ -3,8 +3,8 @@ use std::io::BufReader;
 use std::io::Read;
 
 use common::Solution;
-use cpu::CPU;
 use cpu::OpCode;
+use cpu::CPU;
 
 #[derive(Default)]
 pub struct Day19 {

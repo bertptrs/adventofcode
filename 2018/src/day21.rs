@@ -4,18 +4,15 @@ use std::io::Read;
 use common::Solution;
 
 #[derive(Default)]
-pub struct Day21 {
-}
+pub struct Day21 {}
 
 struct ValidInputs {
-    f: i64
+    f: i64,
 }
 
 impl ValidInputs {
     pub fn new(start: i64) -> Self {
-        ValidInputs {
-            f: start
-        }
+        ValidInputs { f: start }
     }
 }
 

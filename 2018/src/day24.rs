@@ -61,9 +61,9 @@ impl Day24 {
         for line in reader.lines() {
             let line = line.unwrap();
             match line.as_str() {
-                "Immune System:" => { fac = 'D' }
+                "Immune System:" => fac = 'D',
                 "" => {}
-                "Infection:" => { fac = 'I' }
+                "Infection:" => fac = 'I',
                 line => {
                     let caps = matcher.captures(line).unwrap_or_else(|| {
                         panic!("{}", line);
@@ -100,7 +100,9 @@ impl Day24 {
 
     fn simulate(&mut self) -> bool {
         let mut order: Vec<usize> = (0..self.units.len()).collect();
-        order.sort_unstable_by_key(|&x| Reverse((self.units[x].effective_power(), self.units[x].initiative)));
+        order.sort_unstable_by_key(|&x| {
+            Reverse((self.units[x].effective_power(), self.units[x].initiative))
+        });
 
         // select targets
         let mut targets: Vec<Option<usize>> = vec![None; self.units.len()];
@@ -114,8 +116,19 @@ impl Day24 {
             }
             let damage = self.units.iter().map(|x| unit.damage_to(x)).collect_vec();
             let target = (0..self.units.len())
-                .filter(|&x| !is_targeted[x] && self.units[x].faction != unit.faction && self.units[x].is_alive() && damage[x] > 0)
-                .max_by_key(|&x| (damage[x], self.units[x].effective_power(), self.units[x].initiative));
+                .filter(|&x| {
+                    !is_targeted[x]
+                        && self.units[x].faction != unit.faction
+                        && self.units[x].is_alive()
+                        && damage[x] > 0
+                })
+                .max_by_key(|&x| {
+                    (
+                        damage[x],
+                        self.units[x].effective_power(),
+                        self.units[x].initiative,
+                    )
+                });
 
             if let Some(target) = target {
                 targets[i] = Some(target);
@@ -172,7 +185,9 @@ impl Day24 {
         if self.both_alive() {
             false
         } else {
-            self.units.iter().filter(|x| x.is_alive())
+            self.units
+                .iter()
+                .filter(|x| x.is_alive())
                 .all(|x| x.faction == faction)
         }
     }

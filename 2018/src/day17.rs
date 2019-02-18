@@ -62,7 +62,8 @@ impl Day17 {
     }
 
     fn support_end<T>(&mut self, center: usize, range: T, y: usize) -> (usize, bool)
-        where T: Iterator<Item=usize>
+    where
+        T: Iterator<Item = usize>,
     {
         let mut prev = center;
         for x in range {
@@ -88,7 +89,11 @@ impl Day17 {
     fn descend(&mut self, pos: Coordinate) {
         let (x, y) = pos;
 
-        if y > self.ymax || self.clays.contains(&pos) || self.flowing.contains(&pos) || self.contained.contains(&pos) {
+        if y > self.ymax
+            || self.clays.contains(&pos)
+            || self.flowing.contains(&pos)
+            || self.contained.contains(&pos)
+        {
             return;
         }
 
@@ -119,8 +124,7 @@ impl Solution for Day17 {
 
         self.descend((500, 0));
 
-        let result = self.contained.len()
-            + self.flowing.len() - self.ymin;
+        let result = self.contained.len() + self.flowing.len() - self.ymin;
         result.to_string()
     }
 

@@ -83,7 +83,6 @@ impl PartialOrd for Cart {
     }
 }
 
-
 #[derive(Default)]
 pub struct Day13 {
     grid: Vec<Vec<char>>,
@@ -229,7 +228,6 @@ mod tests {
         let mut instance = Day13::new();
         assert_eq!("7,3", instance.part1(&mut SAMPLE1_INPUT))
     }
-
 
     #[test]
     fn sample_part2() {

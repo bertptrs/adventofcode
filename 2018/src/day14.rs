@@ -66,7 +66,6 @@ fn find_first(n: usize, len: usize) -> usize {
     unreachable!();
 }
 
-
 #[derive(Default)]
 pub struct Day14 {}
 

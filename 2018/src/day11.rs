@@ -1,8 +1,8 @@
 use std::i32;
 use std::io::Read;
 
-use common::Solution;
 use common::read_single_input;
+use common::Solution;
 
 fn power_at(serial: i32, (x, y): (i32, i32)) -> i32 {
     let rack_id = x + 10;

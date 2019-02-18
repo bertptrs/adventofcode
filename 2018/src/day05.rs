@@ -42,9 +42,16 @@ impl common::Solution for Day05 {
         input.read_to_end(&mut data).expect("Can't read input!");
         common::trim_back(&mut data);
 
-        let min_len = (b'a'..=b'z').map(|option| data.iter().filter(|&x| !x.eq_ignore_ascii_case(&option)).cloned().collect())
+        let min_len = (b'a'..=b'z')
+            .map(|option| {
+                data.iter()
+                    .filter(|&x| !x.eq_ignore_ascii_case(&option))
+                    .cloned()
+                    .collect()
+            })
             .map(Day05::reduce)
-            .min().unwrap();
+            .min()
+            .unwrap();
 
         min_len.to_string()
     }

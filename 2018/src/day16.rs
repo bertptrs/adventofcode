@@ -6,8 +6,8 @@ use std::io::Read;
 use regex::Regex;
 
 use common::Solution;
-use cpu::CPU;
 use cpu::OpCode;
+use cpu::CPU;
 
 pub struct Day16 {
     matcher: Regex,
@@ -38,12 +38,27 @@ impl Day16 {
         found
     }
 
-    fn determine_options(&mut self, mut reader: &mut BufReader<&mut Read>) -> [HashSet<OpCode>; 16] {
+    fn determine_options(
+        &mut self,
+        mut reader: &mut BufReader<&mut Read>,
+    ) -> [HashSet<OpCode>; 16] {
         let mut mappings: [HashSet<OpCode>; 16] = [
-            HashSet::new(), HashSet::new(), HashSet::new(), HashSet::new(),
-            HashSet::new(), HashSet::new(), HashSet::new(), HashSet::new(),
-            HashSet::new(), HashSet::new(), HashSet::new(), HashSet::new(),
-            HashSet::new(), HashSet::new(), HashSet::new(), HashSet::new(),
+            HashSet::new(),
+            HashSet::new(),
+            HashSet::new(),
+            HashSet::new(),
+            HashSet::new(),
+            HashSet::new(),
+            HashSet::new(),
+            HashSet::new(),
+            HashSet::new(),
+            HashSet::new(),
+            HashSet::new(),
+            HashSet::new(),
+            HashSet::new(),
+            HashSet::new(),
+            HashSet::new(),
+            HashSet::new(),
         ];
         let mut before = [0; 6];
         let mut op = [0; 4];
@@ -54,11 +69,10 @@ impl Day16 {
             reader.read_line(&mut self.buf).unwrap_or(0);
 
             if mappings[op[0] as usize].is_empty() {
-                mappings[op[0] as usize].extend(OpCode::values()
-                    .filter(|x| x.is_valid(&op, &before, &after)));
+                mappings[op[0] as usize]
+                    .extend(OpCode::values().filter(|x| x.is_valid(&op, &before, &after)));
             } else {
-                for option in OpCode::values()
-                    .filter(|x| !x.is_valid(&op, &before, &after)) {
+                for option in OpCode::values().filter(|x| !x.is_valid(&op, &before, &after)) {
                     mappings[op[0] as usize].remove(&option);
                 }
                 continue;
@@ -148,7 +162,6 @@ impl Solution for Day16 {
         cpu.registers[0].to_string()
     }
 }
-
 
 #[cfg(test)]
 mod tests {

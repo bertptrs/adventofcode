@@ -1,11 +1,10 @@
 use std::io::Read;
 
-use common::Solution;
 use common::read_single_input;
+use common::Solution;
 
 #[derive(Default)]
 pub struct Day08 {}
-
 
 fn total1(items: &[usize]) -> (usize, usize) {
     let children = items[0];
@@ -42,14 +41,14 @@ fn total2(items: &[usize]) -> (usize, usize) {
             values.push(ct);
         }
 
-        let total = items[start..(start + meta_entries)].iter()
+        let total = items[start..(start + meta_entries)]
+            .iter()
             .filter_map(|&x| values.get(x - 1))
             .sum();
 
         (total, start + meta_entries)
     }
 }
-
 
 impl Day08 {
     pub fn new() -> Self {

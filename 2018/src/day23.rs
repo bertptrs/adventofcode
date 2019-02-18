@@ -9,7 +9,7 @@ use common::Point;
 use common::Solution;
 
 type Coordinate = (i64, i64, i64);
-type Graph<'a> = &'a[HashSet<usize>];
+type Graph<'a> = &'a [HashSet<usize>];
 type NodeSet = HashSet<usize>;
 
 fn bron_kerbosch(graph: Graph) -> Vec<NodeSet> {
@@ -24,7 +24,13 @@ fn bron_kerbosch(graph: Graph) -> Vec<NodeSet> {
     cliques
 }
 
-fn bron_kerbosch1(graph: Graph, cliques: &mut Vec<NodeSet>, r: &mut NodeSet, p: NodeSet, mut x: NodeSet) {
+fn bron_kerbosch1(
+    graph: Graph,
+    cliques: &mut Vec<NodeSet>,
+    r: &mut NodeSet,
+    p: NodeSet,
+    mut x: NodeSet,
+) {
     if p.is_empty() && x.is_empty() {
         if cliques.is_empty() {
             cliques.push(r.clone());
@@ -56,10 +62,9 @@ fn bron_kerbosch1(graph: Graph, cliques: &mut Vec<NodeSet>, r: &mut NodeSet, p: 
     }
 }
 
-
 #[derive(Default)]
 pub struct Day23 {
-    bots: Vec<(i64, Coordinate)>
+    bots: Vec<(i64, Coordinate)>,
 }
 
 impl Day23 {
@@ -74,7 +79,7 @@ impl Day23 {
         for line in reader.lines() {
             let line = line.unwrap();
 
-            let mut ints = [0i64;4];
+            let mut ints = [0i64; 4];
             for (c, i) in matcher.find_iter(&line).zip(ints.iter_mut()) {
                 *i = c.as_str().parse().unwrap();
             }
@@ -92,7 +97,10 @@ impl Solution for Day23 {
         self.bots.sort_unstable();
         let (best_range, best_pos) = *self.bots.last().unwrap();
 
-        let result = self.bots.iter().filter(|(_, pos)| pos.manhattan(best_pos) <= best_range)
+        let result = self
+            .bots
+            .iter()
+            .filter(|(_, pos)| pos.manhattan(best_pos) <= best_range)
             .count();
 
         result.to_string()
@@ -118,8 +126,11 @@ impl Solution for Day23 {
 
         let mut best = None;
         for clique in cliques {
-            let dist = clique.iter().map(|&x| (0, 0, 0).manhattan(self.bots[x].1) - self.bots[x].0)
-                .max().unwrap();
+            let dist = clique
+                .iter()
+                .map(|&x| (0, 0, 0).manhattan(self.bots[x].1) - self.bots[x].0)
+                .max()
+                .unwrap();
             if best.is_none() {
                 best = Some(dist);
             } else {

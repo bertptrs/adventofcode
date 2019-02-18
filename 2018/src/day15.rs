@@ -57,7 +57,9 @@ impl Day15 {
 
             for (x, c) in line.chars().enumerate() {
                 match c {
-                    '#' => { current[x] = true; }
+                    '#' => {
+                        current[x] = true;
+                    }
                     'E' | 'G' => {
                         self.units.push(Unit {
                             pos: (y, x),
@@ -78,13 +80,19 @@ impl Day15 {
         let initial = self.units[unit].pos;
         let faction = self.units[unit].faction;
 
-        let enemy_positions: HashSet<Coordinate> = self.units.iter()
+        let enemy_positions: HashSet<Coordinate> = self
+            .units
+            .iter()
             .filter(|x| x.faction != faction && x.is_alive())
-            .map(|x| x.pos).collect();
+            .map(|x| x.pos)
+            .collect();
 
-        let all_positions: HashSet<Coordinate> = self.units.iter()
+        let all_positions: HashSet<Coordinate> = self
+            .units
+            .iter()
             .filter(|x| x.is_alive())
-            .map(|x| x.pos).collect();
+            .map(|x| x.pos)
+            .collect();
 
         let mut todo = BinaryHeap::new();
         let mut prev: HashMap<Coordinate, Coordinate> = HashMap::new();
@@ -92,19 +100,13 @@ impl Day15 {
         todo.push(Reverse((0, initial)));
 
         while let Some(Reverse((d, (y, x)))) = todo.pop() {
-            let next = [
-                (y - 1, x),
-                (y, x - 1),
-                (y, x + 1),
-                (y + 1, x),
-            ];
+            let next = [(y - 1, x), (y, x - 1), (y, x + 1), (y + 1, x)];
 
             for pos in &next {
                 if !prev.contains_key(pos) && !self.walls[pos.0][pos.1] {
                     if enemy_positions.contains(pos) {
                         return prev.remove(&(y, x));
                     } else if !all_positions.contains(pos) {
-                        ;
                         let prev_step = *prev.get(&(y, x)).unwrap_or(pos);
                         prev.insert(*pos, prev_step);
                         todo.push(Reverse((d + 1, *pos)));
@@ -119,7 +121,9 @@ impl Day15 {
         let initial = self.units[unit].pos;
         let faction = self.units[unit].faction;
 
-        let to_attack = self.units.iter()
+        let to_attack = self
+            .units
+            .iter()
             .enumerate()
             .filter(|(_, x)| x.faction != faction && x.is_alive())
             .filter(|(_, x)| x.pos.manhattan(initial) == 1)
@@ -154,8 +158,8 @@ impl Day15 {
 
                 if target.hp == 0 {
                     match target.faction {
-                        'E' => { self.alive[0] -= 1 }
-                        'G' => { self.alive[1] -= 1 }
+                        'E' => self.alive[0] -= 1,
+                        'G' => self.alive[1] -= 1,
                         _ => panic!(),
                     };
                 }
@@ -167,7 +171,9 @@ impl Day15 {
 
     #[allow(dead_code)]
     fn print(&self) {
-        let positions: HashMap<_, _> = self.units.iter()
+        let positions: HashMap<_, _> = self
+            .units
+            .iter()
             .filter(|x| x.is_alive())
             .map(|x| (x.pos, x))
             .collect();
@@ -192,8 +198,7 @@ impl Day15 {
     }
 
     fn return_score(&self, rounds: usize) -> String {
-        let result: usize = rounds * self.units.iter().map(|x| x.hp as usize)
-            .sum::<usize>();
+        let result: usize = rounds * self.units.iter().map(|x| x.hp as usize).sum::<usize>();
         result.to_string()
     }
 
@@ -247,7 +252,6 @@ impl Solution for Day15 {
     }
 }
 
-
 #[cfg(test)]
 mod tests {
     use common::Solution;
@@ -262,14 +266,7 @@ mod tests {
         include_bytes!("samples/15.6.txt"),
     ];
 
-    const SAMPLE1_OUTPUT: [&str; 6] = [
-        "27730",
-        "36334",
-        "39514",
-        "27755",
-        "28944",
-        "18740",
-    ];
+    const SAMPLE1_OUTPUT: [&str; 6] = ["27730", "36334", "39514", "27755", "28944", "18740"];
 
     #[test]
     fn sample_part1() {
@@ -282,13 +279,7 @@ mod tests {
     #[test]
     fn sample_part2() {
         let indices = [0, 2, 3, 4, 5];
-        let outputs = [
-            "4988",
-            "31284",
-            "3478",
-            "6474",
-            "1140",
-        ];
+        let outputs = ["4988", "31284", "3478", "6474", "1140"];
 
         for (&input, output) in indices.iter().zip(outputs.iter()) {
             let mut instance = Day15::new();

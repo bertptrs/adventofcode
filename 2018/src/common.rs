@@ -20,7 +20,8 @@ pub trait Point {
 }
 
 impl<T> Point for (T, T)
-    where T: Add<Output=T> + Sub<Output=T> + Copy + Ord
+where
+    T: Add<Output = T> + Sub<Output = T> + Copy + Ord,
 {
     type CoordType = T;
 
@@ -32,7 +33,8 @@ impl<T> Point for (T, T)
 }
 
 impl<T> Point for (T, T, T)
-    where T: Add<Output=T> + Sub<Output=T> + Copy + Ord
+where
+    T: Add<Output = T> + Sub<Output = T> + Copy + Ord,
 {
     type CoordType = T;
 
@@ -44,7 +46,8 @@ impl<T> Point for (T, T, T)
 }
 
 impl<T> Point for [T; 4]
-where T: Default + Add<Output=T> + Sub<Output=T> + Copy + Ord
+where
+    T: Default + Add<Output = T> + Sub<Output = T> + Copy + Ord,
 {
     type CoordType = T;
 
@@ -57,7 +60,6 @@ where T: Default + Add<Output=T> + Sub<Output=T> + Copy + Ord
         dist
     }
 }
-
 
 /// Apply Erathostenes's sieve to the supplied array
 ///
@@ -111,8 +113,9 @@ pub fn trim_back(input: &mut Vec<u8>) {
 ///
 /// This function loads the input into a string and then attempts to parse it.
 pub fn read_single_input<T>(input: &mut Read) -> T
-    where T: FromStr,
-          <T as FromStr>::Err: Debug
+where
+    T: FromStr,
+    <T as FromStr>::Err: Debug,
 {
     let mut buf = String::new();
     input.read_to_string(&mut buf).unwrap();
@@ -132,12 +135,13 @@ pub trait GroupingCount {
 }
 
 impl<T> GroupingCount for T
-    where T: Iterator,
-          T::Item: Eq + Hash {
+where
+    T: Iterator,
+    T::Item: Eq + Hash,
+{
     type Type = T::Item;
 
-    fn grouping_count(&mut self) -> HashMap<Self::Type, usize>
-    {
+    fn grouping_count(&mut self) -> HashMap<Self::Type, usize> {
         let mut counts = HashMap::new();
 
         for element in self {
@@ -170,11 +174,7 @@ mod tests {
         prime_sieve(&mut input);
 
         let output = [
-            false, false,
-            true, true,
-            false, true,
-            false, true,
-            false, false
+            false, false, true, true, false, true, false, true, false, false,
         ];
 
         assert_eq!(output, input);

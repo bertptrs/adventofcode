@@ -49,7 +49,7 @@ impl Day06 {
         self.ymax = my;
     }
 
-    fn range(&self) -> impl Iterator<Item=Coordinate> {
+    fn range(&self) -> impl Iterator<Item = Coordinate> {
         iproduct!(0..=self.xmax, 0..=self.ymax)
     }
 
@@ -103,13 +103,20 @@ impl Solution for Day06 {
         infinite.extend(grid.first().unwrap().iter().filter_map(claim_filter));
         infinite.extend(grid.last().unwrap().iter().filter_map(claim_filter));
         for row in grid.iter().take(self.ymax) {
-            infinite.extend([row.first().unwrap(), row.last().unwrap()].iter()
-                .cloned().filter_map(claim_filter));
+            infinite.extend(
+                [row.first().unwrap(), row.last().unwrap()]
+                    .iter()
+                    .cloned()
+                    .filter_map(claim_filter),
+            );
         }
 
-        let counts = grid.iter().flat_map(|x| x.iter())
+        let counts = grid
+            .iter()
+            .flat_map(|x| x.iter())
             .filter_map(claim_filter)
-            .filter(|x| !infinite.contains(x)).grouping_count();
+            .filter(|x| !infinite.contains(x))
+            .grouping_count();
 
         counts.values().max().unwrap().to_string()
     }
