@@ -95,25 +95,8 @@ impl Day10 {
 
         dist.checked_div(speed).unwrap_or(1).max(1)
     }
-}
 
-impl Solution for Day10 {
-    fn part1(&mut self, input: &mut Read) -> String {
-        self.read_inputs(input);
-        let mut prev = self.height();
-        let initial = self.underestimate_time();
-        self.run(initial);
-        let mut height = self.height();
-        while height < prev {
-            prev = height;
-            self.run(1);
-            height = self.height();
-        }
-        self.run(-1);
-        self.print_state()
-    }
-
-    fn part2(&mut self, input: &mut Read) -> String {
+    fn simulate(&mut self, input: &mut Read) -> i32 {
         self.read_inputs(input);
         let mut prev = self.height();
         let mut steps = self.underestimate_time();
@@ -126,7 +109,19 @@ impl Solution for Day10 {
             self.run(1);
             height = self.height();
         }
-        (steps - 1).to_string()
+        self.run(-1);
+        steps - 1
+    }
+}
+
+impl Solution for Day10 {
+    fn part1(&mut self, input: &mut Read) -> String {
+        self.simulate(input);
+        self.print_state()
+    }
+
+    fn part2(&mut self, input: &mut Read) -> String {
+        self.simulate(input).to_string()
     }
 }
 
