@@ -68,14 +68,14 @@ impl Day10 {
     }
 
     fn height(&self) -> i32 {
-        match self.points.iter().skip(1).step(2).minmax() {
+        match self.points.iter().skip(1).step_by(2).minmax() {
             MinMaxResult::MinMax(x, y) => { y - x + 1 }
             _ => panic!("Input does not make sense."),
         }
     }
 
     fn underestimate_time(&self) -> i32 {
-        let (lower, upper) = match self.points.iter().enumerate().skip(1).step(2).minmax_by_key(|&(_, y)| y) {
+        let (lower, upper) = match self.points.iter().enumerate().skip(1).step_by(2).minmax_by_key(|&(_, y)| y) {
             MinMaxResult::MinMax((x, _), (y, _)) => (x, y),
             _ => panic!("Input does not make sense"),
         };

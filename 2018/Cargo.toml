@@ -8,7 +8,7 @@ description = "Implementation of the problems of Advent of Code 2018"
 clap = "2.32"
 regex = "1.1.0"
 chrono = "0.4.6"
-itertools = "0.7.11"
+itertools = "0.8"
 
 [dev-dependencies]
 bencher = "0.1.5"
