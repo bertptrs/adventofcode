@@ -52,7 +52,7 @@ impl OpCode {
     /// Iterator over all possible OpCode values.
     ///
     /// This iterator is backed internally by a static array of all op codes.
-    pub fn values() -> impl Iterator<Item=Self> {
+    pub fn values() -> impl Iterator<Item = Self> {
         OP_LIST.iter().cloned()
     }
 }

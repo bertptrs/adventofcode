@@ -17,7 +17,8 @@ impl common::Solution for Day01 {
     fn part1(&mut self, input: &mut io::Read) -> String {
         let reader = io::BufReader::new(input);
 
-        let sum: i32 = reader.lines()
+        let sum: i32 = reader
+            .lines()
             .map(|x| x.unwrap().parse::<i32>().unwrap())
             .sum();
 
@@ -30,7 +31,8 @@ impl common::Solution for Day01 {
         freqs.insert(0);
 
         let mut sum = 0;
-        let nums: Vec<i32> = reader.lines()
+        let nums: Vec<i32> = reader
+            .lines()
             .map(|x| x.unwrap().parse().unwrap())
             .collect();
         loop {

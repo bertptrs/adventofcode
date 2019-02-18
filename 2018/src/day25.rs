@@ -2,10 +2,10 @@ use std::io::Read;
 
 use regex::Regex;
 
-use common::Solution;
-use std::io::BufReader;
-use std::io::BufRead;
 use common::Point;
+use common::Solution;
+use std::io::BufRead;
+use std::io::BufReader;
 
 #[derive(Default)]
 pub struct Day25 {

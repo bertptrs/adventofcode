@@ -50,7 +50,7 @@ impl From<char> for Tile {
             '|' => Tile::Tree,
             '#' => Tile::Lumber,
             '.' => Tile::Open,
-            _ => Tile::Invalid
+            _ => Tile::Invalid,
         }
     }
 }
@@ -129,9 +129,12 @@ impl Day18 {
     }
 
     fn score(&self) -> String {
-        let result = self.grid.iter()
+        let result = self
+            .grid
+            .iter()
             .flat_map(|x| x.iter())
-            .cloned().grouping_count();
+            .cloned()
+            .grouping_count();
 
         (result[&Tile::Tree] * result[&Tile::Lumber]).to_string()
     }

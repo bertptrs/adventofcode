@@ -2,9 +2,9 @@ use std::collections::HashMap;
 use std::io;
 use std::io::BufRead;
 
-use chrono::DateTime;
 use chrono::offset::TimeZone;
 use chrono::offset::Utc;
+use chrono::DateTime;
 use chrono::Timelike;
 use regex::Regex;
 
@@ -42,7 +42,9 @@ impl Day04 {
         for line in reader.lines() {
             let line = line.unwrap();
             let captures = scanner.captures(&line).unwrap();
-            let timestamp = Utc.datetime_from_str(&captures[1], "%Y-%m-%d %H:%M").unwrap();
+            let timestamp = Utc
+                .datetime_from_str(&captures[1], "%Y-%m-%d %H:%M")
+                .unwrap();
 
             let event = match &captures[2] {
                 "falls asleep" => EventType::SLEEP,
@@ -63,7 +65,6 @@ impl Day04 {
         let mut sleeps = HashMap::new();
         let mut guard: Option<usize> = None;
         let mut sleep_start: Option<DateTime<Utc>> = None;
-
 
         for event in &self.events {
             match &event.event {
@@ -86,11 +87,18 @@ impl Day04 {
         sleeps
     }
 
-    fn format_results(sleepers: &HashMap<usize, [u32; 60]>, scores: &HashMap<usize, u32>) -> String {
+    fn format_results(
+        sleepers: &HashMap<usize, [u32; 60]>,
+        scores: &HashMap<usize, u32>,
+    ) -> String {
         let (best_sleeper, _) = scores.iter().max_by(|&(_, a), &(_, b)| a.cmp(b)).unwrap();
 
-        let best_minute = sleepers[best_sleeper].iter().enumerate()
-            .max_by(|&(_, a), &(_, b)| a.cmp(b)).unwrap().0;
+        let best_minute = sleepers[best_sleeper]
+            .iter()
+            .enumerate()
+            .max_by(|&(_, a), &(_, b)| a.cmp(b))
+            .unwrap()
+            .0;
 
         (best_sleeper * (best_minute as usize)).to_string()
     }
@@ -100,7 +108,8 @@ impl common::Solution for Day04 {
     fn part1(&mut self, input: &mut io::Read) -> String {
         self.read_events(input);
         let sleepers = self.get_sleeps();
-        let scores: HashMap<usize, u32> = sleepers.iter().map(|(k, v)| (*k, v.iter().sum())).collect();
+        let scores: HashMap<usize, u32> =
+            sleepers.iter().map(|(k, v)| (*k, v.iter().sum())).collect();
 
         Day04::format_results(&sleepers, &scores)
     }
@@ -108,7 +117,10 @@ impl common::Solution for Day04 {
     fn part2(&mut self, input: &mut io::Read) -> String {
         self.read_events(input);
         let sleepers = self.get_sleeps();
-        let scores: HashMap<usize, u32> = sleepers.iter().map(|(k, v)| (*k, *v.iter().max().unwrap())).collect();
+        let scores: HashMap<usize, u32> = sleepers
+            .iter()
+            .map(|(k, v)| (*k, *v.iter().max().unwrap()))
+            .collect();
 
         Day04::format_results(&sleepers, &scores)
     }

@@ -1,5 +1,5 @@
-use std::i32;
 use std::collections::HashSet;
+use std::i32;
 use std::io::BufRead;
 use std::io::BufReader;
 use std::io::Read;
@@ -23,7 +23,9 @@ impl Day10 {
 
     fn read_inputs(&mut self, input: &mut Read) {
         let reader = BufReader::new(input);
-        let matcher = Regex::new(r"position=<\s*(-?\d+),\s*(-?\d+)> velocity=<\s*(-?\d+),\s*(-?\d+)>").unwrap();
+        let matcher =
+            Regex::new(r"position=<\s*(-?\d+),\s*(-?\d+)> velocity=<\s*(-?\d+),\s*(-?\d+)>")
+                .unwrap();
 
         for line in reader.lines() {
             let line = line.unwrap();
@@ -69,13 +71,20 @@ impl Day10 {
 
     fn height(&self) -> i32 {
         match self.points.iter().skip(1).step_by(2).minmax() {
-            MinMaxResult::MinMax(x, y) => { y - x + 1 }
+            MinMaxResult::MinMax(x, y) => y - x + 1,
             _ => panic!("Input does not make sense."),
         }
     }
 
     fn underestimate_time(&self) -> i32 {
-        let (lower, upper) = match self.points.iter().enumerate().skip(1).step_by(2).minmax_by_key(|&(_, y)| y) {
+        let (lower, upper) = match self
+            .points
+            .iter()
+            .enumerate()
+            .skip(1)
+            .step_by(2)
+            .minmax_by_key(|&(_, y)| y)
+        {
             MinMaxResult::MinMax((x, _), (y, _)) => (x, y),
             _ => panic!("Input does not make sense"),
         };

@@ -56,7 +56,8 @@ impl common::Solution for Day02 {
     fn part2(&mut self, input: &mut io::Read) -> String {
         let mut ids: Vec<String> = io::BufReader::new(input)
             .lines()
-            .map(|x| x.unwrap()).collect();
+            .map(|x| x.unwrap())
+            .collect();
         ids.sort_unstable();
 
         for id1 in &ids {

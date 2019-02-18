@@ -25,16 +25,15 @@ impl Claim {
         self.y..(self.y + self.height)
     }
 
-    pub fn range(&self) -> impl Iterator<Item=(usize, usize)> {
+    pub fn range(&self) -> impl Iterator<Item = (usize, usize)> {
         iproduct!(self.xrange(), self.yrange())
     }
 }
 
 #[derive(Default)]
 pub struct Day03 {
-    claims: Vec<Claim>
+    claims: Vec<Claim>,
 }
-
 
 impl Day03 {
     pub fn new() -> Day03 {
@@ -62,21 +61,16 @@ impl Day03 {
     }
 
     fn get_claims(&self) -> HashMap<(usize, usize), usize> {
-        self.claims.iter()
-            .flat_map(|x| x.range())
-            .grouping_count()
+        self.claims.iter().flat_map(|x| x.range()).grouping_count()
     }
 }
-
 
 impl common::Solution for Day03 {
     fn part1(&mut self, input: &mut io::Read) -> String {
         self.read_claims(input);
         let claim_map = self.get_claims();
 
-        let multi_claim = claim_map.values()
-            .filter(|&&x| x > 1)
-            .count();
+        let multi_claim = claim_map.values().filter(|&&x| x > 1).count();
 
         multi_claim.to_string()
     }
@@ -85,7 +79,9 @@ impl common::Solution for Day03 {
         self.read_claims(input);
         let claims = self.get_claims();
 
-        let uncontested = self.claims.iter()
+        let uncontested = self
+            .claims
+            .iter()
             .position(|x| x.range().all(|x| claims[&x] == 1))
             .unwrap();
 

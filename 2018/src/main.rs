@@ -13,30 +13,38 @@ use aoc_2018::get_impl;
 
 fn main() {
     let matches = app_from_crate!()
-        .arg(Arg::with_name("day")
-            .value_name("DAY")
-            .help("Number of the day to execute")
-            .required(true)
-            .takes_value(true))
-        .arg(Arg::with_name("part2")
-            .short("2")
-            .help("Run part 2 instead of part 1")
-            .long("part2"))
-        .arg(Arg::with_name("input")
-            .short("i")
-            .long("input")
-            .help("Optional input file, stdin otherwise")
-            .takes_value(true))
-        .arg(Arg::with_name("time")
-            .short("t")
-            .long("time")
-            .help("Print the time for the result"))
+        .arg(
+            Arg::with_name("day")
+                .value_name("DAY")
+                .help("Number of the day to execute")
+                .required(true)
+                .takes_value(true),
+        )
+        .arg(
+            Arg::with_name("part2")
+                .short("2")
+                .help("Run part 2 instead of part 1")
+                .long("part2"),
+        )
+        .arg(
+            Arg::with_name("input")
+                .short("i")
+                .long("input")
+                .help("Optional input file, stdin otherwise")
+                .takes_value(true),
+        )
+        .arg(
+            Arg::with_name("time")
+                .short("t")
+                .long("time")
+                .help("Print the time for the result"),
+        )
         .get_matches();
 
     let mut implementation = get_impl(value_t_or_exit!(matches, "day", u32));
     let mut data: Box<io::Read> = match matches.value_of("input") {
-        Some(filename) => { Box::new(fs::File::open(filename).unwrap()) }
-        None => { Box::new(io::stdin()) }
+        Some(filename) => Box::new(fs::File::open(filename).unwrap()),
+        None => Box::new(io::stdin()),
     };
 
     let begin = Instant::now();

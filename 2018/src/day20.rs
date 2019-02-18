@@ -62,7 +62,11 @@ impl Day20 {
         Default::default()
     }
 
-    fn follow_directions(&mut self, initial: &[Coordinate], data: &[u8]) -> (Vec<Coordinate>, usize) {
+    fn follow_directions(
+        &mut self,
+        initial: &[Coordinate],
+        data: &[u8],
+    ) -> (Vec<Coordinate>, usize) {
         let mut pos = Vec::from(initial);
         let mut positions = Vec::new();
 
@@ -96,7 +100,7 @@ impl Day20 {
                         *p = dir.walk(*p);
                     }
                 }
-                val => panic!("Invalid input character: {}", val)
+                val => panic!("Invalid input character: {}", val),
             }
             index += 1;
         }
@@ -111,12 +115,13 @@ impl Day20 {
 
         while let Some((dist, pos)) = todo.pop_front() {
             if let Some(dirs) = self.paths.get(&pos) {
-                let dirs = dirs.iter().enumerate()
-                    .filter_map(|(idx, state)| if *state {
+                let dirs = dirs.iter().enumerate().filter_map(|(idx, state)| {
+                    if *state {
                         Some(Direction::from(idx))
                     } else {
                         None
-                    });
+                    }
+                });
                 for dir in dirs {
                     let new_pos = dir.walk(pos);
                     if !visited.contains_key(&new_pos) {
@@ -147,7 +152,11 @@ impl Solution for Day20 {
         let pos = (0, 0);
 
         self.follow_directions(&[pos], &data[1..]);
-        self.distances().values().filter(|&&x| x >= 1000).count().to_string()
+        self.distances()
+            .values()
+            .filter(|&&x| x >= 1000)
+            .count()
+            .to_string()
     }
 }
 

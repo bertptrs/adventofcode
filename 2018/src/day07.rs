@@ -18,8 +18,7 @@ struct Worker {
 
 impl Ord for Worker {
     fn cmp(&self, other: &Self) -> Ordering {
-        other.time.cmp(&self.time)
-            .then(other.work.cmp(&self.work))
+        other.time.cmp(&self.time).then(other.work.cmp(&self.work))
     }
 }
 
@@ -55,11 +54,19 @@ impl Day07 {
         }
     }
 
-    fn part2_parametrized(&mut self, input: &mut Read, base_time: usize, max_workers: usize) -> usize {
+    fn part2_parametrized(
+        &mut self,
+        input: &mut Read,
+        base_time: usize,
+        max_workers: usize,
+    ) -> usize {
         self.read_edges(input);
-        let mut starting_points: BinaryHeap<Reverse<char>> = self.forward.keys()
+        let mut starting_points: BinaryHeap<Reverse<char>> = self
+            .forward
+            .keys()
             .filter(|&x| !self.dep_count.contains_key(x))
-            .map(|&x| Reverse(x)).collect();
+            .map(|&x| Reverse(x))
+            .collect();
 
         let mut workers: BinaryHeap<Worker> = BinaryHeap::new();
         let mut time = 0;
@@ -106,8 +113,12 @@ impl Solution for Day07 {
 
         let mut result = String::new();
 
-        let mut starting_points: BinaryHeap<_> = self.forward.keys().filter(|&x| !self.dep_count.contains_key(x))
-            .map(|&x| Reverse(x)).collect();
+        let mut starting_points: BinaryHeap<_> = self
+            .forward
+            .keys()
+            .filter(|&x| !self.dep_count.contains_key(x))
+            .map(|&x| Reverse(x))
+            .collect();
 
         while let Some(Reverse(c)) = starting_points.pop() {
             result.push(c);

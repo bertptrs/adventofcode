@@ -16,16 +16,21 @@ fn char_bool(c: char) -> bool {
     match c {
         '#' => true,
         '.' => false,
-        _ => panic!("Invalid input {}", c)
+        _ => panic!("Invalid input {}", c),
     }
 }
 
 fn print_state(state: &[(i64, bool)]) -> String {
-    state.iter().map(|(_, x)| if *x { '#' } else { '.' }).collect()
+    state
+        .iter()
+        .map(|(_, x)| if *x { '#' } else { '.' })
+        .collect()
 }
 
 fn state_from_string(representation: &str, offset: i64) -> State {
-    representation.chars().enumerate()
+    representation
+        .chars()
+        .enumerate()
         .map(|(i, c)| (i as i64 + offset, char_bool(c)))
         .collect()
 }
@@ -72,8 +77,7 @@ impl Day12 {
             }
         }
 
-        let new_len = new_state.len() - new_state.iter().rev()
-            .take_while(|&&(_, x)| !x).count();
+        let new_len = new_state.len() - new_state.iter().rev().take_while(|&&(_, x)| !x).count();
         new_state.truncate(new_len);
 
         new_state
@@ -98,10 +102,7 @@ impl Day12 {
     }
 
     fn sum(&self, state: &[(i64, bool)]) -> i64 {
-        state.iter()
-            .filter(|&&(_, x)| x)
-            .map(|&(i, _)| i)
-            .sum()
+        state.iter().filter(|&&(_, x)| x).map(|&(i, _)| i).sum()
     }
 }
 

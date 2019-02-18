@@ -93,8 +93,7 @@ impl Solution for Day22 {
         let mut table = compute_table(target, depth);
         table[target.1][target.0] = 0;
 
-        let result: usize = table.iter().flat_map(|x| x.iter())
-            .sum();
+        let result: usize = table.iter().flat_map(|x| x.iter()).sum();
         result.to_string()
     }
 
@@ -105,9 +104,21 @@ impl Solution for Day22 {
 
         let mut todo = BinaryHeap::new();
         let mut visited: HashSet<State> = HashSet::new();
-        let target_state = State { pos: target, climbing: false, torch: true };
+        let target_state = State {
+            pos: target,
+            climbing: false,
+            torch: true,
+        };
 
-        todo.push((Reverse((0, 0).manhattan(target)), Reverse(0), State { pos: (0, 0), climbing: false, torch: true }));
+        todo.push((
+            Reverse((0, 0).manhattan(target)),
+            Reverse(0),
+            State {
+                pos: (0, 0),
+                climbing: false,
+                torch: true,
+            },
+        ));
 
         while let Some((Reverse(approx), Reverse(dist), state)) = todo.pop() {
             if visited.contains(&state) {
@@ -122,9 +133,21 @@ impl Solution for Day22 {
 
             // Handle equipment changes
             let changes = [
-                State { pos: state.pos, climbing: state.climbing, torch: !state.torch },
-                State { pos: state.pos, climbing: !state.climbing, torch: state.torch },
-                State { pos: state.pos, climbing: !state.climbing, torch: !state.torch },
+                State {
+                    pos: state.pos,
+                    climbing: state.climbing,
+                    torch: !state.torch,
+                },
+                State {
+                    pos: state.pos,
+                    climbing: !state.climbing,
+                    torch: state.torch,
+                },
+                State {
+                    pos: state.pos,
+                    climbing: !state.climbing,
+                    torch: !state.torch,
+                },
             ];
 
             for state in changes.iter().cloned() {
@@ -146,8 +169,15 @@ impl Solution for Day22 {
                         climbing: state.climbing,
                     };
 
-                    if !visited.contains(&new_state) && new_state.is_valid(table[yn][xn]) && (x == xn || y == yn) {
-                        todo.push((Reverse(dist + 1 + target.manhattan(new_state.pos)), Reverse(dist + 1), new_state));
+                    if !visited.contains(&new_state)
+                        && new_state.is_valid(table[yn][xn])
+                        && (x == xn || y == yn)
+                    {
+                        todo.push((
+                            Reverse(dist + 1 + target.manhattan(new_state.pos)),
+                            Reverse(dist + 1),
+                            new_state,
+                        ));
                     }
                 }
             }
@@ -163,7 +193,6 @@ mod tests {
     use super::*;
 
     const SAMPLE_INPUT: &[u8] = include_bytes!("samples/22.txt");
-
 
     #[test]
     fn sample_part1() {

@@ -37,18 +37,17 @@ fn test_part2(day: u32, bench: &mut Bencher) {
 }
 
 macro_rules! day_bench {
-
     ( $name:ident, $day:expr ) => {
-            pub mod $name {
-                use super::*;
-                pub fn part1(bench: & mut Bencher) {
-                test_part1( $day, bench);
-                }
-                pub fn part2(bench: & mut Bencher) {
-                test_part2( $day, bench);
-                }
+        pub mod $name {
+            use super::*;
+            pub fn part1(bench: &mut Bencher) {
+                test_part1($day, bench);
             }
-            benchmark_group!( $name, $name::part1, $name::part2);
+            pub fn part2(bench: &mut Bencher) {
+                test_part2($day, bench);
+            }
+        }
+        benchmark_group!($name, $name::part1, $name::part2);
     };
 }
 
