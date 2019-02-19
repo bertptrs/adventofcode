@@ -144,16 +144,16 @@ impl Solution for Day22 {
             let (xe, ye) = state.empty_pos;
             let empty_capacity = *get_grid(&capacity, size, state.empty_pos);
 
-            let valid_x = [if xe > 0 { Some(xe - 1) } else { None }, Some(xe), Some(xe), if xe < size - 1 { Some(xe + 1) } else { None }];
-            let valid_y = [Some(ye), if ye > 0 { Some(ye - 1) } else { None }, if ye < height - 1 { Some(ye + 1) } else { None }, Some(ye)];
+            let valid_x = [xe.checked_sub(1), Some(xe), Some(xe), if xe < size - 1 { Some(xe + 1) } else { None }];
+            let valid_y = [Some(ye), ye.checked_sub(1), if ye < height - 1 { Some(ye + 1) } else { None }, Some(ye)];
             for (x, y) in valid_x.iter().zip(valid_y.iter()) {
                 if x.is_none() || y.is_none() {
-                    continue
+                    continue;
                 }
                 let switch = (x.unwrap(), y.unwrap());
                 let contents = *get_grid(&state.grid, size, switch);
 
-                if contents >  empty_capacity {
+                if contents > empty_capacity {
                     // Not enough capacity
                     continue;
                 }
