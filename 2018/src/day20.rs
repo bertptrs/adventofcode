@@ -137,7 +137,7 @@ impl Day20 {
 }
 
 impl Solution for Day20 {
-    fn part1(&mut self, input: &mut Read) -> String {
+    fn part1(&mut self, input: &mut dyn Read) -> String {
         let mut data = Vec::new();
         input.read_to_end(&mut data).unwrap();
         let pos = (0, 0);
@@ -146,7 +146,7 @@ impl Solution for Day20 {
         self.distances().values().max().unwrap().to_string()
     }
 
-    fn part2(&mut self, input: &mut Read) -> String {
+    fn part2(&mut self, input: &mut dyn Read) -> String {
         let mut data = Vec::new();
         input.read_to_end(&mut data).unwrap();
         let pos = (0, 0);

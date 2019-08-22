@@ -57,7 +57,7 @@ impl Day08 {
 }
 
 impl Solution for Day08 {
-    fn part1(&mut self, input: &mut Read) -> String {
+    fn part1(&mut self, input: &mut dyn Read) -> String {
         let data: String = read_single_input(input);
 
         let data: Vec<usize> = data.trim().split(' ').map(|x| x.parse().unwrap()).collect();
@@ -66,7 +66,7 @@ impl Solution for Day08 {
         result.to_string()
     }
 
-    fn part2(&mut self, input: &mut Read) -> String {
+    fn part2(&mut self, input: &mut dyn Read) -> String {
         let data: String = read_single_input(input);
 
         let data: Vec<usize> = data.trim().split(' ').map(|x| x.parse().unwrap()).collect();

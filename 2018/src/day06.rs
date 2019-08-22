@@ -28,7 +28,7 @@ impl Day06 {
         Default::default()
     }
 
-    pub fn read_points(&mut self, input: &mut Read) {
+    pub fn read_points(&mut self, input: &mut dyn Read) {
         let reader = BufReader::new(input);
         self.points.clear();
 
@@ -78,7 +78,7 @@ impl Day06 {
         grid
     }
 
-    pub fn part2_with_limit(&mut self, input: &mut Read, limit: usize) -> usize {
+    pub fn part2_with_limit(&mut self, input: &mut dyn Read, limit: usize) -> usize {
         self.read_points(input);
 
         self.range()
@@ -96,7 +96,7 @@ fn claim_filter(claim: &Claim) -> Option<usize> {
 }
 
 impl Solution for Day06 {
-    fn part1(&mut self, input: &mut Read) -> String {
+    fn part1(&mut self, input: &mut dyn Read) -> String {
         self.read_points(input);
         let grid = self.compute_claim_grid();
         let mut infinite: HashSet<usize> = HashSet::new();
@@ -121,7 +121,7 @@ impl Solution for Day06 {
         counts.values().max().unwrap().to_string()
     }
 
-    fn part2(&mut self, input: &mut Read) -> String {
+    fn part2(&mut self, input: &mut dyn Read) -> String {
         self.part2_with_limit(input, 10_000).to_string()
     }
 }

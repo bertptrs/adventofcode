@@ -93,7 +93,7 @@ impl Default for Day11 {
 }
 
 impl Solution for Day11 {
-    fn part1(&mut self, input: &mut Read) -> String {
+    fn part1(&mut self, input: &mut dyn Read) -> String {
         let serial = read_single_input(input);
         self.compute_summed_area(serial);
         let (x, y, _) = self.best(3);
@@ -101,7 +101,7 @@ impl Solution for Day11 {
         format!("{},{}", x, y)
     }
 
-    fn part2(&mut self, input: &mut Read) -> String {
+    fn part2(&mut self, input: &mut dyn Read) -> String {
         let serial = read_single_input(input);
         self.compute_summed_area(serial);
         let mut best_result = 0;

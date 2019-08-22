@@ -40,7 +40,7 @@ impl Day12 {
         Default::default()
     }
 
-    fn read_input(&mut self, input: &mut Read) -> State {
+    fn read_input(&mut self, input: &mut dyn Read) -> State {
         let state;
         let mut reader = BufReader::new(input);
         let mut line = String::new();
@@ -107,14 +107,14 @@ impl Day12 {
 }
 
 impl Solution for Day12 {
-    fn part1(&mut self, input: &mut Read) -> String {
+    fn part1(&mut self, input: &mut dyn Read) -> String {
         let mut state = self.read_input(input);
         state = self.simulate_n(state, 20);
 
         self.sum(&state).to_string()
     }
 
-    fn part2(&mut self, input: &mut Read) -> String {
+    fn part2(&mut self, input: &mut dyn Read) -> String {
         // Note: this is way too slow
         let mut state = self.read_input(input);
         let mut seen = HashMap::new();

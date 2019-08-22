@@ -40,7 +40,7 @@ impl Day16 {
 
     fn determine_options(
         &mut self,
-        mut reader: &mut BufReader<&mut Read>,
+        mut reader: &mut BufReader<&mut dyn Read>,
     ) -> [HashSet<OpCode>; 16] {
         let mut mappings: [HashSet<OpCode>; 16] = [
             HashSet::new(),
@@ -119,7 +119,7 @@ impl Default for Day16 {
 }
 
 impl Solution for Day16 {
-    fn part1(&mut self, input: &mut Read) -> String {
+    fn part1(&mut self, input: &mut dyn Read) -> String {
         let mut reader = BufReader::new(input);
 
         let mut before = [0; 6];
@@ -143,7 +143,7 @@ impl Solution for Day16 {
         counter.to_string()
     }
 
-    fn part2(&mut self, input: &mut Read) -> String {
+    fn part2(&mut self, input: &mut dyn Read) -> String {
         let mut reader = BufReader::new(input);
 
         let mappings = self.determine_options(&mut reader);

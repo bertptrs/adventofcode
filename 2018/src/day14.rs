@@ -76,12 +76,12 @@ impl Day14 {
 }
 
 impl Solution for Day14 {
-    fn part1(&mut self, input: &mut Read) -> String {
+    fn part1(&mut self, input: &mut dyn Read) -> String {
         let input = read_single_input(input);
         format!("{:010}", skill_after(input))
     }
 
-    fn part2(&mut self, input: &mut Read) -> String {
+    fn part2(&mut self, input: &mut dyn Read) -> String {
         let mut buf = String::new();
         input.read_to_string(&mut buf).unwrap();
 

@@ -21,7 +21,7 @@ impl Day10 {
         Default::default()
     }
 
-    fn read_inputs(&mut self, input: &mut Read) {
+    fn read_inputs(&mut self, input: &mut dyn Read) {
         let reader = BufReader::new(input);
         let matcher =
             Regex::new(r"position=<\s*(-?\d+),\s*(-?\d+)> velocity=<\s*(-?\d+),\s*(-?\d+)>")
@@ -96,7 +96,7 @@ impl Day10 {
         dist.checked_div(speed).unwrap_or(1).max(1)
     }
 
-    fn simulate(&mut self, input: &mut Read) -> i32 {
+    fn simulate(&mut self, input: &mut dyn Read) -> i32 {
         self.read_inputs(input);
         let mut prev = self.height();
         let mut steps = self.underestimate_time();
@@ -115,12 +115,12 @@ impl Day10 {
 }
 
 impl Solution for Day10 {
-    fn part1(&mut self, input: &mut Read) -> String {
+    fn part1(&mut self, input: &mut dyn Read) -> String {
         self.simulate(input);
         self.print_state()
     }
 
-    fn part2(&mut self, input: &mut Read) -> String {
+    fn part2(&mut self, input: &mut dyn Read) -> String {
         self.simulate(input).to_string()
     }
 }

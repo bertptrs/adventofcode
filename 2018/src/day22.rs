@@ -63,7 +63,7 @@ fn compute_table((x, y): Coordinate, depth: usize) -> Vec<Vec<usize>> {
     table
 }
 
-fn read_input(input: &mut Read) -> (usize, Coordinate) {
+fn read_input(input: &mut dyn Read) -> (usize, Coordinate) {
     let mut buf = String::new();
     let mut reader = BufReader::new(input);
     reader.read_line(&mut buf).unwrap();
@@ -88,7 +88,7 @@ fn read_input(input: &mut Read) -> (usize, Coordinate) {
 }
 
 impl Solution for Day22 {
-    fn part1(&mut self, input: &mut Read) -> String {
+    fn part1(&mut self, input: &mut dyn Read) -> String {
         let (depth, target) = read_input(input);
         let mut table = compute_table(target, depth);
         table[target.1][target.0] = 0;
@@ -97,7 +97,7 @@ impl Solution for Day22 {
         result.to_string()
     }
 
-    fn part2(&mut self, input: &mut Read) -> String {
+    fn part2(&mut self, input: &mut dyn Read) -> String {
         let (depth, target) = read_input(input);
         let mut table = compute_table((target.0 + 200, target.1 + 200), depth);
         table[target.1][target.0] = 0;

@@ -17,7 +17,7 @@ impl Day19 {
         Default::default()
     }
 
-    fn read_input(&mut self, input: &mut Read) {
+    fn read_input(&mut self, input: &mut dyn Read) {
         let reader = BufReader::new(input);
 
         for line in reader.lines() {
@@ -39,7 +39,7 @@ impl Day19 {
 }
 
 impl Solution for Day19 {
-    fn part1(&mut self, input: &mut Read) -> String {
+    fn part1(&mut self, input: &mut dyn Read) -> String {
         self.read_input(input);
 
         let mut cpu = CPU::new();
@@ -53,7 +53,7 @@ impl Solution for Day19 {
         cpu.registers[0].to_string()
     }
 
-    fn part2(&mut self, input: &mut Read) -> String {
+    fn part2(&mut self, input: &mut dyn Read) -> String {
         self.read_input(input);
 
         let mut cpu = CPU::new();

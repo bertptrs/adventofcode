@@ -17,7 +17,7 @@ impl Day25 {
         Default::default()
     }
 
-    fn read_input(&mut self, input: &mut Read) {
+    fn read_input(&mut self, input: &mut dyn Read) {
         let matcher = Regex::new(r"-?\d+").unwrap();
         let reader = BufReader::new(input);
 
@@ -79,12 +79,12 @@ impl Day25 {
 }
 
 impl Solution for Day25 {
-    fn part1(&mut self, input: &mut Read) -> String {
+    fn part1(&mut self, input: &mut dyn Read) -> String {
         self.read_input(input);
         self.connected_components().to_string()
     }
 
-    fn part2(&mut self, _input: &mut Read) -> String {
+    fn part2(&mut self, _input: &mut dyn Read) -> String {
         // As always, no part 2 for day 25.
         String::new()
     }

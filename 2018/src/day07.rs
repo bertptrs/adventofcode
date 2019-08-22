@@ -39,7 +39,7 @@ impl Day07 {
         Default::default()
     }
 
-    fn read_edges(&mut self, input: &mut Read) {
+    fn read_edges(&mut self, input: &mut dyn Read) {
         let reader = BufReader::new(input);
         let regex = Regex::new(r"Step (\w) must be finished before step (\w) can begin").unwrap();
 
@@ -56,7 +56,7 @@ impl Day07 {
 
     fn part2_parametrized(
         &mut self,
-        input: &mut Read,
+        input: &mut dyn Read,
         base_time: usize,
         max_workers: usize,
     ) -> usize {
@@ -108,7 +108,7 @@ impl Day07 {
 }
 
 impl Solution for Day07 {
-    fn part1(&mut self, input: &mut Read) -> String {
+    fn part1(&mut self, input: &mut dyn Read) -> String {
         self.read_edges(input);
 
         let mut result = String::new();
@@ -138,7 +138,7 @@ impl Solution for Day07 {
         result
     }
 
-    fn part2(&mut self, input: &mut Read) -> String {
+    fn part2(&mut self, input: &mut dyn Read) -> String {
         self.part2_parametrized(input, 60, 5).to_string()
     }
 }

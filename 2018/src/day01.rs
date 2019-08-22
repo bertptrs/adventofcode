@@ -14,7 +14,7 @@ impl Day01 {
 }
 
 impl common::Solution for Day01 {
-    fn part1(&mut self, input: &mut io::Read) -> String {
+    fn part1(&mut self, input: &mut dyn io::Read) -> String {
         let reader = io::BufReader::new(input);
 
         let sum: i32 = reader
@@ -25,7 +25,7 @@ impl common::Solution for Day01 {
         sum.to_string()
     }
 
-    fn part2(&mut self, input: &mut io::Read) -> String {
+    fn part2(&mut self, input: &mut dyn io::Read) -> String {
         let reader = io::BufReader::new(input);
         let mut freqs = HashSet::new();
         freqs.insert(0);

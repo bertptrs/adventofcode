@@ -40,7 +40,7 @@ impl Day03 {
         Default::default()
     }
 
-    fn read_claims(&mut self, input: &mut io::Read) {
+    fn read_claims(&mut self, input: &mut dyn io::Read) {
         let reader = io::BufReader::new(input);
         self.claims.clear();
 
@@ -66,7 +66,7 @@ impl Day03 {
 }
 
 impl common::Solution for Day03 {
-    fn part1(&mut self, input: &mut io::Read) -> String {
+    fn part1(&mut self, input: &mut dyn io::Read) -> String {
         self.read_claims(input);
         let claim_map = self.get_claims();
 
@@ -75,7 +75,7 @@ impl common::Solution for Day03 {
         multi_claim.to_string()
     }
 
-    fn part2(&mut self, input: &mut io::Read) -> String {
+    fn part2(&mut self, input: &mut dyn io::Read) -> String {
         self.read_claims(input);
         let claims = self.get_claims();
 

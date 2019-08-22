@@ -52,7 +52,7 @@ impl Day24 {
         Default::default()
     }
 
-    fn read_input(&mut self, input: &mut Read) {
+    fn read_input(&mut self, input: &mut dyn Read) {
         let matcher = Regex::new(r"(\d+) units each with (\d+) hit points (\(([^)]+)\) )?with an attack that does (\d+) (\w+) damage at initiative (\d+)").unwrap();
         let weakness_matcher = Regex::new(r"(weak|immune) to ([^;)]+)").unwrap();
         let reader = BufReader::new(input);
@@ -194,7 +194,7 @@ impl Day24 {
 }
 
 impl Solution for Day24 {
-    fn part1(&mut self, input: &mut Read) -> String {
+    fn part1(&mut self, input: &mut dyn Read) -> String {
         self.read_input(input);
         self.full_simulation();
 
@@ -202,7 +202,7 @@ impl Solution for Day24 {
         result.to_string()
     }
 
-    fn part2(&mut self, input: &mut Read) -> String {
+    fn part2(&mut self, input: &mut dyn Read) -> String {
         self.read_input(input);
         let original = self.units.clone();
 

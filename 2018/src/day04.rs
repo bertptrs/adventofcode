@@ -33,7 +33,7 @@ impl Day04 {
         Default::default()
     }
 
-    fn read_events(&mut self, input: &mut io::Read) {
+    fn read_events(&mut self, input: &mut dyn io::Read) {
         self.events.clear();
         let reader = io::BufReader::new(input);
 
@@ -105,7 +105,7 @@ impl Day04 {
 }
 
 impl common::Solution for Day04 {
-    fn part1(&mut self, input: &mut io::Read) -> String {
+    fn part1(&mut self, input: &mut dyn io::Read) -> String {
         self.read_events(input);
         let sleepers = self.get_sleeps();
         let scores: HashMap<usize, u32> =
@@ -114,7 +114,7 @@ impl common::Solution for Day04 {
         Day04::format_results(&sleepers, &scores)
     }
 
-    fn part2(&mut self, input: &mut io::Read) -> String {
+    fn part2(&mut self, input: &mut dyn io::Read) -> String {
         self.read_events(input);
         let sleepers = self.get_sleeps();
         let scores: HashMap<usize, u32> = sleepers

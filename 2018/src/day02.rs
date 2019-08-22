@@ -33,7 +33,7 @@ impl Day02 {
 }
 
 impl common::Solution for Day02 {
-    fn part1(&mut self, input: &mut io::Read) -> String {
+    fn part1(&mut self, input: &mut dyn io::Read) -> String {
         let reader = io::BufReader::new(input);
         let mut twos = 0;
         let mut threes = 0;
@@ -53,7 +53,7 @@ impl common::Solution for Day02 {
         (twos * threes).to_string()
     }
 
-    fn part2(&mut self, input: &mut io::Read) -> String {
+    fn part2(&mut self, input: &mut dyn io::Read) -> String {
         let mut ids: Vec<String> = io::BufReader::new(input)
             .lines()
             .map(|x| x.unwrap())
