@@ -161,8 +161,8 @@ impl Solution for Day22 {
             let xmin = if x == 0 { 0 } else { x - 1 };
             let ymin = if y == 0 { 0 } else { y - 1 };
 
-            for xn in xmin..=(x + 1) {
-                for yn in ymin..=(y + 1) {
+            for yn in ymin..=(y + 1) {
+                for xn in xmin..=(x + 1) {
                     let new_state = State {
                         pos: (xn, yn),
                         torch: state.torch,
