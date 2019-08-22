@@ -1,3 +1,4 @@
+use std::collections::hash_map::Entry;
 use std::collections::HashMap;
 use std::collections::VecDeque;
 use std::io::Read;
@@ -124,8 +125,8 @@ impl Day20 {
                 });
                 for dir in dirs {
                     let new_pos = dir.walk(pos);
-                    if !visited.contains_key(&new_pos) {
-                        visited.insert(new_pos, dist + 1);
+                    if let Entry::Vacant(entry) = visited.entry(new_pos) {
+                        entry.insert(dist + 1);
                         todo.push_back((dist + 1, new_pos));
                     }
                 }

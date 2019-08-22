@@ -22,14 +22,14 @@ impl Iterator for ValidInputs {
     fn next(&mut self) -> Option<i64> {
         let mut f = self.f;
         let mut e = f | 0x10000;
-        f = 13284195;
+        f = 13_284_195;
 
         loop {
             let d = e & 0xff;
             f += d;
-            f &= 0xffffff;
+            f &= 0xff_ffff;
             f *= 65899;
-            f &= 0xffffff;
+            f &= 0xff_ffff;
 
             if 0x100 > e {
                 self.f = f;

@@ -76,7 +76,7 @@ impl Day04 {
                     sleep_start = Some(event.time);
                 }
                 EventType::WAKE => {
-                    let mut minutes = sleeps.entry(guard.unwrap()).or_insert([0u32; 60]);
+                    let minutes = sleeps.entry(guard.unwrap()).or_insert([0u32; 60]);
                     for m in sleep_start.unwrap().minute()..event.time.minute() {
                         minutes[m as usize] += 1;
                     }

@@ -31,7 +31,7 @@ pub mod day23;
 pub mod day24;
 pub mod day25;
 
-pub fn get_impl(day: u32) -> Box<common::Solution> {
+pub fn get_impl(day: u32) -> Box<dyn common::Solution> {
     match day {
         1 => Box::new(day01::Day01::new()),
         2 => Box::new(day02::Day02::new()),
