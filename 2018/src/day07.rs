@@ -54,6 +54,19 @@ impl Day07 {
         }
     }
 
+    fn schedule_dependents(&mut self, c: char, starting_points: &mut BinaryHeap<Reverse<char>>) {
+        if let Some(dependents) = self.forward.get(&c) {
+            for d in dependents {
+                let entry = self.dep_count.get_mut(d).unwrap();
+                if *entry == 1 {
+                    starting_points.push(Reverse(*d));
+                } else {
+                    *entry -= 1;
+                }
+            }
+        }
+    }
+
     fn part2_parametrized(
         &mut self,
         input: &mut dyn Read,
@@ -85,17 +98,7 @@ impl Day07 {
             while let Some(worker) = workers.pop() {
                 if worker.time == time {
                     let c = worker.work;
-
-                    if let Some(dependents) = self.forward.get(&c) {
-                        for d in dependents {
-                            let mut entry = self.dep_count.get_mut(d).unwrap();
-                            if *entry == 1 {
-                                starting_points.push(Reverse(*d));
-                            } else {
-                                *entry -= 1;
-                            }
-                        }
-                    }
+                    self.schedule_dependents(c, &mut starting_points);
                 } else {
                     workers.push(worker);
                     break;
@@ -122,17 +125,7 @@ impl Solution for Day07 {
 
         while let Some(Reverse(c)) = starting_points.pop() {
             result.push(c);
-
-            if let Some(dependents) = self.forward.get(&c) {
-                for d in dependents {
-                    let mut entry = self.dep_count.get_mut(d).unwrap();
-                    if *entry == 1 {
-                        starting_points.push(Reverse(*d));
-                    } else {
-                        *entry -= 1;
-                    }
-                }
-            }
+            self.schedule_dependents(c, &mut starting_points);
         }
 
         result

@@ -171,7 +171,7 @@ impl Day24 {
             seen = Some(unit.faction);
         }
 
-        return false;
+        false
     }
 
     fn full_simulation(&mut self) {

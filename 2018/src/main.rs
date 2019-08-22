@@ -42,7 +42,7 @@ fn main() {
         .get_matches();
 
     let mut implementation = get_impl(value_t_or_exit!(matches, "day", u32));
-    let mut data: Box<io::Read> = match matches.value_of("input") {
+    let mut data: Box<dyn io::Read> = match matches.value_of("input") {
         Some(filename) => Box::new(fs::File::open(filename).unwrap()),
         None => Box::new(io::stdin()),
     };

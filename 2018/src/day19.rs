@@ -22,7 +22,7 @@ impl Day19 {
 
         for line in reader.lines() {
             let line = line.unwrap();
-            if line.chars().next().unwrap() == '#' {
+            if line.starts_with('#') {
                 self.ip = line.split(' ').last().unwrap().parse().unwrap();
             } else {
                 let mut parts = line.split(' ');

@@ -22,7 +22,7 @@ impl Day16 {
         }
     }
 
-    fn read(&mut self, reader: &mut BufRead, target: &mut [i32]) -> bool {
+    fn read(&mut self, reader: &mut impl BufRead, target: &mut [i32]) -> bool {
         self.buf.clear();
         if reader.read_line(&mut self.buf).is_err() {
             return false;

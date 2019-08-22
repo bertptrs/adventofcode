@@ -42,12 +42,12 @@ impl Day22 {
 fn compute_table((x, y): Coordinate, depth: usize) -> Vec<Vec<usize>> {
     let mut table = vec![vec![0usize; x + 1]; y + 1];
     table[0][0] = 0;
-    for x in 1..=x {
-        table[0][x] = (16807 * x + depth) % MOD_BASE;
+    for (x, entry) in table[0].iter_mut().enumerate().skip(1) {
+        *entry = (16807 * x + depth) % MOD_BASE;
     }
 
-    for y in 1..=y {
-        table[y][0] = (48271 * y + depth) % MOD_BASE;
+    for (y, entry) in table.iter_mut().enumerate().skip(1) {
+        entry[0] = (48271 * y + depth) % MOD_BASE;
     }
 
     for y in 1..=y {
