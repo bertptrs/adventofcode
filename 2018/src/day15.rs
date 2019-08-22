@@ -48,7 +48,7 @@ impl Day15 {
         Default::default()
     }
 
-    fn read_input(&mut self, input: &mut Read) {
+    fn read_input(&mut self, input: &mut dyn Read) {
         let reader = BufReader::new(input);
 
         for (y, line) in reader.lines().enumerate() {
@@ -212,7 +212,7 @@ impl Day15 {
 }
 
 impl Solution for Day15 {
-    fn part1(&mut self, input: &mut Read) -> String {
+    fn part1(&mut self, input: &mut dyn Read) -> String {
         self.read_input(input);
         let mut rounds = 0;
         while self.simulate() {
@@ -221,7 +221,7 @@ impl Solution for Day15 {
         self.return_score(rounds)
     }
 
-    fn part2(&mut self, input: &mut Read) -> String {
+    fn part2(&mut self, input: &mut dyn Read) -> String {
         self.read_input(input);
         let backup = self.units.clone();
         let starting_elves = self.alive[0];

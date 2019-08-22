@@ -78,7 +78,7 @@ impl Day18 {
         Default::default()
     }
 
-    fn read_input(&mut self, input: &mut Read) {
+    fn read_input(&mut self, input: &mut dyn Read) {
         let reader = BufReader::new(input);
         self.grid.clear();
 
@@ -141,7 +141,7 @@ impl Day18 {
 }
 
 impl Solution for Day18 {
-    fn part1(&mut self, input: &mut Read) -> String {
+    fn part1(&mut self, input: &mut dyn Read) -> String {
         self.read_input(input);
 
         for _ in 0..10 {
@@ -151,7 +151,7 @@ impl Solution for Day18 {
         self.score()
     }
 
-    fn part2(&mut self, input: &mut Read) -> String {
+    fn part2(&mut self, input: &mut dyn Read) -> String {
         self.read_input(input);
         let limit = 1_000_000_000;
 

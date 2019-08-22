@@ -40,7 +40,7 @@ impl Day09 {
         Default::default()
     }
 
-    fn read_input(input: &mut Read) -> (usize, usize) {
+    fn read_input(input: &mut dyn Read) -> (usize, usize) {
         let mut data = String::new();
         input.read_to_string(&mut data).unwrap();
         let mut parts = data.split(' ');
@@ -52,13 +52,13 @@ impl Day09 {
 }
 
 impl Solution for Day09 {
-    fn part1(&mut self, input: &mut Read) -> String {
+    fn part1(&mut self, input: &mut dyn Read) -> String {
         let (elves, marbles) = Day09::read_input(input);
 
         winning_marbles(elves, marbles).to_string()
     }
 
-    fn part2(&mut self, input: &mut Read) -> String {
+    fn part2(&mut self, input: &mut dyn Read) -> String {
         let (elves, marbles) = Day09::read_input(input);
 
         winning_marbles(elves, marbles * 100).to_string()

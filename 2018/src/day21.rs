@@ -48,11 +48,11 @@ impl Day21 {
 }
 
 impl Solution for Day21 {
-    fn part1(&mut self, _input: &mut Read) -> String {
+    fn part1(&mut self, _input: &mut dyn Read) -> String {
         ValidInputs::new(0).next().unwrap().to_string()
     }
 
-    fn part2(&mut self, _input: &mut Read) -> String {
+    fn part2(&mut self, _input: &mut dyn Read) -> String {
         let inputs = ValidInputs::new(0);
         let mut seen = HashSet::new();
         let mut last: Option<i64> = None;

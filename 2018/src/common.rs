@@ -112,7 +112,7 @@ pub fn trim_back(input: &mut Vec<u8>) {
 /// Read the entire input as one value.
 ///
 /// This function loads the input into a string and then attempts to parse it.
-pub fn read_single_input<T>(input: &mut Read) -> T
+pub fn read_single_input<T>(input: &mut dyn Read) -> T
 where
     T: FromStr,
     <T as FromStr>::Err: Debug,
@@ -158,10 +158,10 @@ where
 /// be easily run from the main program.
 pub trait Solution {
     /// Solve the first part of the day
-    fn part1(&mut self, input: &mut io::Read) -> String;
+    fn part1(&mut self, input: &mut dyn io::Read) -> String;
 
     /// Solve the second part of the day
-    fn part2(&mut self, input: &mut io::Read) -> String;
+    fn part2(&mut self, input: &mut dyn io::Read) -> String;
 }
 
 #[cfg(test)]

@@ -72,7 +72,7 @@ impl Day23 {
         Default::default()
     }
 
-    fn read_input(&mut self, input: &mut Read) {
+    fn read_input(&mut self, input: &mut dyn Read) {
         let matcher = Regex::new(r"-?\d+").unwrap();
         let reader = BufReader::new(input);
 
@@ -92,7 +92,7 @@ impl Day23 {
 }
 
 impl Solution for Day23 {
-    fn part1(&mut self, input: &mut Read) -> String {
+    fn part1(&mut self, input: &mut dyn Read) -> String {
         self.read_input(input);
         self.bots.sort_unstable();
         let (best_range, best_pos) = *self.bots.last().unwrap();
@@ -106,7 +106,7 @@ impl Solution for Day23 {
         result.to_string()
     }
 
-    fn part2(&mut self, input: &mut Read) -> String {
+    fn part2(&mut self, input: &mut dyn Read) -> String {
         self.read_input(input);
         let mut neighbours = vec![HashSet::new(); self.bots.len()];
 

@@ -98,7 +98,7 @@ impl Day13 {
         self.carts.iter().filter(|x| x.alive).count()
     }
 
-    fn read_input(&mut self, input: &mut Read) {
+    fn read_input(&mut self, input: &mut dyn Read) {
         let reader = BufReader::new(input);
         for (y, line) in reader.lines().enumerate() {
             let line = line.unwrap();
@@ -183,7 +183,7 @@ impl Day13 {
 }
 
 impl Solution for Day13 {
-    fn part1(&mut self, input: &mut Read) -> String {
+    fn part1(&mut self, input: &mut dyn Read) -> String {
         self.read_input(input);
         let mut collision = None;
         while collision == None {
@@ -193,7 +193,7 @@ impl Solution for Day13 {
         format!("{},{}", x, y)
     }
 
-    fn part2(&mut self, input: &mut Read) -> String {
+    fn part2(&mut self, input: &mut dyn Read) -> String {
         self.read_input(input);
         while self.alive() > 1 {
             self.simulate();

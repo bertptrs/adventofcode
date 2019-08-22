@@ -25,7 +25,7 @@ impl Day17 {
         Default::default()
     }
 
-    fn read_input(&mut self, input: &mut Read) {
+    fn read_input(&mut self, input: &mut dyn Read) {
         let matcher = Regex::new(r"(.)=(\d+), (.)=(\d+)\.\.(\d+)").unwrap();
         let reader = BufReader::new(input);
 
@@ -119,7 +119,7 @@ impl Day17 {
 }
 
 impl Solution for Day17 {
-    fn part1(&mut self, input: &mut Read) -> String {
+    fn part1(&mut self, input: &mut dyn Read) -> String {
         self.read_input(input);
 
         self.descend((500, 0));
@@ -128,7 +128,7 @@ impl Solution for Day17 {
         result.to_string()
     }
 
-    fn part2(&mut self, input: &mut Read) -> String {
+    fn part2(&mut self, input: &mut dyn Read) -> String {
         self.read_input(input);
 
         self.descend((500, 0));
