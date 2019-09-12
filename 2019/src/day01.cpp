@@ -25,7 +25,7 @@ void aoc2019::day01_part2(std::istream &input, std::ostream &output) {
         for (auto drift : drifts) {
             cur += drift;
             if (seen.count(cur) == 1) {
-                output << drift << std::endl;
+                output << cur << std::endl;
                 return;
             } else {
                 seen.insert(cur);
