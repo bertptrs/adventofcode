@@ -16,3 +16,4 @@ addons:
     apt:
         packages:
             - libboost-program-options-dev
+            - libboost-test-dev
