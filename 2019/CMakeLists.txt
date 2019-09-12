@@ -14,7 +14,9 @@ target_link_libraries(runner AoCSolutions Boost::program_options)
 add_executable(test_solutions tests/test_solutions.cpp)
 target_compile_features(test_solutions PUBLIC cxx_std_17)
 target_link_libraries(test_solutions AoCSolutions Boost::unit_test_framework)
-target_include_directories(test_solutions PRIVATE ${CMAKE_SOURCE_DIR}/src)
+target_include_directories(test_solutions PRIVATE "${CMAKE_SOURCE_DIR}/src")
 
 enable_testing()
-add_test(test_solutions test_solutions)
+add_test(NAME test_solutions
+         COMMAND test_solutions
+         WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/tests")
