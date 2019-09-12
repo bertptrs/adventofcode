@@ -1,16 +1,15 @@
 #define BOOST_TEST_MODULE solutions_tests
 
-#include <filesystem>
 #include <regex>
 #include <string>
-#include <tuple>
+#include <boost/filesystem.hpp>
 #include <boost/test/included/unit_test.hpp>
 #include <boost/test/data/test_case.hpp>
 #include "solutions.hpp"
 
 std::vector<std::string> get_samples() {
     std::vector<std::string> samples;
-    for (auto entry : std::filesystem::directory_iterator("./samples")) {
+    for (const auto &entry : boost::filesystem::directory_iterator("./samples")) {
         if (entry.path().filename().extension() == ".in") {
             samples.push_back(entry.path().string());
         }
