@@ -1,24 +1,15 @@
-language: rust
-rust:
-    - stable
-    - beta
-    - nightly
-    - 1.28.0 # Ubuntu Bionic and Xenial
+language: cpp
+dist: bionic
+compiler:
+    - clang
+    - gcc
 
-matrix:
-    allow_failures:
-        - rust: nightly
-        - rust: 1.28.0
-    fast_finish: true
-
-cache: cargo
 
 # Custom directory, for the correct year
 before_script:
-    - cd 2018
+    - cd 2019
 
-# After success on stable, run benchmark
-after_success:
-    - if [ "$TRAVIS_RUST_VERSION" == "stable" ]; then
-          cargo bench;
-      fi
+# CMake build
+script:
+    - cmake .
+    - make
