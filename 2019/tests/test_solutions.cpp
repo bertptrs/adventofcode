@@ -5,7 +5,7 @@
 #include <boost/filesystem.hpp>
 #include <boost/test/included/unit_test.hpp>
 #include <boost/test/data/test_case.hpp>
-#include "solutions.hpp"
+#include "implementations.hpp"
 
 std::vector<std::string> get_samples() {
     std::vector<std::string> samples;

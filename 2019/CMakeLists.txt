@@ -4,7 +4,7 @@ project(aoc2019)
 
 find_package(Boost REQUIRED COMPONENTS program_options unit_test_framework filesystem)
 
-add_library(AoCSolutions src/solutions.hpp src/solutions.cpp src/day01.cpp)
+add_library(AoCSolutions src/implementations.hpp src/implementations.cpp src/day01.cpp src/days.hpp)
 target_compile_features(AoCSolutions PUBLIC cxx_std_17)
 
 add_executable(runner src/runner.cpp)

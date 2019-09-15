@@ -1,5 +1,6 @@
 #include <array>
-#include "solutions.hpp"
+#include "days.hpp"
+#include "implementations.hpp"
 
 constexpr const std::array<std::array<aoc2019::solution_t, 2>, 25> SOLUTIONS = {
         {aoc2019::day01_part1, aoc2019::day01_part2}
