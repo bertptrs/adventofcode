@@ -2,7 +2,7 @@
 #include <iterator>
 #include <vector>
 #include <unordered_set>
-#include "solutions.hpp"
+#include "days.hpp"
 
 // Currently an implementation of 2018 day 1
 void aoc2019::day01_part1(std::istream &input, std::ostream &output) {
