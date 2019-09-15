@@ -15,6 +15,9 @@ std::vector<std::string> get_samples() {
         }
     }
 
+    // Ensure a consistent order.
+    std::sort(samples.begin(), samples.end());
+
     return samples;
 }
 
