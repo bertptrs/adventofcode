@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.12)
 
 project(aoc2019)
 
-find_package(Boost REQUIRED COMPONENTS program_options filesystem)
+find_package(Boost REQUIRED COMPONENTS program_options)
 find_package(GTest REQUIRED)
 
 add_library(AoCSolutions src/implementations.hpp src/implementations.cpp src/day01.cpp src/days.hpp)
@@ -14,9 +14,9 @@ target_link_libraries(runner AoCSolutions Boost::program_options)
 
 add_executable(unit_tests tests/test_solutions.cpp)
 target_compile_features(unit_tests PUBLIC cxx_std_17)
-target_link_libraries(unit_tests AoCSolutions Boost::filesystem GTest::GTest GTest::Main)
+target_link_libraries(unit_tests AoCSolutions GTest::GTest GTest::Main)
 target_compile_definitions(unit_tests PRIVATE "TEST_SAMPLES_DIR=\"${CMAKE_SOURCE_DIR}/tests/samples\"")
 target_include_directories(unit_tests PRIVATE "${CMAKE_SOURCE_DIR}/src")
 
 enable_testing()
-gtest_discover_tests(unit_tests)
+gtest_discover_tests(unit_tests NO_PRETTY_VALUES)

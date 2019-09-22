@@ -2,9 +2,11 @@
 
 #include <cassert>
 #include <cctype>
+#include <cstring>
 #include <charconv>
+#include <filesystem>
+#include <fstream>
 #include <string>
-#include <boost/filesystem.hpp>
 #include <gtest/gtest.h>
 #include "implementations.hpp"
 
@@ -93,7 +95,7 @@ TEST_P(SolutionsTest, TestExpectedOutcome) {
 
 static std::vector<std::string> get_samples() {
     std::vector<std::string> samples;
-    for (const auto &entry : boost::filesystem::directory_iterator(TEST_SAMPLES_DIR)) {
+    for (const auto &entry : std::filesystem::directory_iterator(TEST_SAMPLES_DIR)) {
         if (entry.path().filename().extension() == ".in") {
             samples.push_back(entry.path().string());
         }
