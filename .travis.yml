@@ -1,10 +1,27 @@
 language: cpp
 dist: bionic
 sudo: true
-compiler:
-    - clang
-    - gcc
 
+matrix:
+    include:
+        - addons:
+            apt:
+                sources:
+                    - ubuntu-toolchain-r-test
+                    - llvm-toolchain-bionic-8
+                packages:
+                    - clang-8
+                    - libc++-8-dev
+                    - libc++abi-8-dev
+                    - libboost-filesystem-dev
+                    - libboost-program-options-dev
+                    - libgtest-dev
+          env:
+            - MATRIX_EVAL="CC=clang-8 && CXX=clang++-8"
+
+
+before_install:
+    - eval "$MATRIX_EVAL"
 
 # Install GTest properly since it is only available as a static library.
 install:
@@ -20,14 +37,3 @@ before_script:
 
 # CMake build
 script: cmake . && make && make test
-
-addons:
-    apt:
-        packages:
-            - libboost-filesystem-dev
-            - libboost-program-options-dev
-            - libgtest-dev
-
-cache:
-    directories:
-        - /home/travis/gtest_build
