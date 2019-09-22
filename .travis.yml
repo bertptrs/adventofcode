@@ -1,9 +1,18 @@
 language: cpp
 dist: bionic
+sudo: true
 compiler:
     - clang
     - gcc
 
+
+# Install GTest properly since it is only available as a static library.
+install:
+    - mkdir gtest_build
+    - pushd gtest_build
+    - cmake /usr/src/gtest -DBUILD_SHARED_LIBS=true
+    - make && sudo make install
+    - popd
 
 # Custom directory, for the correct year
 before_script:
@@ -18,3 +27,7 @@ addons:
             - libboost-filesystem-dev
             - libboost-program-options-dev
             - libgtest-dev
+
+cache:
+    directories:
+        - /home/travis/gtest_build
