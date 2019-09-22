@@ -2,7 +2,8 @@ cmake_minimum_required(VERSION 3.12)
 
 project(aoc2019)
 
-find_package(Boost REQUIRED COMPONENTS program_options unit_test_framework filesystem)
+find_package(Boost REQUIRED COMPONENTS program_options filesystem)
+find_package(GTest)
 
 add_library(AoCSolutions src/implementations.hpp src/implementations.cpp src/day01.cpp src/days.hpp)
 target_compile_features(AoCSolutions PUBLIC cxx_std_17)
@@ -13,10 +14,10 @@ target_link_libraries(runner AoCSolutions Boost::program_options)
 
 add_executable(test_solutions tests/test_solutions.cpp)
 target_compile_features(test_solutions PUBLIC cxx_std_17)
-target_link_libraries(test_solutions AoCSolutions Boost::unit_test_framework Boost::filesystem)
+target_link_libraries(test_solutions AoCSolutions Boost::filesystem gtest gtest_main)
+target_compile_definitions(test_solutions PRIVATE "TEST_SAMPLES_DIR=\"${CMAKE_SOURCE_DIR}/tests/samples\"")
 target_include_directories(test_solutions PRIVATE "${CMAKE_SOURCE_DIR}/src")
 
 enable_testing()
-add_test(NAME test_solutions
-         COMMAND test_solutions
-         WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/tests")
+include(GoogleTest)
+gtest_discover_tests(test_solutions)
