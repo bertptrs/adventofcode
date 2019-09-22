@@ -17,4 +17,4 @@ addons:
         packages:
             - libboost-filesystem-dev
             - libboost-program-options-dev
-            - libboost-test-dev
+            - libgtest-dev

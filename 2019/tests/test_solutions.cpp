@@ -1,15 +1,69 @@
 #define BOOST_TEST_MODULE solutions_tests
 
-#include <regex>
+#include <cassert>
+#include <cstdio>
 #include <string>
 #include <boost/filesystem.hpp>
-#include <boost/test/included/unit_test.hpp>
-#include <boost/test/data/test_case.hpp>
+#include <gtest/gtest.h>
 #include "implementations.hpp"
 
-std::vector<std::string> get_samples() {
+class SolutionsTest : public testing::TestWithParam<std::string> {
+protected:
+    std::string input_data = "";
+    std::string output_data = "";
+    aoc2019::solution_t implementation = nullptr;
+
+    // Read input data
+    void SetUp() override;
+
+private:
+    static void readToString(const std::string &name, std::string &target);
+};
+
+void SolutionsTest::SetUp() {
+    const auto input_name = GetParam();
+    const auto output_name = input_name.substr(0, input_name.length() - 3) + ".out";
+
+    const char *base_name = input_name.c_str();
+    if (const auto last_slash = input_name.rfind('/'); last_slash != std::string::npos) {
+        base_name += last_slash + 1;
+    }
+
+    int day, part;
+    const auto read_result = std::sscanf(base_name, "%02d-%1d-", &day, &part); // NOLINT(cert-err34-c)
+    // Ensure that we've read the input files.
+    assert(read_result != 0);
+
+    const bool part2 = part == 2;
+    implementation = aoc2019::get_implementation(day, part2);
+
+    readToString(input_name, input_data);
+    readToString(output_name, output_data);
+}
+
+void SolutionsTest::readToString(const std::string &name, std::string &target) {
+    std::ifstream source(name);
+
+    target.assign(std::istreambuf_iterator<char>(source),
+                  std::istreambuf_iterator<char>());
+}
+
+TEST_P(SolutionsTest, TestExpectedOutcome) {
+    std::stringstream input_buffer, output_buffer;
+
+    // Sanity check, don't call null implementation
+    ASSERT_NE(implementation, nullptr);
+
+    input_buffer.str(input_data);
+
+    implementation(input_buffer, output_buffer);
+
+    ASSERT_EQ(output_data, output_buffer.str());
+}
+
+static std::vector<std::string> get_samples() {
     std::vector<std::string> samples;
-    for (const auto &entry : boost::filesystem::directory_iterator("./samples")) {
+    for (const auto &entry : boost::filesystem::directory_iterator(TEST_SAMPLES_DIR)) {
         if (entry.path().filename().extension() == ".in") {
             samples.push_back(entry.path().string());
         }
@@ -21,35 +75,5 @@ std::vector<std::string> get_samples() {
     return samples;
 }
 
-static std::string read_file(const std::string &file_name) {
-    std::ifstream file(file_name);
-    return std::string(std::istreambuf_iterator<char>(file),
-                       std::istreambuf_iterator<char>());
-}
-
-static void test_solution_impl(const std::string &input_name) {
-    std::regex name_parser("/(\\d{2})-(1|2).*\\.in$");
-    std::smatch match;
-    // Sanity check, is this a parseable input file?
-    BOOST_TEST(std::regex_search(input_name, match, name_parser));
-
-    const auto output_filename = input_name.substr(0, input_name.length() - 3) + ".out";
-    const int day = std::atoi(match[1].str().c_str());
-    const int part2 = match[2].str() == "2";
-
-    const auto desired_output = read_file(output_filename);
-    const auto implementation = aoc2019::get_implementation(day, part2);
-
-    std::stringstream output_buffer;
-    std::ifstream input(input_name);
-
-    implementation(input, output_buffer);
-
-    BOOST_TEST(desired_output == output_buffer.str());
-}
-
-BOOST_DATA_TEST_CASE(test_solution,
-                     boost::unit_test::data::make(get_samples()),
-                     input_name) {
-    test_solution_impl(input_name);
-}
+INSTANTIATE_TEST_CASE_P(InstantiatedSolutionsTest, SolutionsTest,
+                        testing::ValuesIn(get_samples()));
