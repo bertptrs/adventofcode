@@ -8,7 +8,7 @@ compiler:
 
 # Install GTest properly since it is only available as a static library.
 install:
-    - mkdir ~/gtest_build
+    - mkdir -p ~/gtest_build
     - pushd ~/gtest_build
     - cmake /usr/src/gtest -DBUILD_SHARED_LIBS=true
     - make && sudo make install
