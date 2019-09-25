@@ -14,7 +14,6 @@ Install the dependencies:
   by default tries to dynamically link GTest, and the Ubuntu packages
   only provide a statically linked archive. You may need to compile it
   for yourself.
-- [Boost.Program_options](https://www.boost.org/doc/libs/1_71_0/doc/html/program_options.html)
 
 ```
 mkdir build && cd build

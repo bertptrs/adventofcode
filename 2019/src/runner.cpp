@@ -1,45 +1,92 @@
 #include "implementations.hpp"
+#include <charconv>
 #include <chrono>
 #include <iostream>
-#include <boost/program_options.hpp>
-
-namespace po = boost::program_options;
 
 struct AoCOptions {
     aoc2019::solution_t implementation;
     bool run_timer;
 };
 
-static AoCOptions parse_options(const int argc, const char *argv[]) {
+static AoCOptions parse_options(const int argc, const char* argv[]) {
+    using namespace std::string_view_literals;
     AoCOptions options{};
-    int day;
-    bool part2;
-    po::options_description desc("Allowed options");
-    desc.add_options()
-            ("day", po::value<int>(&day)->required(), "The day to run.")
-            ("part2,2", po::bool_switch(&part2), "Whether to run part 2.")
-            ("timer,t", po::bool_switch(&options.run_timer), "Show the execution time.");
 
-    po::positional_options_description positionals;
-    positionals.add("day", 1);
+    auto show_help = [argv] (int exit_status = 0) {
+        std::cerr << "Usage: " << argv[0] << " [--timer|-t] [--part2|-2] [--help|-h] DAY\n"
+                  << "\t--timer|-t: print execution time\n"
+                  << "\t--part2|-2: run part 2\n"
+                  << "\t --help|-h: show this message\n";
+        std::exit(exit_status);
+    };
 
-    try {
-        po::variables_map vm;
+    int day = -1;
+    bool part2 = false;
 
-        po::store(po::command_line_parser(argc, argv).options(desc).positional(positionals).run(), vm);
-        po::notify(vm);
+    // Here follows a manual implementation of getopt, since getopt doesn't work on windows…
+    for (int i = 1; i < argc; ++i) {
+        std::string_view arg(argv[i]);
+        if (arg[0] == '-') {
+            // Handle flag arguments
+            if (arg[1] != '-') {
+                // Shorthand flags
+                for (char c : arg.substr(1)) {
+                    switch (c) {
+                        case '2':
+                            part2 = true;
+                            break;
 
-        options.implementation = aoc2019::get_implementation(day, part2);
+                        case 't':
+                            options.run_timer = true;
+                            break;
 
-        return options;
-    } catch (po::error &argument_error) {
-        std::cerr << argument_error.what() << std::endl;
-        std::exit(1);
-    } catch (std::out_of_range &) {
-        std::cerr << "Invalid day: " << day
-                  << ".\n Valid range: [1, 25].\n";
-        std::exit(1);
+                        case 'h':
+                            show_help();
+                            break;
+
+                        default:
+                            std::cerr << "Unknown flag '" << c << "'.\n\n";
+                            show_help(1);
+                    }
+                }
+            } else {
+                // Handle long form versions
+                if (arg == "--timer"sv) {
+                    part2 = true;
+                } else if (arg == "--timer"sv) {
+                    options.run_timer = true;
+                } else if (arg == "--help"sv) {
+                    show_help();
+                } else {
+                    show_help(1);
+                }
+            }
+        } else {
+            if (day != -1) {
+                // Double date specification, bail.
+                show_help(1);
+            }
+
+            // Try to parse the date number
+            if (auto res = std::from_chars(arg.data(), arg.data() + arg.size(), day); res.ec != std::errc()) {
+                auto error_code = std::make_error_code(res.ec);
+                std::cerr << error_code.message() << "\n\n";
+                show_help(1);
+            }
+        }
     }
+
+    if (day == -1) {
+        std::cerr << "Argument DAY is required.\n\n";
+        show_help(1);
+    } else if (day < 1 || day > 25) {
+        std::cerr << "Invalid day. Valid range: [1, 25]\n";
+        show_help(1);
+    }
+
+    options.implementation = aoc2019::get_implementation(day, part2);
+
+    return options;
 }
 
 int main(int argc, const char *argv[]) {
