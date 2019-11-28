@@ -1,5 +1,3 @@
-#define BOOST_TEST_MODULE solutions_tests
-
 #include <cassert>
 #include <cctype>
 #include <cstring>
@@ -59,7 +57,7 @@ std::tuple<int, bool, std::string> SolutionsTest::parseInputName(const std::stri
     res = std::from_chars(base_name + 3, base_name + 4, part);
     assert(res.ec == std::errc());
 
-    return {day, part == 2, std::string(base_name + 5, std::strchr(base_name, '.'))};
+    return {day, part == 2, std::string(base_name + 5, (const char*) std::strchr(base_name, '.'))};
 }
 
 std::string SolutionsTest::nameInstantiatedTest(const testing::TestParamInfo<SolutionsTest::ParamType> &paramInfo) {
