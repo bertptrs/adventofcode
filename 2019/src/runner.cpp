@@ -2,6 +2,7 @@
 #include <charconv>
 #include <chrono>
 #include <iostream>
+#include <string_view>
 
 struct AoCOptions {
     aoc2019::solution_t implementation;
@@ -9,7 +10,7 @@ struct AoCOptions {
 };
 
 static AoCOptions parse_options(const int argc, const char* argv[]) {
-    using namespace std::string_view_literals;
+    using namespace std::literals;
     AoCOptions options{};
 
     auto show_help = [argv] (int exit_status = 0) {
