@@ -1,9 +1,15 @@
 #pragma once
 
+#include <charconv>
 #include <functional>
 #include <string_view>
 
 namespace aoc2019 {
+
+    template<typename T>
+    inline std::from_chars_result from_chars(std::string_view str, T& value) {
+        return std::from_chars(str.data(), str.data() + str.size(), value);
+    }
 
     template<typename T>
     void combine_hash(std::size_t& seed, const T& o) {
