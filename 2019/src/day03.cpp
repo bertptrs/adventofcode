@@ -2,7 +2,6 @@
 #include <charconv>
 #include <iostream>
 #include <limits>
-#include <unordered_set>
 #include <unordered_map>
 #include <utility>
 #include <vector>
@@ -20,10 +19,11 @@ namespace {
             {'R', {1,  0}},
     };
 
-    std::unordered_set<point_t> get_points(std::string_view line) {
-        std::unordered_set<point_t> points{};
+    std::unordered_map<point_t, int> get_points(std::string_view line) {
+        std::unordered_map<point_t, int> points{};
         point_t pos = {};
 
+        int steps = 0;
         for (auto entry = aoc2019::strtok(line); !line.empty() || !entry.empty(); entry = aoc2019::strtok(line)) {
             const auto dir = DIRECTION_MAP.at(entry[0]);
             std::size_t amount = 0;
@@ -32,14 +32,16 @@ namespace {
 
             for (std::size_t i = 0; i < amount; ++i) {
                 pos += dir;
-                points.insert(pos);
+                if (!points.count(pos)) {
+                    points[pos] = ++steps;
+                }
             }
         }
 
         return points;
     }
 
-    std::pair<std::unordered_set<point_t>, std::unordered_set<point_t>> read_input(std::istream& input) {
+    std::pair<std::unordered_map<point_t, int>, std::unordered_map<point_t, int>> read_input(std::istream& input) {
         std::string buffer;
         std::getline(input, buffer);
         auto a = get_points(buffer);
@@ -56,8 +58,8 @@ void aoc2019::day03_part1(std::istream &input, std::ostream &output) {
     int best = std::numeric_limits<int>::max();
 
     for (const auto& point : a) {
-        if (b.count(point) && point.l1() < best) {
-            best = point.l1();
+        if (b.count(point.first) && point.first.l1() < best) {
+            best = point.first.l1();
         }
     }
 
@@ -65,5 +67,17 @@ void aoc2019::day03_part1(std::istream &input, std::ostream &output) {
 }
 
 void aoc2019::day03_part2(std::istream &input, std::ostream &output) {
-    output << "Not implemented\n";
+    auto [a, b] = read_input(input);
+
+    int best = std::numeric_limits<int>::max();
+
+    for (const auto& ap : a) {
+        const auto bp = b.find(ap.first);
+
+        if (bp != b.cend() && (ap.second + bp->second) < best) {
+            best = ap.second + bp->second;
+        }
+    }
+
+    output << best << std::endl;
 }
