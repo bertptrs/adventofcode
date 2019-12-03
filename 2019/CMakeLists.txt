@@ -5,7 +5,7 @@ project(aoc2019)
 find_package(GTest REQUIRED)
 
 file(GLOB DAYS_FILES src/day*.cpp)
-add_library(AoCSolutions src/implementations.cpp "${DAYS_FILES}")
+add_library(AoCSolutions src/implementations.cpp "${DAYS_FILES}" src/point.hpp src/utils.cpp src/utils.hpp)
 target_compile_features(AoCSolutions PUBLIC cxx_std_17)
 
 add_executable(runner src/runner.cpp)
