@@ -31,9 +31,10 @@ namespace {
             assert(amount > 0 && "Must have some valid direction");
 
             for (std::size_t i = 0; i < amount; ++i) {
+                ++steps;
                 pos += dir;
                 if (!points.count(pos)) {
-                    points[pos] = ++steps;
+                    points[pos] = steps;
                 }
             }
         }
