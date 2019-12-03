@@ -27,7 +27,7 @@ namespace {
         for (auto entry = aoc2019::strtok(line); !line.empty() || !entry.empty(); entry = aoc2019::strtok(line)) {
             const auto dir = DIRECTION_MAP.at(entry[0]);
             std::size_t amount = 0;
-            std::from_chars(entry.data() + 1, entry.data() + entry.size(), amount);
+            aoc2019::from_chars(entry.substr(1), amount);
             assert(amount > 0 && "Must have some valid direction");
 
             for (std::size_t i = 0; i < amount; ++i) {
