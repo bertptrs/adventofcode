@@ -1,52 +1,24 @@
-#include <cstdio>
 #include <exception>
 #include <iostream>
 #include <array>
 #include <vector>
 #include "days.hpp"
-
-static std::vector<int> read_program(std::istream &input) {
-	std::vector<int> program{};
-	for (int current; input >> current; input.ignore()) {
-		program.push_back(current);
-	}
-
-	return program;
-}
+#include "utils.hpp"
 
 static int run_program(std::vector<int> program) {
-	for (int ip = 0; ip < program.size(); ip += 4) {
-		switch (program[ip]) {
-			case 1:
-				program[program[ip + 3]] = program[program[ip + 1]] + program[program[ip + 2]];
-				break;
-
-			case 2:
-				program[program[ip + 3]] = program[program[ip + 1]] * program[program[ip + 2]];
-				break;
-
-			case 99:
-				return program[0];
-
-			default:
-				char buffer[30];
-				std::snprintf(buffer, sizeof(buffer), "Invalid opcode: %d", program[ip]);
-
-				throw std::domain_error(buffer);
-		}
-	}
-	throw std::out_of_range("Program read out of bounds");
+    aoc2019::run_intcode(program);
+    return program[0];
 }
 
 void aoc2019::day02_part1(std::istream &input, std::ostream &output) {
-	auto program = read_program(input);
+	auto program = read_intcode(input);
 	program[1] = 12;
 	program[2] = 2;
 	output << run_program(std::move(program)) << std::endl;
 }
 
 void aoc2019::day02_part2(std::istream &input, std::ostream &output) {
-	auto program = read_program(input);
+	auto program = read_intcode(input);
 
 	for (int noun = 0; noun < 100; ++noun) {
 		for (int verb = 0; verb < 100; ++verb) {
