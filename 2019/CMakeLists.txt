@@ -12,7 +12,7 @@ add_executable(runner src/runner.cpp)
 target_compile_features(runner PUBLIC cxx_std_17)
 target_link_libraries(runner AoCSolutions)
 
-add_executable(unit_tests tests/test_solutions.cpp)
+add_executable(unit_tests tests/test_solutions.cpp tests/test_intcode.cpp)
 target_compile_features(unit_tests PUBLIC cxx_std_17)
 target_link_libraries(unit_tests AoCSolutions GTest::GTest GTest::Main)
 target_compile_definitions(unit_tests PRIVATE "TEST_SAMPLES_DIR=\"${CMAKE_SOURCE_DIR}/tests/samples\"")
