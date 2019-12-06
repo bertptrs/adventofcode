@@ -51,29 +51,23 @@ void aoc2019::day06_part1(std::istream &input, std::ostream &output) {
 }
 
 void aoc2019::day06_part2(std::istream &input, std::ostream &output) {
-    std::unordered_map<std::string, std::vector<std::string>> orbits;
+    std::unordered_map<std::string, std::string> ancestors;
 
     for (auto[a, b] : read_orbits(input)) {
-        orbits[a].emplace_back(b);
-        orbits[b].emplace_back(a);
+        ancestors[std::move(b)] = std::move(a);
     }
 
-    std::deque<std::pair<std::string, int>> todo = {{"YOU", 0}};
-    std::unordered_set<std::string> visited = { "YOU" };
+    std::unordered_map<std::string, int> santa_ancestors;
 
-    while (!todo.empty()) {
-        auto[name, offset] = todo.front();
-        todo.pop_front();
+    for (auto current = ancestors["SAN"]; current != "COM"; current = ancestors[current]) {
+        santa_ancestors[ancestors[current]] = santa_ancestors[current] + 1;
+    }
 
-        for (const auto& partner : orbits[name]) {
-            if (partner == "SAN") {
-                output << offset - 1 << std::endl;
-                return;
-            }
-            if (!visited.count(partner)) {
-                todo.emplace_back(partner, offset + 1);
-                visited.emplace(partner);
-            }
+    int dist = 0;
+    for (auto current = ancestors["YOU"]; current != "COM"; current = ancestors[current], ++dist) {
+        if (auto it = santa_ancestors.find(current); it != santa_ancestors.end()) {
+            output << dist + it->second << std::endl;
+            return;
         }
     }
 
