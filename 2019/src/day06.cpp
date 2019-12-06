@@ -1,25 +1,18 @@
+#include <deque>
 #include <iostream>
-#include <regex>
-#include <queue>
-#include <unordered_set>
+#include <unordered_map>
+#include <vector>
 #include "days.hpp"
 
 namespace {
     std::vector<std::pair<std::string, std::string>> read_orbits(std::istream &input) {
         std::vector<std::pair<std::string, std::string>> result;
-        std::string buffer;
+        std::string name1, name2;
 
-        std::regex regex("^([A-Z0-9]+)\\)([A-Z0-9]+)$");
-        std::smatch match_results;
+        while (std::getline(input, name1, ')')) {
+            std::getline(input, name2);
 
-        while (std::getline(input, buffer)) {
-            if (!std::regex_match(buffer, match_results, regex)) {
-                std::string error = "Invalid line: ";
-                error += buffer;
-                throw std::domain_error(error);
-            }
-
-            result.emplace_back(match_results[1], match_results[2]);
+            result.emplace_back(name1, name2);
         }
 
         return result;
