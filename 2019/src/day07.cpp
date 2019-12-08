@@ -1,6 +1,6 @@
+#include <algorithm>
 #include <array>
 #include <iostream>
-#include <memory>
 #include "days.hpp"
 #include "utils.hpp"
 
