@@ -38,9 +38,11 @@ namespace {
     std::pair<std::size_t, std::size_t> part1(const std::vector<point_t> &points) {
         std::size_t best = 0;
         std::size_t best_index = 0;
+        std::unordered_set<point_t> visible;
 
         for (std::size_t i = 0; i < points.size(); ++i) {
-            std::unordered_set<point_t> visible;
+            visible.clear();
+
             const auto point = points[i];
 
             for (auto asteroid : points) {
