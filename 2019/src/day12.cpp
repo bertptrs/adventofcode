@@ -1,4 +1,5 @@
 #include <iostream>
+#include <numeric>
 #include <vector>
 #include <regex>
 #include "days.hpp"
@@ -47,6 +48,14 @@ namespace {
             }
         }
     }
+
+    void simulate_step(std::vector<point_t> &moons, std::vector<point_t> &velocities) {
+        update_velocities(moons, velocities);
+
+        for (int j = 0; j < moons.size(); ++j) {
+            moons[j] += velocities[j];
+        }
+    }
 }
 
 void aoc2019::day12_part1(std::istream &input, std::ostream &output) {
@@ -54,11 +63,7 @@ void aoc2019::day12_part1(std::istream &input, std::ostream &output) {
     std::vector<point_t> velocities(moons.size());
 
     for (int i = 0; i < 1000; ++i) {
-        update_velocities(moons, velocities);
-
-        for (int j = 0; j < moons.size(); ++j) {
-            moons[j] += velocities[j];
-        }
+        simulate_step(moons, velocities);
     }
 
     int energy = 0;
@@ -67,9 +72,38 @@ void aoc2019::day12_part1(std::istream &input, std::ostream &output) {
         energy += moons[i].l1() * velocities[i].l1();
     }
 
-	output << energy << std::endl;
+    output << energy << std::endl;
 }
 
 void aoc2019::day12_part2(std::istream &input, std::ostream &output) {
-	output << "Not implemented\n";
+    const auto moons = read_moons(input);
+    auto moons_mut = moons;
+    std::vector<point_t> velocities(moons.size());
+
+    std::array<uint64_t, 3> recurrence = {0, 0, 0};
+
+    std::uint64_t steps = 0;
+
+    while (!std::all_of(recurrence.begin(), recurrence.end(), [](auto x) { return x > 0; })) {
+        simulate_step(moons_mut, velocities);
+        ++steps;
+
+        for (int i = 0; i < 3; ++i) {
+            if (!recurrence[i]) {
+                bool back_again =
+                        std::all_of(velocities.begin(), velocities.end(), [i](const auto &x) { return !x[i]; })
+                        && std::equal(moons_mut.begin(), moons_mut.end(), moons.begin(),
+                                      [i](const auto &a, const auto &b) {
+                                          return a[i] == b[i];
+                                      });
+
+                if (back_again) {
+                    recurrence[i] = steps;
+                }
+            }
+        }
+    }
+
+    auto result = std::lcm(recurrence[0], std::lcm(recurrence[1], recurrence[2]));
+    output << result << std::endl;
 }
