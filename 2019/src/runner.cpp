@@ -3,10 +3,13 @@
 #include <chrono>
 #include <iostream>
 #include <string_view>
+#include <optional>
+#include <fstream>
 
 struct AoCOptions {
     aoc2019::solution_t implementation;
     bool run_timer;
+    std::optional<std::ifstream> input_file;
 };
 
 static AoCOptions parse_options(const int argc, const char* argv[]) {
@@ -16,6 +19,7 @@ static AoCOptions parse_options(const int argc, const char* argv[]) {
     auto show_help = [argv] (int exit_status = 0) {
         std::cerr << "Usage: " << argv[0] << " [--timer|-t] [--part2|-2] [--help|-h] DAY\n"
                   << "\t--timer|-t: print execution time\n"
+                  << "\t--input ARG|-fARG: use given input file as puzzle input"
                   << "\t--part2|-2: run part 2\n"
                   << "\t --help|-h: show this message\n";
         std::exit(exit_status);
@@ -31,8 +35,8 @@ static AoCOptions parse_options(const int argc, const char* argv[]) {
             // Handle flag arguments
             if (arg[1] != '-') {
                 // Shorthand flags
-                for (char c : arg.substr(1)) {
-                    switch (c) {
+                for (int j = 1; j < arg.size(); ++j) {
+                    switch (arg[j]) {
                         case '2':
                             part2 = true;
                             break;
@@ -45,8 +49,23 @@ static AoCOptions parse_options(const int argc, const char* argv[]) {
                             show_help();
                             break;
 
+                        case 'f':
+                            if (j == arg.size() - 1) {
+                                if (i == argc - 1) {
+                                    std::cerr << "Option -f requires an argument.";
+                                    show_help(1);
+                                } else {
+                                    options.input_file = std::ifstream(argv[i + 1]);
+                                    ++i;
+                                }
+                            } else {
+                                options.input_file = std::ifstream(std::string(arg.substr(j)));
+                                j = arg.size();
+                            }
+                            break;
+
                         default:
-                            std::cerr << "Unknown flag '" << c << "'.\n\n";
+                            std::cerr << "Unknown flag '" << arg[j] << "'.\n\n";
                             show_help(1);
                     }
                 }
@@ -58,6 +77,14 @@ static AoCOptions parse_options(const int argc, const char* argv[]) {
                     options.run_timer = true;
                 } else if (arg == "--help"sv) {
                     show_help();
+                } else if (arg == "--input"sv) {
+                    if (i == argc - 1) {
+                        std::cerr << "Option -f requires an argument.";
+                        show_help(1);
+                    } else {
+                        options.input_file = std::ifstream(argv[i + 1]);
+                        ++i;
+                    }
                 } else {
                     show_help(1);
                 }
@@ -91,11 +118,11 @@ static AoCOptions parse_options(const int argc, const char* argv[]) {
 }
 
 int main(int argc, const char *argv[]) {
-    const auto options = parse_options(argc, argv);
+    auto options = parse_options(argc, argv);
 
     if (options.implementation != nullptr) {
         const auto start = std::chrono::high_resolution_clock::now();
-        options.implementation(std::cin, std::cout);
+        options.implementation(options.input_file ? *options.input_file : std::cin, std::cout);
         if (options.run_timer) {
             const std::chrono::duration<double> duration = std::chrono::high_resolution_clock::now() - start;
             std::cerr << "Time taken: " << duration.count() << "s\n";
