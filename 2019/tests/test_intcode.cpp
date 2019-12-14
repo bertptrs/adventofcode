@@ -2,34 +2,39 @@
 #include "utils.hpp"
 
 using aoc2019::run_intcode;
+using aoc2019::IntCodeComputer;
 
-auto run_program(std::vector<int> program, std::deque<int> input) {
-    return run_intcode(program, std::move(input));
+auto run_program(std::vector<int64_t> program, std::deque<int64_t> input) {
+    std::deque<std::int64_t> output;
+    IntCodeComputer computer(std::move(program), std::move(input));
+    computer.connectOutput(output);
+    computer.run();
+    return output;
 }
 
 TEST(Intcode, TestPositionEquality) {
-    const std::vector<int> program = {3, 9, 8, 9, 10, 9, 4, 9, 99, -1, 8};
+    const std::vector<int64_t> program = {3, 9, 8, 9, 10, 9, 4, 9, 99, -1, 8};
 
     ASSERT_EQ(1, run_program(program, {8}).front());
     ASSERT_EQ(0, run_program(program, {9}).front());
 }
 
 TEST(Intcode, TestPositionLess) {
-    const std::vector<int> program = {3, 9, 7, 9, 10, 9, 4, 9, 99, -1, 8};
+    const std::vector<int64_t> program = {3, 9, 7, 9, 10, 9, 4, 9, 99, -1, 8};
 
     ASSERT_EQ(1, run_program(program, {7}).front());
     ASSERT_EQ(0, run_program(program, {9}).front());
 }
 
 TEST(Intcode, TestImmediateEquality) {
-    const std::vector<int> program = {3, 3, 1108, -1, 8, 3, 4, 3, 99};
+    const std::vector<int64_t> program = {3, 3, 1108, -1, 8, 3, 4, 3, 99};
 
     ASSERT_EQ(1, run_program(program, {8}).front());
     ASSERT_EQ(0, run_program(program, {9}).front());
 }
 
 TEST(Intcode, TestImmediateLess) {
-    const std::vector<int> program = {3, 3, 1107, -1, 8, 3, 4, 3, 99};
+    const std::vector<int64_t> program = {3, 3, 1107, -1, 8, 3, 4, 3, 99};
 
     ASSERT_EQ(1, run_program(program, {7}).front());
     ASSERT_EQ(0, run_program(program, {9}).front());
