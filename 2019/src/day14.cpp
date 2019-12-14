@@ -99,16 +99,36 @@ namespace {
 
         return ore_needed;
     }
+
+    std::int64_t ore_to_fuel(const std::map<reqlist_t, reqlist_t> &recipes, std::int64_t amount = 1) {
+        auto inverted = element_creators(recipes);
+        std::unordered_map<std::string, std::int64_t> stock;
+
+        return ore_required("FUEL", amount, stock, recipes, inverted);
+    }
 }
 
 void aoc2019::day14_part1(std::istream &input, std::ostream &output) {
     auto recipes = read_recipes(input);
-    auto inverted = element_creators(recipes);
-    std::unordered_map<std::string, std::int64_t> stock;
 
-    output << ore_required("FUEL", 1, stock, recipes, inverted) << std::endl;
+    output << ore_to_fuel(recipes) << std::endl;
 }
 
 void aoc2019::day14_part2(std::istream &input, std::ostream &output) {
-    output << "Not implemented\n";
+    auto recipes = read_recipes(input);
+
+    constexpr std::int64_t ore_stock = 1000000000000;
+
+    std::int64_t min = 1, max = ore_stock + 1; // assumption: 1 ore produces < 1 fuel.
+    while (max - min > 1) {
+        auto cur = (max + min) / 2;
+
+        if (ore_to_fuel(recipes, cur) < ore_stock) {
+            min = cur;
+        } else {
+            max = cur - 1;
+        }
+    }
+
+    output << (max + min) / 2 << std::endl;
 }
