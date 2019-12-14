@@ -23,9 +23,7 @@ namespace aoc2019 {
 
     std::string_view strtok(std::string_view &str, char token = ',');
 
-    std::vector<int> read_intcode(std::istream &input);
-
-    std::vector<int> run_intcode(std::vector<int> &program, std::deque<int> inputs = {});
+    std::deque<int64_t> run_intcode(std::vector<std::int64_t> program, std::deque<std::int64_t> inputs = {});
 
     template<class Node>
     std::vector<Node> topological_sort(const std::unordered_map<Node, std::vector<Node>> &edge_list) {
@@ -75,6 +73,7 @@ namespace aoc2019 {
         typedef std::int64_t value_t;
 
         explicit IntCodeComputer(std::vector<value_t> program, std::deque<value_t> initial_inputs = {});
+        explicit IntCodeComputer(std::istream &program_stream, std::deque<value_t> initial_inputs = {});
 
         void run();
         void connectOutput(IntCodeComputer &computer);
@@ -84,6 +83,9 @@ namespace aoc2019 {
         [[nodiscard]] bool isTerminated() const;
 
         [[nodiscard]] const std::deque<value_t> &currentInputs() const;
+
+        value_t &operator[](std::size_t index);
+        const value_t &operator[](std::size_t index) const;
 
         static std::vector<value_t> read_intcode(std::istream &input);
 

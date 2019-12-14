@@ -4,10 +4,9 @@
 #include "utils.hpp"
 
 void aoc2019::day09_part1(std::istream &input, std::ostream &output) {
-    auto program = IntCodeComputer::read_intcode(input);
     std::deque<std::int64_t> outputs;
 
-    IntCodeComputer computer(std::move(program), { 1 });
+    IntCodeComputer computer(input, { 1 });
     computer.connectOutput(outputs);
 
     computer.run();
@@ -23,10 +22,9 @@ void aoc2019::day09_part1(std::istream &input, std::ostream &output) {
 }
 
 void aoc2019::day09_part2(std::istream &input, std::ostream &output) {
-    auto program = IntCodeComputer::read_intcode(input);
     std::deque<std::int64_t> outputs;
 
-    IntCodeComputer computer(std::move(program), { 2 });
+    IntCodeComputer computer(input, { 2 });
     computer.connectOutput(outputs);
 
     computer.run();
