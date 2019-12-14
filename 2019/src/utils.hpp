@@ -27,6 +27,49 @@ namespace aoc2019 {
 
     std::vector<int> run_intcode(std::vector<int> &program, std::deque<int> inputs = {});
 
+    template<class Node>
+    std::vector<Node> topological_sort(const std::unordered_map<Node, std::vector<Node>> &edge_list) {
+        std::unordered_map<Node, int> incoming_edges;
+
+        for (auto &entry : edge_list) {
+            // Ensure entry for parent exist
+            incoming_edges[entry.first] += 0;
+
+            for (auto &node : entry.second) {
+                incoming_edges[node]++;
+            }
+        }
+
+        std::vector<Node> order;
+        std::deque<Node> childless;
+
+        for (auto &entry : incoming_edges) {
+            if (!entry.second) {
+                childless.push_back(entry.first);
+            }
+        }
+
+        while (!childless.empty()) {
+            auto current = childless.front();
+            childless.pop_front();
+            order.emplace_back(current);
+
+            if (auto it = edge_list.find(current); it != edge_list.end()) {
+                for (const auto &parent : it->second) {
+                    if (--incoming_edges[parent] == 0) {
+                        childless.push_back(parent);
+                    }
+                }
+            }
+        }
+
+        if (order.size() != incoming_edges.size()) {
+            throw std::domain_error("Not a DAG.");
+        }
+
+        return order;
+    }
+
     class IntCodeComputer {
     public:
         typedef std::int64_t value_t;
