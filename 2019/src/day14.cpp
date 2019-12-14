@@ -7,6 +7,7 @@
 #include <regex>
 #include <charconv>
 #include "days.hpp"
+#include "utils.hpp"
 
 namespace {
     typedef std::pair<std::string, std::int64_t> requirement_t;
@@ -68,7 +69,7 @@ namespace {
     std::vector<std::string> topological_order(const std::map<reqlist_t, reqlist_t> &recipes) {
         std::vector<std::string> order;
 
-        std::unordered_map<std::string_view, std::vector<std::string>> edges;
+        std::unordered_map<std::string, std::vector<std::string>> edges;
         for (auto &entry : recipes) {
             for (auto &production : entry.first) {
                 std::transform(entry.second.begin(), entry.second.end(), std::back_inserter(edges[production.first]),
@@ -78,28 +79,7 @@ namespace {
             }
         }
 
-        std::unordered_map<std::string_view, int> incoming_edge_count;
-        for (const auto &entry : edges) {
-            for (const auto &parent : entry.second) {
-                incoming_edge_count[parent]++;
-            }
-        }
-
-        std::deque<std::string_view> childless{"FUEL"};
-
-        while (!childless.empty()) {
-            auto current = childless.front();
-            childless.pop_front();
-            order.emplace_back(current);
-
-            for (const auto &parent : edges[current]) {
-                if (--incoming_edge_count[parent] == 0) {
-                    childless.push_back(parent);
-                }
-            }
-        }
-
-        return order;
+        return aoc2019::topological_sort(edges);
     }
 
     std::int64_t ore_to_fuel(const std::map<reqlist_t, reqlist_t> &recipes, std::int64_t amount = 1) {
