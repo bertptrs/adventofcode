@@ -1,7 +1,6 @@
 #include <iostream>
 #include <numeric>
 #include <vector>
-#include <regex>
 #include "days.hpp"
 #include "point.hpp"
 
@@ -12,18 +11,10 @@ namespace {
     std::vector<point_t> read_moons(std::istream &input) {
         std::vector<point_t> moons;
 
-        std::regex regex(R"(^<x=(-?\d+), y=(-?\d+), z=(-?\d+)>$)");
-        std::smatch results;
+        point_t moon;
 
-        for (std::string buffer; std::getline(input, buffer);) {
-            if (!std::regex_match(buffer, results, regex)) {
-                throw std::domain_error(buffer);
-            }
-
-            point_t moon;
-            for (int i = 0; i < 3; ++i) from_chars(results[i + 1].str(), moon[i]);
-
-            moons.emplace_back(moon);
+        while (aoc2019::read_line_numbers_and_garbage<int>(input, moon.begin())) {
+            moons.push_back(moon);
         }
 
         return moons;

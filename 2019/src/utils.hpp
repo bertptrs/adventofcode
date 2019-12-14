@@ -21,6 +21,25 @@ namespace aoc2019 {
         seed ^= hash(o) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
     }
 
+    template<typename ValueType, typename OutputIt>
+    std::istream &read_line_numbers_and_garbage(std::istream &input, OutputIt output) {
+        ValueType v;
+        char c;
+        while (input && (c = input.peek()) != '\n') {
+            if (c == '-' || std::isdigit(c)) {
+                input >> v;
+                *output = v;
+                ++output;
+            } else {
+                input.ignore();
+            }
+        }
+
+        input.get();
+
+        return input;
+    }
+
     std::string_view strtok(std::string_view &str, char token = ',');
 
     std::deque<int64_t> run_intcode(std::vector<std::int64_t> program, std::deque<std::int64_t> inputs = {});
