@@ -30,14 +30,16 @@ namespace {
             auto requirements_part = line.substr(0, split_point);
             auto production_part = line.substr(split_point + 4);
 
-            for(auto it = std::regex_token_iterator(requirements_part.begin(), requirements_part.end(), listing_regex, {1, 2}); it != std::cregex_token_iterator(); ++it) {
+            for (auto it = std::regex_token_iterator(requirements_part.begin(), requirements_part.end(), listing_regex,
+                                                     {1, 2}); it != std::cregex_token_iterator(); ++it) {
                 std::from_chars(it->first, it->second, amount);
                 ++it;
 
                 requirements.emplace_back(*it, amount);
             }
 
-            for(auto it = std::regex_token_iterator(production_part.begin(), production_part.end(), listing_regex, {1, 2}); it != std::cregex_token_iterator(); ++it) {
+            for (auto it = std::regex_token_iterator(production_part.begin(), production_part.end(), listing_regex,
+                                                     {1, 2}); it != std::cregex_token_iterator(); ++it) {
                 std::from_chars(it->first, it->second, amount);
                 ++it;
 
@@ -63,48 +65,78 @@ namespace {
         return inverted;
     }
 
-    std::int64_t
-    ore_required(const std::string &element, std::int64_t amount, std::unordered_map<std::string, std::int64_t> &stock,
-                 const std::map<reqlist_t, reqlist_t> &recipes, std::unordered_map<std::string, reqlist_t> inverted) {
-        if (element == "ORE") {
-            return amount;
+    std::vector<std::string> topological_order(const std::map<reqlist_t, reqlist_t> &recipes) {
+        std::vector<std::string> order;
+
+        std::unordered_map<std::string_view, std::vector<std::string>> edges;
+        for (auto &entry : recipes) {
+            for (auto &production : entry.first) {
+                std::transform(entry.second.begin(), entry.second.end(), std::back_inserter(edges[production.first]),
+                               [](const auto &x) {
+                                   return x.first;
+                               });
+            }
         }
 
-        if (stock[element] > 0) {
-            auto from_stock = std::min(amount, stock[element]);
-            amount -= from_stock;
-            stock[element] -= from_stock;
+        std::unordered_map<std::string_view, int> incoming_edge_count;
+        for (const auto &entry : edges) {
+            for (const auto &parent : entry.second) {
+                incoming_edge_count[parent]++;
+            }
         }
 
-        auto &productions = inverted.at(element);
-        auto &requirements = recipes.at(productions);
+        std::deque<std::string_view> childless{"FUEL"};
 
-        auto number_produced = std::find_if(productions.begin(), productions.end(),
-                                            [element](const auto &x) { return x.first == element; })->second;
+        while (!childless.empty()) {
+            auto current = childless.front();
+            childless.pop_front();
+            order.emplace_back(current);
 
-        auto productions_needed = amount / number_produced + (amount % number_produced ? 1 : 0);
-
-        std::int64_t ore_needed = 0;
-
-        for (auto &requirement : requirements) {
-            ore_needed += ore_required(requirement.first, requirement.second * productions_needed, stock, recipes,
-                                       inverted);
+            for (const auto &parent : edges[current]) {
+                if (--incoming_edge_count[parent] == 0) {
+                    childless.push_back(parent);
+                }
+            }
         }
 
-        for (auto &production : productions) {
-            stock[production.first] += productions_needed * production.second;
-        }
-
-        stock[element] -= amount;
-
-        return ore_needed;
+        return order;
     }
 
     std::int64_t ore_to_fuel(const std::map<reqlist_t, reqlist_t> &recipes, std::int64_t amount = 1) {
         auto inverted = element_creators(recipes);
-        std::unordered_map<std::string, std::int64_t> stock;
+        auto order = topological_order(recipes);
 
-        return ore_required("FUEL", amount, stock, recipes, inverted);
+        std::unordered_map<std::string_view, std::int64_t> total_requirements;
+        total_requirements["FUEL"] = amount;
+
+        for (const auto &element : order) {
+            if (element == "ORE") {
+                break;
+            }
+
+            const auto number_required = total_requirements[element];
+            if (number_required <= 0) {
+                continue;
+            }
+
+            const auto &productions = inverted.at(element);
+            const auto &requirements = recipes.at(productions);
+
+            auto number_produced = std::find_if(productions.begin(), productions.end(),
+                                                [element](const auto &x) { return x.first == element; })->second;
+
+            auto productions_needed = number_required / number_produced + (number_required % number_produced ? 1 : 0);
+
+            for (auto &requirement : requirements) {
+                total_requirements[requirement.first] += requirement.second * productions_needed;
+            }
+
+            for (auto &production : productions) {
+                total_requirements[production.first] -= productions_needed * production.second;
+            }
+        }
+
+        return total_requirements["ORE"];
     }
 }
 
