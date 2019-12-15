@@ -145,7 +145,7 @@ void aoc2019::day15_part1(std::istream &input, std::ostream &output) {
 void aoc2019::day15_part2(std::istream &input, std::ostream &output) {
     const auto map = read_map(input);
 
-    auto starting_point = std::find_if(map.begin(), map.end(), [](auto x) { return x.second == Tile::Oxygen; })->first;
+    auto starting_point = std::find_if(map.begin(), map.end(), [](auto &x) { return x.second == Tile::Oxygen; })->first;
 
     auto dist = bfs(map, starting_point, [](Tile x) { return false; });
 
