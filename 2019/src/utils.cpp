@@ -135,12 +135,12 @@ void aoc2019::IntCodeComputer::run() {
                 }
                 break;
 
-            case 7: // equality
+            case 7: // less than
                 interpret_value(3) = interpret_value(1) < interpret_value(2);
                 ip += 4;
                 break;
 
-            case 8: // less than
+            case 8: // equality
                 interpret_value(3) = interpret_value(1) == interpret_value(2) ? 1 : 0;
                 ip += 4;
                 break;
