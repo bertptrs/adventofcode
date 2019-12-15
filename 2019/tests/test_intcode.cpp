@@ -12,6 +12,25 @@ auto run_program(std::vector<int64_t> program, std::deque<int64_t> input) {
     return output;
 }
 
+TEST(Intcode, TestReproduceInput) {
+    const std::vector<int64_t> program = {109, 1, 204, -1, 1001, 100, 1, 100, 1008, 100, 16, 101, 1006, 101, 0, 99};
+    const std::deque<int64_t> expected(program.begin(), program.end());
+
+    ASSERT_EQ(expected, run_program(program, {}));
+}
+
+TEST(Intcode, TestLargeMultiplication) {
+    const std::vector<int64_t> program = {1102, 34915192, 34915192, 7, 4, 7, 99, 0};
+
+    ASSERT_EQ(1219070632396864, run_program(program, {}).front());
+}
+
+TEST(Intcode, TestLargeNumber) {
+    const std::vector<int64_t> program = {104, 1125899906842624, 99};
+
+    ASSERT_EQ(1125899906842624, run_program(program, {}).front());
+}
+
 TEST(Intcode, TestPositionEquality) {
     const std::vector<int64_t> program = {3, 9, 8, 9, 10, 9, 4, 9, 99, -1, 8};
 
@@ -42,8 +61,8 @@ TEST(Intcode, TestImmediateLess) {
 
 TEST(Intcode, TestComplicatedConditional) {
     const std::vector<std::int64_t> program = {3, 21, 1008, 21, 8, 20, 1005, 20, 22, 107, 8, 21, 20, 1006, 20, 31,
-                                      1106, 0, 36, 98, 0, 0, 1002, 21, 125, 20, 4, 20, 1105, 1, 46, 104,
-                                      999, 1105, 1, 46, 1101, 1000, 1, 20, 4, 20, 1105, 1, 46, 98, 99};
+                                               1106, 0, 36, 98, 0, 0, 1002, 21, 125, 20, 4, 20, 1105, 1, 46, 104,
+                                               999, 1105, 1, 46, 1101, 1000, 1, 20, 4, 20, 1105, 1, 46, 98, 99};
     auto pcopy = program;
 
     auto output = run_intcode(pcopy, {7});

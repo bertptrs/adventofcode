@@ -169,7 +169,7 @@ aoc2019::IntCodeComputer::IntCodeComputer(std::vector<value_t> program, std::deq
 
 
 aoc2019::IntCodeComputer::IntCodeComputer(std::istream &program_stream, std::deque<value_t> initial_inputs) :
-        program(read_intcode(program_stream)), inputs(std::move(inputs)) {
+        program(read_intcode(program_stream)), inputs(std::move(initial_inputs)) {
 }
 
 void aoc2019::IntCodeComputer::sendInput(aoc2019::IntCodeComputer::value_t input) {
