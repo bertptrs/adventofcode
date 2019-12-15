@@ -94,42 +94,60 @@ namespace {
             }
         }
     }
+
+    template<class Callback>
+    int bfs(const std::unordered_map<point_t, Tile> &map, point_t starting_point, Callback callback) {
+        std::deque<std::pair<point_t, int>> todo{{starting_point, 0}};
+        std::unordered_set<point_t> visited{{0, 0}};
+
+        int max_dist = 0;
+
+        while (!todo.empty()) {
+            auto[cur, dist] = todo.front();
+            todo.pop_front();
+
+            max_dist = std::max(max_dist, dist);
+
+            for (auto &dir : DIRECTIONS) {
+                auto new_pos = cur + dir.first;
+                if (!visited.count(new_pos)) {
+                    visited.insert(new_pos);
+
+                    if (callback(map.at(new_pos))) {
+                        return dist + 1;
+                    }
+
+                    switch (map.at(new_pos)) {
+                        case Tile::Oxygen:
+                        case Tile::Empty:
+                            todo.emplace_back(new_pos, dist + 1);
+                            break;
+
+                        default:
+                            break;
+                    }
+                }
+            }
+        }
+
+        return max_dist;
+    }
 }
 
 void aoc2019::day15_part1(std::istream &input, std::ostream &output) {
     const auto map = read_map(input);
 
-    std::deque<std::pair<point_t, int>> todo{{{0, 0}, 0}};
-    std::unordered_set<point_t> visited{{0, 0}};
+    auto dist = bfs(map, {0, 0}, [](Tile x) { return x == Tile::Oxygen; });
 
-    while (!todo.empty()) {
-        auto [cur, dist] = todo.front();
-        todo.pop_front();
-
-        for (auto &dir : DIRECTIONS) {
-            auto new_pos = cur + dir.first;
-            if (!visited.count(new_pos)) {
-                visited.insert(new_pos);
-
-                switch (map.at(new_pos)) {
-                    case Tile::Empty:
-                        todo.emplace_back(new_pos, dist + 1);
-                        break;
-
-                    case Tile::Oxygen:
-                        output << dist + 1 << std::endl;
-                        return;
-
-                    default:
-                        break;
-                }
-            }
-        }
-    }
-
-    throw std::domain_error("No route to oxygen.");
+    output << dist << std::endl;
 }
 
 void aoc2019::day15_part2(std::istream &input, std::ostream &output) {
-    output << "Not implemented\n";
+    const auto map = read_map(input);
+
+    auto starting_point = std::find_if(map.begin(), map.end(), [](auto x) { return x.second == Tile::Oxygen; })->first;
+
+    auto dist = bfs(map, starting_point, [](Tile x) { return false; });
+
+    output << dist << std::endl;
 }
