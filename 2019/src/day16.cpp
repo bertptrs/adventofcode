@@ -54,6 +54,36 @@ namespace {
         std::copy(numbers.begin(), numbers.begin() + 8, std::ostream_iterator<int>(output));
         output << std::endl;
     }
+
+    int get_offset(const std::vector<int> &numbers) {
+        int offset = 0;
+        for (int i = 0; i < 7; ++i) {
+            offset *= 10;
+            offset += numbers[i];
+        }
+
+        return offset;
+    }
+
+    std::vector<int> numbers_from_offset(const std::vector<int> &numbers, unsigned int offset) {
+        constexpr auto repetitions = 10000;
+        const auto desired_length = repetitions * numbers.size() - offset;
+
+        std::vector<int> numbers_after;
+        numbers_after.reserve(desired_length);
+        numbers_after.insert(numbers_after.end(), numbers.begin() + (offset % numbers.size()), numbers.end());
+
+        while (numbers_after.size() < desired_length) {
+            auto remaining = desired_length - numbers_after.size();
+            if (remaining >= numbers.size()) {
+                numbers_after.insert(numbers_after.end(), numbers.begin(), numbers.end());
+            } else {
+                numbers_after.insert(numbers_after.end(), numbers.begin(), numbers.end() + remaining);
+            }
+        }
+
+        return numbers_after;
+    }
 }
 
 void aoc2019::day16_part1(std::istream &input, std::ostream &output) {
@@ -64,33 +94,20 @@ void aoc2019::day16_part1(std::istream &input, std::ostream &output) {
 
 void aoc2019::day16_part2(std::istream &input, std::ostream &output) {
     auto numbers = read_input(input);
-    const auto initial_size = numbers.size();
 
-    constexpr auto repetitions = 10000;
+    const int offset = get_offset(numbers);
 
-    numbers.reserve(repetitions * numbers.size());
+    numbers = numbers_from_offset(numbers, offset);
 
-    int offset = 0;
-    for (int i = 0; i < 7; ++i) {
-        offset *= 10;
-        offset += numbers[i];
-    }
-
-    for (int i = 1; i < repetitions; ++i) {
-        std::copy(numbers.begin(), numbers.begin() + initial_size, std::back_inserter(numbers));
-    }
-
-    numbers = std::vector(numbers.begin() + offset, numbers.end());
     std::vector<int> new_numbers(numbers.size());
     std::vector<int> partial_sums(numbers.size());
 
     for (int i = 0; i < 100; ++i) {
-        std::partial_sum(numbers.begin(), numbers.end(), partial_sums.begin());
+        std::partial_sum(numbers.rbegin(), numbers.rend(), partial_sums.rbegin());
 
-        for (int j = 0; j < numbers.size(); ++j) {
-            int n = partial_sums.back() - partial_sums[j] + numbers[j];
-            new_numbers[j] = std::abs(n % 10);
-        }
+        std::transform(partial_sums.begin(), partial_sums.end(), new_numbers.begin(), [](int x) {
+            return x % 10;
+        });
 
         std::swap(numbers, new_numbers);
     }
