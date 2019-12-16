@@ -41,9 +41,13 @@ namespace {
         new_numbers.reserve(numbers.size());
 
         for (int rank = 0; rank < numbers.size(); ++rank) {
+            auto partial_sums = partial_sum(numbers);
             int n = 0;
-            for (int pos = rank; pos < numbers.size(); ++pos) {
-                n += get_modifier(rank, pos) * numbers[pos];
+            for (int pos = rank; pos < numbers.size(); pos += rank + 1) {
+                int run = std::min(rank + 1, (int) numbers.size() - pos);
+                if (int modifier = get_modifier(rank, pos); modifier) {
+                    n += modifier * (partial_sums[pos + run - 1] - partial_sums[pos] + numbers[pos]);
+                }
             }
 
             n = std::abs(n % 10);
@@ -59,21 +63,7 @@ void aoc2019::day16_part1(std::istream &input, std::ostream &output) {
     auto numbers = read_input(input);
 
     for (int i = 0; i < 100; ++i) {
-        std::vector<int> new_numbers;
-        new_numbers.reserve(numbers.size());
-
-        for (int rank = 0; rank < numbers.size(); ++rank) {
-            int n = 0;
-            for (int pos = rank; pos < numbers.size(); ++pos) {
-                n += get_modifier(rank, pos) * numbers[pos];
-            }
-
-            n = std::abs(n % 10);
-
-            new_numbers.push_back(n);
-        }
-
-        numbers = new_numbers;
+        numbers = advance(numbers);
     }
 
     std::copy(numbers.begin(), numbers.begin() + 8, std::ostream_iterator<int>(output));
