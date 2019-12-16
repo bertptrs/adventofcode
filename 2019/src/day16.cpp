@@ -36,9 +36,8 @@ namespace {
         return partial_sums;
     }
 
-    std::vector<int> advance(const std::vector<int>& numbers) {
-        std::vector<int> new_numbers;
-        new_numbers.reserve(numbers.size());
+    void next_phase(const std::vector<int>& numbers, std::vector<int> &new_numbers) {
+        new_numbers.resize(numbers.size());
 
         for (int rank = 0; rank < numbers.size(); ++rank) {
             auto partial_sums = partial_sum(numbers);
@@ -52,18 +51,18 @@ namespace {
 
             n = std::abs(n % 10);
 
-            new_numbers.push_back(n);
+            new_numbers[rank] = n;
         }
-
-        return new_numbers;
     }
 }
 
 void aoc2019::day16_part1(std::istream &input, std::ostream &output) {
     auto numbers = read_input(input);
+    auto new_numbers = numbers;
 
     for (int i = 0; i < 100; ++i) {
-        numbers = advance(numbers);
+        next_phase(numbers, new_numbers);
+        std::swap(numbers, new_numbers);
     }
 
     std::copy(numbers.begin(), numbers.begin() + 8, std::ostream_iterator<int>(output));
