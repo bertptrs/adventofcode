@@ -26,6 +26,16 @@ namespace {
         return result;
     }
 
+    std::vector<int> partial_sum(const std::vector<int> &numbers) {
+        std::vector<int> partial_sums(numbers.size());
+        partial_sums[0] = numbers[0];
+        for (int j = 1; j < numbers.size(); ++j) {
+            partial_sums[j] = partial_sums[j - 1] + numbers[j];
+        }
+
+        return partial_sums;
+    }
+
     std::vector<int> advance(const std::vector<int>& numbers) {
         std::vector<int> new_numbers;
         new_numbers.reserve(numbers.size());
@@ -91,18 +101,17 @@ void aoc2019::day16_part2(std::istream &input, std::ostream &output) {
     numbers = std::vector(numbers.begin() + offset, numbers.end());
 
     for (int i = 0; i < 100; ++i) {
-        std::vector<int> partial_sums(numbers.size());
+        std::vector<int> partial_sums = partial_sum(numbers);
         std::vector<int> new_numbers(numbers.size());
 
-        partial_sums[0] = numbers[0];
-        for (int j = 1; j < numbers.size(); ++j) {
-            partial_sums[j] = partial_sums[j - 1] + numbers[j];
+        for (int j = 0; j < numbers.size(); ++j) {
+            int n = partial_sums.back() - partial_sums[j] + numbers[j];
+            new_numbers[j] = std::abs(n % 10);
         }
 
-        for (int j = 0; j < numbers.size(); ++j) {
-            new_numbers[j] = partial_sums.back() - partial_sums[j] + numbers[j];
-        }
+        numbers = new_numbers;
     }
 
     std::copy(numbers.begin(), numbers.begin() + 8, std::ostream_iterator<int>(output));
+    output << std::endl;
 }
