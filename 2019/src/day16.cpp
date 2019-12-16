@@ -88,17 +88,17 @@ void aoc2019::day16_part2(std::istream &input, std::ostream &output) {
     }
 
     numbers = std::vector(numbers.begin() + offset, numbers.end());
+    std::vector<int> new_numbers(numbers.size());
 
     for (int i = 0; i < 100; ++i) {
         std::vector<int> partial_sums = partial_sum(numbers);
-        std::vector<int> new_numbers(numbers.size());
 
         for (int j = 0; j < numbers.size(); ++j) {
             int n = partial_sums.back() - partial_sums[j] + numbers[j];
             new_numbers[j] = std::abs(n % 10);
         }
 
-        numbers = new_numbers;
+        std::swap(numbers, new_numbers);
     }
 
     std::copy(numbers.begin(), numbers.begin() + 8, std::ostream_iterator<int>(output));
