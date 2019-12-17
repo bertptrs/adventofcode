@@ -64,17 +64,10 @@ void aoc2019::day11_part2(std::istream &input, std::ostream &output) {
     const auto result = simulate(input, true);
 
     // Determine bounding box
-    using limits = std::numeric_limits<int>;
-    int left_edge = limits::max(), right_edge = limits::min(), top_edge = limits::max(), bottom_edge = limits::min();
-    for (auto& entry : result) {
-        left_edge = std::min(entry.first[0], left_edge);
-        right_edge = std::max(entry.first[0], right_edge);
-        top_edge = std::min(entry.first[1], top_edge);
-        bottom_edge = std::max(entry.first[1], bottom_edge);
-    }
+    auto[lower,upper] = aoc2019::bounding_box(result);
 
-    for (int y = top_edge; y <= bottom_edge; ++y) {
-        for (int x = left_edge; x <= right_edge; ++x) {
+    for (int y = lower[1]; y <= upper[1]; ++y) {
+        for (int x = lower[0]; x <= upper[0]; ++x) {
             if (auto it = result.find({x, y}); it != result.end() && it->second) {
                 output << '#';
             } else {
