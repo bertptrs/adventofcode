@@ -46,6 +46,22 @@ namespace aoc2019 {
             return result;
         }
     };
+
+    template<typename ValueType, std::size_t N, typename Ignored>
+    std::pair<Point<ValueType, N>, Point<ValueType, N>> bounding_box(const std::unordered_map<Point<ValueType, N>, Ignored> &data) {
+        Point<ValueType, N> lower, upper;
+        std::fill(lower.begin(), lower.end(), std::numeric_limits<ValueType>::max());
+        std::fill(upper.begin(), upper.end(), std::numeric_limits<ValueType>::min());
+
+        for (auto &entry : data) {
+            for (int i = 0; i < N; ++i) {
+                lower[i] = std::min(entry.first[i], lower[i]);
+                upper[i] = std::max(entry.first[i], upper[i]);
+            }
+        }
+
+        return {lower, upper};
+    }
 }
 
 namespace std {

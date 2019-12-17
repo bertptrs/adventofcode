@@ -41,16 +41,10 @@ namespace {
         // Determine bounding box
         using limits = std::numeric_limits<int>;
 
-        std::int64_t left_edge = limits::max(), right_edge = limits::min(), top_edge = limits::max(), bottom_edge = limits::min();
-        for (auto& entry : screen) {
-            left_edge = std::min(entry.first[0], left_edge);
-            right_edge = std::max(entry.first[0], right_edge);
-            top_edge = std::min(entry.first[1], top_edge);
-            bottom_edge = std::max(entry.first[1], bottom_edge);
-        }
+        const auto [lower, upper] = aoc2019::bounding_box(screen);
 
-        for (auto y = top_edge; y <= bottom_edge; ++y) {
-            for (auto x = left_edge; x <= right_edge; ++x) {
+        for (auto y = lower[1]; y <= upper[1]; ++y) {
+            for (auto x = lower[0]; x <= upper[0]; ++x) {
                 char c = ' ';
                 if (auto it = screen.find({x, y}); it != screen.end()) {
                     switch (it->second) {
