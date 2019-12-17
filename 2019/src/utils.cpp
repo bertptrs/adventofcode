@@ -183,3 +183,9 @@ aoc2019::IntCodeComputer::value_t &aoc2019::IntCodeComputer::operator[](std::siz
 const aoc2019::IntCodeComputer::value_t &aoc2019::IntCodeComputer::operator[](std::size_t index) const {
     return program[index];
 }
+
+void aoc2019::IntCodeComputer::sendInputs(std::string_view str) {
+    for (char c : str) {
+        sendInput(c);
+    }
+}

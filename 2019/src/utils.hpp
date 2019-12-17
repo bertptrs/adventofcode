@@ -99,6 +99,8 @@ namespace aoc2019 {
         void connectOutput(std::deque<value_t> &sink);
         void sendInput(value_t input);
 
+        void sendInputs(std::string_view str);
+
         [[nodiscard]] bool isTerminated() const;
 
         [[nodiscard]] const std::deque<value_t> &currentInputs() const;

@@ -1,4 +1,6 @@
 #include <iostream>
+#include <string_view>
+#include <cassert>
 #include "days.hpp"
 #include "utils.hpp"
 #include "point.hpp"
@@ -60,5 +62,38 @@ void aoc2019::day17_part1(std::istream &input, std::ostream &output) {
 }
 
 void aoc2019::day17_part2(std::istream &input, std::ostream &output) {
-    output << "Not implemented\n";
+    using namespace std::literals;
+
+    aoc2019::IntCodeComputer computer(input);
+    computer[0] = 2;
+    std::deque<std::int64_t> output_buffer;
+    computer.connectOutput(output_buffer);
+
+    std::array<std::string_view, 3> programs = {
+            "L,6,R,8,L,4,R,8,L,12\n",
+            "L,12,R,10,L,4\n",
+            "L,12,L,6,L,4,L,4\n",
+    };
+
+    auto combined_programs = "A,B,B,C,B,C,B,C,A,A\n"sv;
+
+    computer.sendInputs(combined_programs);
+
+    for (auto program : programs) {
+        computer.sendInputs(program);
+    }
+
+    // Don't give me output.
+    computer.sendInputs("n\n");
+
+    computer.run();
+
+    assert(!output_buffer.empty());
+
+    if (output_buffer.size() == 1) {
+        output << output_buffer.front() << std::endl;
+    } else {
+        std::copy(output_buffer.begin(), output_buffer.end(), std::ostreambuf_iterator<char>(output));
+        output << output_buffer.back() << std::endl;
+    }
 }
