@@ -3,18 +3,32 @@
 #include <queue>
 #include <unordered_map>
 #include <map>
-#include <numeric>
-#include <algorithm>
-#include <cctype>
+#include <unordered_set>
+#include <bit>
+#include <set>
 #include "days.hpp"
 #include "point.hpp"
 
-namespace {
-    typedef std::tuple<int, int, std::string> state_t;
+#
 
-    std::vector<std::string> read_map(std::istream &input) {
+static_assert(sizeof(int) >= 4, "Int should be at least 32 bits.");
+
+namespace {
+    typedef aoc2019::Point<int, 2> point_t;
+    typedef std::tuple<unsigned int, char> state_t;
+
+    typedef std::vector<std::string> map_t;
+
+    std::array<point_t, 4> DIRECTIONS = {{
+                                                 {0, -1},
+                                                 {0, 1},
+                                                 {-1, 0},
+                                                 {1, 0},
+                                         }};
+
+    map_t read_map(std::istream &input) {
         std::string buffer;
-        std::vector<std::string> map;
+        map_t map;
 
         while (std::getline(input, buffer)) {
             map.push_back(buffer);
@@ -23,7 +37,7 @@ namespace {
         return map;
     }
 
-    std::pair<int, int> find(const std::vector<std::string> &map, char needle) {
+    point_t find(const std::vector<std::string> &map, char needle) {
         for (int y = 0; y < map.size(); ++y) {
             auto x = map[y].find(needle);
             if (x != std::string::npos) {
@@ -33,81 +47,104 @@ namespace {
 
         throw std::invalid_argument("Can't find it!");
     }
+
+    std::vector<std::pair<char, int>> find_edges(const map_t &map, point_t starting_point) {
+        std::vector<std::pair<char, int>> edges;
+        std::queue<std::pair<int, point_t>> todo;
+        todo.emplace(0, starting_point);
+
+        std::unordered_set<point_t> visited{starting_point};
+
+        while (!todo.empty()) {
+            const auto[dist, pos] = todo.front();
+            todo.pop();
+
+            for (auto &direction : DIRECTIONS) {
+                auto next_pos = pos + direction;
+                const char at = map[next_pos[1]][next_pos[0]];
+
+                if (at == '#' || visited.count(next_pos)) {
+                    // Wall or already visited, ignore
+                    continue;
+                }
+
+                visited.insert(next_pos);
+
+                if (std::isalpha(at)) {
+                    // Don't walk through stuff
+                    edges.emplace_back(at, dist + 1);
+                } else {
+                    todo.emplace(dist + 1, next_pos);
+                }
+            }
+        }
+
+        return edges;
+    }
 }
 
 void aoc2019::day18_part1(std::istream &input, std::ostream &output) {
     const auto map = read_map(input);
 
-    std::priority_queue<std::pair<int, state_t>, std::vector<std::pair<int, state_t>>, std::greater<>> todo;
-    std::map<state_t, int> visited;
+    std::unordered_map<char, std::vector<std::pair<char, int>>> implied_graph;
 
-    const auto initial = find(map, '@');
-    const state_t initial_state(initial.first, initial.second, "");
-    visited[initial_state] = 0;
-    todo.emplace(0, initial_state);
-
-    int keys_needed = 0;
-    for (auto &row : map) {
-        keys_needed += std::count_if(row.begin(), row.end(), isalpha);
+    for (int y = 0; y < map.size(); ++y) {
+        for (int x = 0; x < map[y].size(); ++x) {
+            char at = map[y][x];
+            if (at == '@' || std::isalpha(at)) {
+                implied_graph[at] = find_edges(map, {x, y});
+            }
+        }
     }
 
-    // Don't count keys and locks double
-    keys_needed /= 2;
+    std::priority_queue<std::pair<int, state_t>, std::vector<std::pair<int, state_t>>, std::greater<>> todo;
+    std::set<state_t> visited;
+    todo.emplace(0, std::make_pair(0, '@'));
+
+    auto target_size = std::count_if(implied_graph.cbegin(), implied_graph.cend(), [](auto &x) { return std::islower(x.first); });
 
     while (!todo.empty()) {
-        const auto[dist, state] = todo.top();
+        const auto [dist, state] = todo.top();
         todo.pop();
 
-        const auto[x, y, keys] = state;
+        if (visited.count(state)) {
+            continue;
+        }
 
-        if (keys.size() == keys_needed) {
+        visited.insert(state);
+
+        auto [keys, pos] = state;
+
+        if (std::__popcount(keys) == target_size) {
             output << dist << std::endl;
             return;
         }
 
-        std::array<std::pair<int, int>, 4> next_points = {{
-                {x - 1, y},
-                {x + 1, y},
-                {x, y - 1},
-                {x, y + 1}
-        }};
-
-        for (auto point : next_points) {
-            const auto [nx, ny] = point;
+        for (const auto &edge : implied_graph.at(pos)) {
+            auto next_dist = dist + edge.second;
             auto next_keys = keys;
-
-            if (x < 0 || y < 0 || x >= map[0].size() || y >= map.size()) {
-                continue;
-            }
-
-            char at_next = map[x][y];
-
-            if (at_next == '#') {
-                continue;
-            } else if (std::isupper(at_next)) {
-                // check if we have the key already
-                if (keys.find(at_next) == std::string::npos) {
+            if (std::islower(edge.first)) {
+                // Add the key to our collection
+                next_keys |= 1u << static_cast<unsigned int>(edge.first - 'a');
+            } else if (std::isupper(edge.first)) {
+                // Check if we have the required key already
+                if (!(next_keys & (1u << static_cast<unsigned int>(edge.first - 'A')))) {
                     continue;
                 }
-            } else if (std::islower(at_next)) {
-                if (keys.find(std::toupper(at_next)) == std::string::npos) {
-                    next_keys += std::toupper(at_next);
-                    // Ensure unique representation
-                    std::sort(next_keys.begin(), next_keys.end());
-                }
             }
 
-            state_t next_state{nx, ny, std::move(next_keys)};
-            if (auto it = visited.find(next_state); it == visited.end() || it->second < dist + 1) {
-                visited[next_state] = dist + 1;
-                todo.emplace(dist + 1, std::move(next_state));
+            state_t next_state = {next_keys, edge.first};
+            if (visited.count(next_state)) {
+                continue;
             }
+
+            todo.emplace(next_dist, next_state);
         }
     }
 
-	output << "Not implemented\n";
+    throw std::logic_error("Should have terminated by now.");
 }
 
 void aoc2019::day18_part2(std::istream &input, std::ostream &output) {
-	output << "Not implemented\n";
+    output << "Not implemented\n";
 }
