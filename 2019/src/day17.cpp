@@ -8,11 +8,11 @@
 namespace {
     typedef aoc2019::Point<int, 2> point_t;
 
-    const std::unordered_map<point_t, std::int64_t> DIRECTIONS{
-            {{0,  -1}, 1},
-            {{0,  1},  2},
-            {{-1, 0},  3},
-            {{1,  0},  4},
+    const std::unordered_map<char, point_t> DIRECTIONS{
+            {'^', {0,  -1}},
+            {'>', {0,  1}},
+            {'v', {1,  0}},
+            {'<', {-1, 0}},
     };
 
     std::unordered_map<point_t, char> read_scaffold(const std::deque<std::int64_t> &data) {
@@ -21,6 +21,10 @@ namespace {
         std::unordered_map<point_t, char> map;
         for (auto n : data) {
             if (n == '\n') {
+                if (x == 0) {
+                    // Double newline, end of map
+                    break;
+                }
                 ++y;
                 x = 0;
                 continue;
@@ -49,7 +53,7 @@ void aoc2019::day17_part1(std::istream &input, std::ostream &output) {
         if (entry.second == '.') continue;
 
         bool is_intersection = std::all_of(DIRECTIONS.begin(), DIRECTIONS.end(), [&map, &entry](auto &x) {
-            auto it = map.find(x.first + entry.first);
+            auto it = map.find(x.second + entry.first);
             return it != map.end() && it->second != '.';
         });
 
