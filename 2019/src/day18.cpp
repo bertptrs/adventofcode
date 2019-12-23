@@ -2,20 +2,18 @@
 #include <vector>
 #include <queue>
 #include <unordered_map>
-#include <map>
 #include <unordered_set>
 #include <bit>
 #include <set>
 #include "days.hpp"
 #include "point.hpp"
 
-#
-
 static_assert(sizeof(int) >= 4, "Int should be at least 32 bits.");
+
+using namespace std::string_view_literals;
 
 namespace {
     typedef aoc2019::Point<int, 2> point_t;
-    typedef std::tuple<unsigned int, char> state_t;
 
     typedef std::vector<std::string> map_t;
 
@@ -81,30 +79,43 @@ namespace {
 
         return edges;
     }
+
+    auto compute_implied_graph(const map_t &map) {
+        std::unordered_map<char, std::vector<std::pair<char, int>>> implied_graph;
+
+        for (int y = 0; y < map.size(); ++y) {
+            for (int x = 0; x < map[y].size(); ++x) {
+                char at = map[y][x];
+                if ("@/^*"sv.find(at) != std::string_view::npos || std::isalpha(at)) {
+                    implied_graph[at] = find_edges(map, {x, y});
+                }
+            }
+        }
+
+        return implied_graph;
+    }
+
+    inline unsigned int key_index(char c) {
+        return 1u << static_cast<unsigned int>(c - 'A');
+    }
 }
 
 void aoc2019::day18_part1(std::istream &input, std::ostream &output) {
+    using state_t = std::tuple<unsigned int, char>;
+
     const auto map = read_map(input);
 
-    std::unordered_map<char, std::vector<std::pair<char, int>>> implied_graph;
-
-    for (int y = 0; y < map.size(); ++y) {
-        for (int x = 0; x < map[y].size(); ++x) {
-            char at = map[y][x];
-            if (at == '@' || std::isalpha(at)) {
-                implied_graph[at] = find_edges(map, {x, y});
-            }
-        }
-    }
+    auto implied_graph = compute_implied_graph(map);
 
     std::priority_queue<std::pair<int, state_t>, std::vector<std::pair<int, state_t>>, std::greater<>> todo;
     std::set<state_t> visited;
     todo.emplace(0, std::make_pair(0, '@'));
 
-    auto target_size = std::count_if(implied_graph.cbegin(), implied_graph.cend(), [](auto &x) { return std::islower(x.first); });
+    auto target_size = std::count_if(implied_graph.cbegin(), implied_graph.cend(),
+                                     [](auto &x) { return std::islower(x.first); });
 
     while (!todo.empty()) {
-        const auto [dist, state] = todo.top();
+        const auto[dist, state] = todo.top();
         todo.pop();
 
         if (visited.count(state)) {
@@ -113,7 +124,7 @@ void aoc2019::day18_part1(std::istream &input, std::ostream &output) {
 
         visited.insert(state);
 
-        auto [keys, pos] = state;
+        auto[keys, pos] = state;
 
         if (std::__popcount(keys) == target_size) {
             output << dist << std::endl;
@@ -125,10 +136,10 @@ void aoc2019::day18_part1(std::istream &input, std::ostream &output) {
             auto next_keys = keys;
             if (std::islower(edge.first)) {
                 // Add the key to our collection
-                next_keys |= 1u << static_cast<unsigned int>(edge.first - 'a');
+                next_keys |= key_index(edge.first);;
             } else if (std::isupper(edge.first)) {
                 // Check if we have the required key already
-                if (!(next_keys & (1u << static_cast<unsigned int>(edge.first - 'A')))) {
+                if (!(next_keys & key_index(edge.first))) {
                     continue;
                 }
             }
@@ -146,5 +157,80 @@ void aoc2019::day18_part1(std::istream &input, std::ostream &output) {
 }
 
 void aoc2019::day18_part2(std::istream &input, std::ostream &output) {
+    using state_t = std::tuple<unsigned int, std::array<char, 4>>;
+
+    auto map = read_map(input);
+
+    // problem statement says to duplicate @ but where's the fun in that
+    const auto initial_pos = find(map, '@');
+
+    // problem statement says to duplicate @ but where's the fun in that, let's have different starting positions
+    std::array<std::string_view, 3> overlay = {
+            "@#*",
+            "###",
+            "^#/",
+    };
+
+    for (int y = 0; y < 3; ++y) {
+        auto &row = map[initial_pos[1] + y - 1];
+        std::copy(overlay[y].begin(), overlay[y].end(), row.data() + initial_pos[0] - 1);
+    }
+
+    const auto implied_graph = compute_implied_graph(map);
+
+    std::priority_queue<std::pair<int, state_t>, std::vector<std::pair<int, state_t>>, std::greater<>> todo;
+    std::set<state_t> visited;
+    todo.emplace(0, state_t(0, {'@', '*', '^', '/'}));
+
+    auto target_size = std::count_if(implied_graph.cbegin(), implied_graph.cend(),
+                                     [](auto &x) { return std::islower(x.first); });
+
+    while (!todo.empty()) {
+        const auto[dist, state] = todo.top();
+        todo.pop();
+
+        if (visited.count(state)) {
+            continue;
+        }
+
+        visited.insert(state);
+
+        auto[keys, pos] = state;
+
+        if (std::__popcount(keys) == target_size) {
+            output << dist << std::endl;
+            return;
+        }
+
+        for (int i = 0; i < 4; ++i) {
+            auto next_pos = pos;
+            char &subpos = next_pos[i];
+
+            for (const auto &edge : implied_graph.at(subpos)) {
+                auto next_dist = dist + edge.second;
+                auto next_keys = keys;
+                if (std::islower(edge.first)) {
+                    // Add the key to our collection
+                    next_keys |= key_index(edge.first);;
+                } else if (std::isupper(edge.first)) {
+                    // Check if we have the required key already
+                    if (!(next_keys & key_index(edge.first))) {
+                        continue;
+                    }
+                }
+
+                subpos = edge.first;
+
+                state_t next_state = {next_keys, next_pos};
+                if (visited.count(next_state)) {
+                    continue;
+                }
+
+                todo.emplace(next_dist, next_state);
+            }
+        }
+    }
+
+
     output << "Not implemented\n";
 }
