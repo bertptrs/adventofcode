@@ -155,7 +155,7 @@ void aoc2019::day18_part1(std::istream &input, std::ostream &output) {
 }
 
 void aoc2019::day18_part2(std::istream &input, std::ostream &output) {
-    using state_t = std::tuple<unsigned int, std::array<char, 4>>;
+    using state_t = std::pair<unsigned int, std::array<char, 4>>;
 
     auto map = read_map(input);
 
@@ -177,7 +177,7 @@ void aoc2019::day18_part2(std::istream &input, std::ostream &output) {
     const auto implied_graph = compute_implied_graph(map);
 
     std::priority_queue<std::pair<int, state_t>, std::vector<std::pair<int, state_t>>, std::greater<>> todo;
-    std::map<state_t, int> visited;
+    std::map<std::pair<unsigned int, char>, int> visited;
     todo.emplace(0, state_t(0, {'@', '*', '^', '/'}));
 
     auto target_size = std::count_if(implied_graph.cbegin(), implied_graph.cend(),
@@ -187,10 +187,6 @@ void aoc2019::day18_part2(std::istream &input, std::ostream &output) {
     while (!todo.empty()) {
         const auto[dist, state] = todo.top();
         todo.pop();
-
-        if (visited[state] < dist) {
-            continue;
-        }
 
         auto[keys, pos] = state;
 
@@ -217,8 +213,8 @@ void aoc2019::day18_part2(std::istream &input, std::ostream &output) {
                 next_pos[i] = edge.first;
 
                 state_t next_state = {next_keys, next_pos};
-                if (auto it = visited.find(next_state); it == visited.end() || it->second > next_dist) {
-                    visited[next_state] = next_dist;
+                if (auto it = visited.find({next_keys, next_pos[i]}); it == visited.end() || it->second > next_dist) {
+                    visited[{next_keys, next_pos[i]}] = next_dist;
                     todo.emplace(next_dist, next_state);
                 }
             }
