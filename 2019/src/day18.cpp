@@ -4,7 +4,7 @@
 #include <unordered_map>
 #include <unordered_set>
 #include <bit>
-#include <set>
+#include <map>
 #include "days.hpp"
 #include "point.hpp"
 
@@ -108,7 +108,7 @@ void aoc2019::day18_part1(std::istream &input, std::ostream &output) {
     auto implied_graph = compute_implied_graph(map);
 
     std::priority_queue<std::pair<int, state_t>, std::vector<std::pair<int, state_t>>, std::greater<>> todo;
-    std::set<state_t> visited;
+    std::map<state_t, int> visited;
     todo.emplace(0, std::make_pair(0, '@'));
 
     auto target_size = std::count_if(implied_graph.cbegin(), implied_graph.cend(),
@@ -118,11 +118,9 @@ void aoc2019::day18_part1(std::istream &input, std::ostream &output) {
         const auto[dist, state] = todo.top();
         todo.pop();
 
-        if (visited.count(state)) {
+        if (visited[state] < dist) {
             continue;
         }
-
-        visited.insert(state);
 
         auto[keys, pos] = state;
 
@@ -145,11 +143,11 @@ void aoc2019::day18_part1(std::istream &input, std::ostream &output) {
             }
 
             state_t next_state = {next_keys, edge.first};
-            if (visited.count(next_state)) {
-                continue;
+            if (auto it = visited.find(next_state); it == visited.end() || it->second > next_dist) {
+                visited[next_state] = next_dist;
+                todo.emplace(next_dist, next_state);
             }
 
-            todo.emplace(next_dist, next_state);
         }
     }
 
@@ -179,21 +177,20 @@ void aoc2019::day18_part2(std::istream &input, std::ostream &output) {
     const auto implied_graph = compute_implied_graph(map);
 
     std::priority_queue<std::pair<int, state_t>, std::vector<std::pair<int, state_t>>, std::greater<>> todo;
-    std::set<state_t> visited;
+    std::map<state_t, int> visited;
     todo.emplace(0, state_t(0, {'@', '*', '^', '/'}));
 
     auto target_size = std::count_if(implied_graph.cbegin(), implied_graph.cend(),
                                      [](auto &x) { return std::islower(x.first); });
 
+
     while (!todo.empty()) {
         const auto[dist, state] = todo.top();
         todo.pop();
 
-        if (visited.count(state)) {
+        if (visited[state] < dist) {
             continue;
         }
-
-        visited.insert(state);
 
         auto[keys, pos] = state;
 
@@ -204,9 +201,7 @@ void aoc2019::day18_part2(std::istream &input, std::ostream &output) {
 
         for (int i = 0; i < 4; ++i) {
             auto next_pos = pos;
-            char &subpos = next_pos[i];
-
-            for (const auto &edge : implied_graph.at(subpos)) {
+            for (const auto &edge : implied_graph.at(pos[i])) {
                 auto next_dist = dist + edge.second;
                 auto next_keys = keys;
                 if (std::islower(edge.first)) {
@@ -219,14 +214,13 @@ void aoc2019::day18_part2(std::istream &input, std::ostream &output) {
                     }
                 }
 
-                subpos = edge.first;
+                next_pos[i] = edge.first;
 
                 state_t next_state = {next_keys, next_pos};
-                if (visited.count(next_state)) {
-                    continue;
+                if (auto it = visited.find(next_state); it == visited.end() || it->second > next_dist) {
+                    visited[next_state] = next_dist;
+                    todo.emplace(next_dist, next_state);
                 }
-
-                todo.emplace(next_dist, next_state);
             }
         }
     }
