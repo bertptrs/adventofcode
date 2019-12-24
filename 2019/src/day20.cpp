@@ -40,9 +40,9 @@ namespace {
                     // find out the entry point
                     point_t entry_point = {0, y};
                     if (x > 0 && map[y][x - 1] == '.') {
-                        entry_point[0] = x;
+                        entry_point[0] = x - 1;
                     } else {
-                        entry_point[0] = x + 1;
+                        entry_point[0] = x + 2;
                     }
 
                     auto name = map[y].substr(x, 2);
@@ -65,9 +65,9 @@ namespace {
 
                     point_t entry_point = {x, 0};
                     if (y > 0 && map[y - 1][x] == '.') {
-                        entry_point[1] = y;
+                        entry_point[1] = y - 1;
                     } else {
-                        entry_point[1] = y + 1;
+                        entry_point[1] = y + 2;
                     }
 
                     if (auto it = half_portals.find(name); it != half_portals.end()) {
@@ -109,6 +109,26 @@ void aoc2019::day20_part1(std::istream &input, std::ostream &output) {
             return;
         }
 
+        auto enqueue_point = [&visited, &todo, dist](point_t p) {
+            if (visited.count(p)) {
+                return;
+            }
+
+            visited.insert(p);
+            todo.emplace(dist + 1, p);
+        };
+
+        for (auto &direction : DIRECTIONS) {
+            auto next_point = pos + direction;
+            if (map[next_point[1]][next_point[0]] == '.') {
+                enqueue_point(pos + direction);
+            }
+        }
+
+        if (auto it = links.find(pos); it != links.end()) {
+            // take portal
+            enqueue_point(it->second);
+        }
     }
 
     output << "Not implemented\n";
