@@ -3,6 +3,7 @@
 #include <map>
 #include <unordered_set>
 #include <queue>
+#include <set>
 #include "days.hpp"
 #include "point.hpp"
 
@@ -156,5 +157,59 @@ void aoc2019::day20_part1(std::istream &input, std::ostream &output) {
 }
 
 void aoc2019::day20_part2(std::istream &input, std::ostream &output) {
-    output << "Not implemented\n";
+    const auto map = read_map(input);
+    const auto portals = get_portals(map);
+
+    using state_t = std::pair<int, point_t>;
+
+    const auto starting_point = std::find_if(portals.begin(), portals.end(), [](auto &x) {
+        return x.second == "AA";
+    })->first;
+
+    auto graph = get_implicit_graph(map, portals);
+
+    std::set<state_t> visited;
+    std::priority_queue<std::tuple<int, int, point_t>, std::vector<std::tuple<int, int, point_t>>, std::greater<>> todo;
+    todo.emplace(0, 0, starting_point);
+
+    const int outer_x_min = 2;
+    const int outer_x_max = map[0].size() - 3;
+    const int outer_y_min = 2;
+    const int outer_y_max = map.size() - 3;
+
+    while (!todo.empty()) {
+        const auto[dist, level, pos] = todo.top();
+        todo.pop();
+
+        if (visited.count({level, pos})) {
+            continue;
+        }
+
+        visited.emplace(level, pos);
+
+        if (level == 0 && portals.at(pos) == "ZZ") {
+            output << dist << std::endl;
+            return;
+        }
+
+        for (auto &edge : graph[pos]) {
+            int mod = 0;
+            if (edge.first == 1) {
+                // Taking a portal, determine which level we're going to
+                if (pos[0] == outer_x_max || pos[0] == outer_x_min || pos[1] == outer_y_max || pos[1] == outer_y_min) {
+                    mod = -1;
+                } else {
+                    mod = 1;
+                }
+            }
+
+            if (level + mod < 0 || visited.count({level + mod, edge.second})) {
+                continue;
+            }
+
+            todo.emplace(dist + edge.first, level + mod, edge.second);
+        }
+    }
+
+    throw std::domain_error("No valid route.");
 }
