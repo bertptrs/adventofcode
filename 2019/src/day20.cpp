@@ -28,10 +28,8 @@ namespace {
         return map;
     }
 
-    std::pair<std::unordered_map<std::string, point_t>, std::unordered_map<std::string, std::pair<point_t, point_t>>>
-    get_portals(const map_t &map) {
-        std::unordered_map<std::string, point_t> half_portals;
-        std::unordered_map<std::string, std::pair<point_t, point_t>> portals;
+    auto get_portals(const map_t &map) {
+        std::unordered_map<point_t, std::string> portals;
 
         // First find horizontal portals
         for (int y = 0; y < map.size(); ++y) {
@@ -45,13 +43,7 @@ namespace {
                         entry_point[0] = x + 2;
                     }
 
-                    auto name = map[y].substr(x, 2);
-
-                    if (auto it = half_portals.find(name); it != half_portals.end()) {
-                        portals[name] = {entry_point, it->second};
-                    } else {
-                        half_portals[name] = entry_point;
-                    }
+                    portals[entry_point] = map[y].substr(x, 2);
                 }
             }
         }
@@ -70,68 +62,97 @@ namespace {
                         entry_point[1] = y + 2;
                     }
 
-                    if (auto it = half_portals.find(name); it != half_portals.end()) {
-                        portals[name] = {entry_point, it->second};
-                    } else {
-                        half_portals[name] = entry_point;
-                    }
+                    portals[entry_point] = name;
                 }
             }
         }
 
-        return std::make_pair(half_portals, portals);
+        return portals;
+    }
+
+    std::unordered_map<point_t, std::vector<std::pair<int, point_t>>>
+    get_implicit_graph(const map_t &map, const std::unordered_map<point_t, std::string> &portals) {
+        std::unordered_map<std::string, point_t> half_links;
+
+        std::unordered_map<point_t, std::vector<std::pair<int, point_t>>> graph;
+
+        for (auto &entry : portals) {
+            if (auto it = half_links.find(entry.second); it != half_links.end()) {
+                // Connect up the portals
+                graph[it->second].emplace_back(1, entry.first);
+                graph[entry.first].emplace_back(1, it->second);
+            } else {
+                half_links[entry.second] = entry.first;
+            }
+
+            // Do a BFS from the node to see what we can reach.
+            std::deque<std::pair<int, point_t>> todo{{0, entry.first}};
+            std::unordered_set<point_t> visited{entry.first};
+
+            while (!todo.empty()) {
+                const auto[dist, pos] = todo.front();
+                todo.pop_front();
+
+                for (auto &direction : DIRECTIONS) {
+                    auto next_pos = pos + direction;
+
+                    if (map[next_pos[1]][next_pos[0]] != '.' || visited.count(next_pos)) {
+                        continue;
+                    }
+
+                    if (portals.count(next_pos)) {
+                        graph[entry.first].emplace_back(dist + 1, next_pos);
+                    }
+
+                    todo.emplace_back(dist + 1, next_pos);
+                    visited.insert(next_pos);
+                }
+            }
+        }
+
+        return graph;
     }
 }
 
 void aoc2019::day20_part1(std::istream &input, std::ostream &output) {
     const auto map = read_map(input);
-    auto[half_portals, portals] = get_portals(map);
+    const auto portals = get_portals(map);
 
-    const auto starting_point = half_portals.at("AA");
-    const auto goal = half_portals.at("ZZ");
+    const auto starting_point = std::find_if(portals.begin(), portals.end(), [](auto &x) {
+        return x.second == "AA";
+    })->first;
 
-    std::unordered_map<point_t, point_t> links;
-    for (auto &link : portals) {
-        links[link.second.first] = link.second.second;
-        links[link.second.second] = link.second.first;
-    }
+    auto graph = get_implicit_graph(map, portals);
 
-    std::unordered_set<point_t> visited{starting_point};
-    std::queue<std::pair<int, point_t>> todo;
+    std::unordered_set<point_t> visited;
+    std::priority_queue<std::pair<int, point_t>, std::vector<std::pair<int, point_t>>, std::greater<>> todo;
     todo.emplace(0, starting_point);
 
     while (!todo.empty()) {
-        const auto[dist, pos] = todo.front();
+        const auto[dist, pos] = todo.top();
         todo.pop();
 
-        if (pos == goal) {
+        if (visited.count(pos)) {
+            continue;
+        }
+
+        visited.insert(pos);
+
+        if (portals.at(pos) == "ZZ") {
             output << dist << std::endl;
             return;
         }
 
-        auto enqueue_point = [&visited, &todo, dist](point_t p) {
-            if (visited.count(p)) {
-                return;
+        for (auto &edge : graph[pos]) {
+            if (visited.count(edge.second)) {
+                continue;
             }
 
-            visited.insert(p);
-            todo.emplace(dist + 1, p);
-        };
-
-        for (auto &direction : DIRECTIONS) {
-            auto next_point = pos + direction;
-            if (map[next_point[1]][next_point[0]] == '.') {
-                enqueue_point(pos + direction);
-            }
-        }
-
-        if (auto it = links.find(pos); it != links.end()) {
-            // take portal
-            enqueue_point(it->second);
+            todo.emplace(dist + edge.first, edge.second);
         }
     }
 
-    output << "Not implemented\n";
+    throw std::domain_error("No valid route.");
 }
 
 void aoc2019::day20_part2(std::istream &input, std::ostream &output) {
