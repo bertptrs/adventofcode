@@ -40,44 +40,27 @@ namespace {
 void aoc2019::day22_part1(std::istream &input, std::ostream &output) {
     constexpr int DECK_SIZE = 10007;
 
-    std::vector<int> deck(DECK_SIZE);
-    std::iota(deck.begin(), deck.end(), 0);
-
-    auto copy = deck;
+    int pos = 2019;
 
     for (auto move : read_moves(input)) {
         int argument = move.second;
-        int pos;
         switch (move.first) {
             case Operation::Stack:
-                std::reverse(deck.begin(), deck.end());
+                pos = DECK_SIZE - 1 - pos;
                 break;
 
             case Operation::Deal:
-                pos = 0;
-                for (auto value : deck) {
-                    copy[pos] = value;
-                    pos = (pos + argument) % DECK_SIZE;
-                }
-                std::swap(deck, copy);
+                pos = pos * argument % DECK_SIZE;
                 break;
 
             case Operation::Cut:
-                if (argument < 0) {
-                    argument += DECK_SIZE;
-                }
-
-                auto it = std::copy(deck.begin() + argument, deck.end(), copy.begin());
-                std::copy(deck.begin(), deck.begin() + argument, it);
-
-                std::swap(deck, copy);
+                pos = (pos - argument) % DECK_SIZE;
+                if (pos < 0) pos += DECK_SIZE;
                 break;
         }
     }
 
-    auto location = std::find(deck.begin(), deck.end(), 2019);
-
-    output << std::distance(deck.begin(), location) << std::endl;
+    output << pos << std::endl;
 }
 
 void aoc2019::day22_part2(std::istream &input, std::ostream &output) {
