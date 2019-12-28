@@ -1,5 +1,5 @@
 #include <iostream>
-#include <numeric>
+#include <cassert>
 #include "days.hpp"
 #include "utils.hpp"
 
@@ -35,6 +35,51 @@ namespace {
 
         return moves;
     }
+
+    constexpr std::int64_t mmi(std::int64_t a, std::int64_t n) {
+        std::int64_t t = 0, newt = 1, r = n, newr = a;
+
+        while (newr != 0) {
+            auto q = r / newr;
+            // Poor man's simultaneous assignment
+            std::tie(t, newt) = std::make_tuple(newt, t - q * newt);
+            std::tie(r, newr) = std::make_tuple(newr, r - q * newr);
+        }
+
+        if (r > 1) {
+            throw std::invalid_argument("Not invertible.");
+        }
+
+        if (t < 0) t += n;
+
+        assert((t * a) % n == 1);
+
+        return t;
+    }
+
+    constexpr std::pair<std::int64_t, std::int64_t> pow(std::int64_t a, std::int64_t b, std::int64_t n, const std::int64_t M) {
+        __int128 ra = 0, rb = 0;
+
+        while (n > 0) {
+            if (n % 2) {
+                ra = (ra + a) % M;
+                rb = (rb + b) % M;
+            }
+
+            // f(x) = ax + b
+            // f(f(x)) = a(ax + b) + b
+            //         = aax + ab + b
+            __int128 na = a * (__int128) a;
+            __int128 nb = b * (__int128) a + b;
+
+            a = na % M;
+            b = nb % M;
+
+            n /= 2;
+        }
+
+        return {ra, rb};
+    }
 }
 
 void aoc2019::day22_part1(std::istream &input, std::ostream &output) {
@@ -64,5 +109,41 @@ void aoc2019::day22_part1(std::istream &input, std::ostream &output) {
 }
 
 void aoc2019::day22_part2(std::istream &input, std::ostream &output) {
-	output << "Not implemented\n";
+    constexpr std::int64_t DECK_SIZE = 119315717514047;
+    constexpr std::int64_t SHUFFLES = 101741582076661;
+
+    assert(mmi(3, 11) == 4);
+
+    std::int64_t a = 1, b = 0;
+
+    for (auto move : read_moves(input)) {
+        std::int64_t argument = move.second;
+        switch (move.first) {
+            case Operation::Stack:
+                a = -a;
+                b = DECK_SIZE - b - 1;
+                break;
+
+            case Operation::Cut:
+                b = (b + argument) % DECK_SIZE;
+                break;
+
+            case Operation::Deal:
+                __int128 inv = mmi(argument, DECK_SIZE);
+                a = (a * inv) % DECK_SIZE;
+                b = (b * inv) % DECK_SIZE;
+                break;
+        }
+    }
+
+    const auto[ra, rb] = pow(a, b, SHUFFLES, DECK_SIZE);
+
+    output << ra << ',' << rb << std::endl;
+
+    auto result = (2020 * ra + rb) % DECK_SIZE;
+    if (result < 0) {
+        result += DECK_SIZE;
+    }
+
+    output << result << std::endl;
 }
