@@ -1,0 +1,8 @@
+[package]
+name = "aoc-2020"
+version = "0.1.0"
+authors = ["Bert Peters <bert@bertptrs.nl>"]
+edition = "2018"
+
+[dependencies]
+clap = "3.0.0-beta.2"
