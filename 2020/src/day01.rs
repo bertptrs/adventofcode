@@ -1,3 +1,4 @@
+use std::collections::HashSet;
 use std::io::Read;
 
 use crate::common::from_lines;
@@ -6,35 +7,61 @@ use crate::Solution;
 #[derive(Default)]
 pub struct Day01;
 
-fn fuel_required(weight: u32) -> u32 {
-    (weight / 3).saturating_sub(2)
-}
-
-fn recursive_fuel(mut weight: u32) -> u32 {
-    let mut required = 0;
-
-    while weight > 0 {
-        weight = fuel_required(weight);
-        required += weight
-    }
-
-    required
-}
-
 impl Solution for Day01 {
     fn part1(&mut self, input: &mut dyn Read) -> String {
-        let weights: Vec<u32> = from_lines(input);
+        let expenses: HashSet<u32> = from_lines(input);
+        let target = 2020;
 
-        let fuel_required: u32 = weights.into_iter().map(fuel_required).sum();
+        for &expense in expenses.iter() {
+            let partner = target - expense;
+            if expenses.contains(&partner) {
+                return (expense * partner).to_string();
+            }
+        }
 
-        fuel_required.to_string()
+        panic!("No solution found!")
     }
 
     fn part2(&mut self, input: &mut dyn Read) -> String {
-        let weights: Vec<u32> = from_lines(input);
+        let expenses: HashSet<u32> = from_lines(input);
+        let target = 2020;
 
-        let fuel_required: u32 = weights.into_iter().map(recursive_fuel).sum();
+        for &e1 in expenses.iter() {
+            for &e2 in expenses.iter() {
+                let c = e1 + e2;
+                if c > target {
+                    continue;
+                }
 
-        fuel_required.to_string()
+                let e3 = target - e1 - e2;
+
+                if expenses.contains(&e3) {
+                    return (e3 * e1 * e2).to_string();
+                }
+            }
+        }
+
+        panic!("No solution found!")
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    const SAMPLE: &[u8] = include_bytes!("../samples/01.txt");
+
+    #[test]
+    fn sample_part1() {
+        let mut day = Day01::default();
+        let result = day.part1(&mut SAMPLE.as_ref());
+        assert_eq!("514579", &result);
+    }
+
+    #[test]
+    fn sample_part2() {
+        let mut day = Day01::default();
+        let result = day.part2(&mut SAMPLE.as_ref());
+        assert_eq!("241861950", &result);
     }
 }
