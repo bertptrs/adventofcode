@@ -6,35 +6,29 @@ use regex::Regex;
 
 use crate::Solution;
 
-struct Rule {
-    c: char,
-    min: usize,
-    max: usize,
-    sample: String,
+fn matches1(min: usize, max: usize, c: char, sample: &str) -> bool {
+    let occurrences = sample.matches(c).count();
+
+    occurrences >= min && occurrences <= max
 }
 
-impl Rule {
-    fn matches1(&self) -> bool {
-        let occurrences = self.sample.matches(self.c).count();
+fn matches2(first: usize, second: usize, c: char, sample: &str) -> bool {
+    let c = c as u8;
+    let s = sample.as_bytes();
 
-        occurrences >= self.min && occurrences <= self.max
-    }
-
-    fn matches2(&self) -> bool {
-        let c = self.c as u8;
-        let s = self.sample.as_bytes();
-
-        (s[self.min - 1] == c) ^ (s[self.max - 1] == c)
-    }
+    (s[first - 1] == c) ^ (s[second - 1] == c)
 }
 
-fn read_rules(input: &mut dyn Read) -> Vec<Rule> {
+fn read_rules<M>(input: &mut dyn Read, matcher: M) -> usize
+where
+    M: for<'r> Fn(usize, usize, char, &'r str) -> bool,
+{
     let parser = Regex::new(r"^(\d+)-(\d+) ([a-z]): ([a-z]+)$").unwrap();
 
     let mut reader = BufReader::new(input);
     let mut buffer = String::new();
 
-    let mut rules = Vec::new();
+    let mut matching = 0;
 
     while let Ok(read) = reader.read_line(&mut buffer) {
         if read == 0 {
@@ -43,17 +37,19 @@ fn read_rules(input: &mut dyn Read) -> Vec<Rule> {
 
         let cap = parser.captures(buffer.trim()).unwrap();
 
-        rules.push(Rule {
-            c: cap[3].chars().next().unwrap(),
-            min: cap[1].parse().unwrap(),
-            max: cap[2].parse().unwrap(),
-            sample: cap[4].to_owned(),
-        });
+        let first = cap[1].parse().unwrap();
+        let second = cap[2].parse().unwrap();
+        let c = cap[3].chars().next().unwrap();
+        let sample = &cap[4];
 
-        buffer.clear();
+        if matcher(first, second, c, sample) {
+            matching += 1
+        }
+
+        buffer.clear()
     }
 
-    rules
+    matching
 }
 
 #[derive(Default)]
@@ -61,19 +57,11 @@ pub struct Day02;
 
 impl Solution for Day02 {
     fn part1(&mut self, input: &mut dyn Read) -> String {
-        read_rules(input)
-            .into_iter()
-            .filter(Rule::matches1)
-            .count()
-            .to_string()
+        read_rules(input, matches1).to_string()
     }
 
     fn part2(&mut self, input: &mut dyn Read) -> String {
-        read_rules(input)
-            .into_iter()
-            .filter(Rule::matches2)
-            .count()
-            .to_string()
+        read_rules(input, matches2).to_string()
     }
 }
 
