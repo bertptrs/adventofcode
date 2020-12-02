@@ -9,3 +9,4 @@ This repository contains my solutions for Advent of Code. See:
 - [2017 edition](./2017)
 - [2018 edition](./2018)
 - [2019 edition](./2019)
+- [2020 edition](./2020)
