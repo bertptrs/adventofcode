@@ -2,6 +2,7 @@ use std::io::Read;
 
 mod common;
 mod day01;
+mod day02;
 
 pub trait Solution {
     fn part1(&mut self, input: &mut dyn Read) -> String;
@@ -14,6 +15,7 @@ pub trait Solution {
 pub fn get_implementation(day: usize) -> Box<dyn Solution> {
     match day {
         1 => Box::new(day01::Day01::default()),
+        2 => Box::new(day02::Day02::default()),
         _ => panic!("Unsupported day {}", day),
     }
 }
