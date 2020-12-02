@@ -67,23 +67,19 @@ impl Solution for Day02 {
 
 #[cfg(test)]
 mod tests {
+    use crate::test_implementation;
+
     use super::*;
 
     const SAMPLE: &[u8] = include_bytes!("../samples/02.txt");
 
     #[test]
     fn sample_part1() {
-        let mut implementation = Day02;
-
-        let result = implementation.part1(&mut SAMPLE.as_ref());
-        assert_eq!("2", &result);
+        test_implementation!(Day02, 1, SAMPLE, 2);
     }
 
     #[test]
     fn sample_part2() {
-        let mut implementation = Day02;
-
-        let result = implementation.part2(&mut SAMPLE.as_ref());
-        assert_eq!("1", &result);
+        test_implementation!(Day02, 2, SAMPLE, 1);
     }
 }

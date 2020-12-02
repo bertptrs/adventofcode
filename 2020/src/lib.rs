@@ -19,3 +19,20 @@ pub fn get_implementation(day: usize) -> Box<dyn Solution> {
         _ => panic!("Unsupported day {}", day),
     }
 }
+
+#[macro_export]
+macro_rules! test_implementation {
+    ($impl:ident, 1, $source:ident, $output:expr) => {
+        let mut implementation = $impl::default();
+
+        let result = implementation.part1(&mut $source.as_ref());
+        assert_eq!($output.to_string(), result);
+    };
+
+    ($impl:ident, 2, $source:ident, $output:expr) => {
+        let mut implementation = $impl::default();
+
+        let result = implementation.part2(&mut $source.as_ref());
+        assert_eq!($output.to_string(), result);
+    };
+}
