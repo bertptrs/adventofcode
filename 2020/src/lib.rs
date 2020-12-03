@@ -17,6 +17,7 @@ pub fn get_implementation(day: usize) -> Box<dyn Solution> {
     match day {
         1 => Box::new(day01::Day01::default()),
         2 => Box::new(day02::Day02::default()),
+        3 => Box::new(day03::Day03::default()),
         _ => panic!("Unsupported day {}", day),
     }
 }
