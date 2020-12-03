@@ -4,6 +4,7 @@ mod common;
 mod day01;
 mod day02;
 mod day03;
+mod day04;
 
 pub trait Solution {
     fn part1(&mut self, input: &mut dyn Read) -> String;
