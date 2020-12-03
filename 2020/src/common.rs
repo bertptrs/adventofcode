@@ -34,6 +34,30 @@ where
     buf.trim().parse().unwrap()
 }
 
+pub fn read_char_grid(input: &mut dyn Read) -> Vec<Vec<u8>> {
+    let mut reader = BufReader::new(input);
+    let mut buffer = Vec::new();
+
+    let mut grid = Vec::new();
+
+    while let Ok(read) = reader.read_until(b'\n', &mut buffer) {
+        if read == 0 {
+            break;
+        }
+
+        let line: &[u8] = if let Some(&b'\n') = buffer.last() {
+            &buffer[..(buffer.len() - 1)]
+        } else {
+            &buffer[..]
+        };
+
+        grid.push(line.to_owned());
+        buffer.clear();
+    }
+
+    grid
+}
+
 /// An interface to count elements in particular categories.
 pub trait GroupingCount {
     /// The type of the categories under inspection
