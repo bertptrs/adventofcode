@@ -35,27 +35,11 @@ where
 }
 
 pub fn read_char_grid(input: &mut dyn Read) -> Vec<Vec<u8>> {
-    let mut reader = BufReader::new(input);
-    let mut buffer = Vec::new();
-
-    let mut grid = Vec::new();
-
-    while let Ok(read) = reader.read_until(b'\n', &mut buffer) {
-        if read == 0 {
-            break;
-        }
-
-        let line: &[u8] = if let Some(&b'\n') = buffer.last() {
-            &buffer[..(buffer.len() - 1)]
-        } else {
-            &buffer[..]
-        };
-
-        grid.push(line.to_owned());
-        buffer.clear();
-    }
-
-    grid
+    BufReader::new(input)
+        .lines()
+        // filter_map avoids an expensive unwrap and we know our input is valid ascii
+        .filter_map(|s| s.ok().map(String::into_bytes))
+        .collect()
 }
 
 /// An interface to count elements in particular categories.
