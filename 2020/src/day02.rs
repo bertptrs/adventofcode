@@ -1,9 +1,8 @@
-use std::io::BufRead;
-use std::io::BufReader;
 use std::io::Read;
 
 use regex::Regex;
 
+use crate::common::Lines;
 use crate::Solution;
 
 fn matches1(min: usize, max: usize, c: char, sample: &str) -> bool {
@@ -25,17 +24,10 @@ where
 {
     let parser = Regex::new(r"^(\d+)-(\d+) ([a-z]): ([a-z]+)$").unwrap();
 
-    let mut reader = BufReader::new(input);
-    let mut buffer = String::new();
-
     let mut matching = 0;
 
-    while let Ok(read) = reader.read_line(&mut buffer) {
-        if read == 0 {
-            break;
-        }
-
-        let cap = parser.captures(buffer.trim()).unwrap();
+    for line in Lines::new(input) {
+        let cap = parser.captures(&line).unwrap();
 
         let first = cap[1].parse().unwrap();
         let second = cap[2].parse().unwrap();
@@ -45,8 +37,6 @@ where
         if matcher(first, second, c, sample) {
             matching += 1
         }
-
-        buffer.clear()
     }
 
     matching

@@ -1,7 +1,6 @@
-use std::io::BufRead;
-use std::io::BufReader;
 use std::io::Read;
 
+use crate::common::Lines;
 use crate::Solution;
 
 fn seat_id(boarding_pass: &str) -> u32 {
@@ -11,7 +10,7 @@ fn seat_id(boarding_pass: &str) -> u32 {
 }
 
 fn seat_iter<'a>(input: &'a mut dyn Read) -> impl Iterator<Item = u32> + 'a {
-    BufReader::new(input).lines().map(|s| seat_id(&s.unwrap()))
+    Lines::new(input).map(|s| seat_id(&s))
 }
 
 #[derive(Default)]
