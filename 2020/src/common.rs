@@ -5,6 +5,7 @@ use std::io::BufRead;
 use std::io::BufReader;
 use std::io::Read;
 use std::iter::FromIterator;
+use std::rc::Rc;
 use std::str::FromStr;
 
 /// Read input line by line and try to parse it into some collection.
@@ -14,11 +15,8 @@ where
     E: Debug,
     T: FromIterator<I>,
 {
-    let reader = BufReader::new(input);
-
-    reader
-        .lines()
-        .map(|line| line.unwrap().parse::<I>().unwrap())
+    Lines::new(input)
+        .map(|line| line.parse::<I>().unwrap())
         .collect()
 }
 
@@ -68,6 +66,56 @@ where
         }
 
         counts
+    }
+}
+
+/// Iterator that allows for mostly alloc-less &str iteration
+///
+/// If an owned String is needed, use `BufRead::lines()` as this version is
+/// optimized for temporary references.
+pub struct Lines<T>
+where
+    T: Read,
+{
+    reader: BufReader<T>,
+    buffer: Rc<String>,
+}
+
+impl<T> Lines<T>
+where
+    T: Read,
+{
+    pub fn new(input: T) -> Self {
+        Self {
+            reader: BufReader::new(input),
+            buffer: Rc::default(),
+        }
+    }
+}
+
+impl<T> Iterator for Lines<T>
+where
+    T: Read,
+{
+    type Item = Rc<String>;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        // Assuming the consumer has released the previous reference to the
+        // string, this should not make a copy
+        let buffer = Rc::make_mut(&mut self.buffer);
+        buffer.clear();
+
+        if let Ok(read) = self.reader.read_line(buffer) {
+            if read > 0 {
+                if buffer.ends_with('\n') {
+                    buffer.pop();
+                }
+
+                return Some(Rc::clone(&self.buffer));
+            }
+        }
+
+        None
     }
 }
 
