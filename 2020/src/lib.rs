@@ -6,6 +6,7 @@ mod day02;
 mod day03;
 mod day04;
 mod day05;
+mod day06;
 
 pub trait Solution {
     fn part1(&mut self, input: &mut dyn Read) -> String;
@@ -22,6 +23,7 @@ pub fn get_implementation(day: usize) -> Box<dyn Solution> {
         3 => Box::new(day03::Day03::default()),
         4 => Box::new(day04::Day04::default()),
         5 => Box::new(day05::Day05::default()),
+        6 => Box::new(day06::Day06::default()),
         _ => panic!("Unsupported day {}", day),
     }
 }
