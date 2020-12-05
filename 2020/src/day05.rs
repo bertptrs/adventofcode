@@ -23,7 +23,7 @@ impl Solution for Day05 {
     }
 
     fn part2(&mut self, input: &mut dyn Read) -> String {
-        let mut taken = [false; 0x3ff];
+        let mut taken = [false; 0x400];
 
         for seat_id in seat_iter(input) {
             taken[seat_id as usize] = true;
