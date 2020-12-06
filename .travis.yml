@@ -10,7 +10,9 @@ jobs:
     - rust: nightly
   fast_finish: true
 
-cache: cargo
+cache:
+  - cargo
+  - 2020/target
 
 # Custom directory, for the correct year
 before_script:
