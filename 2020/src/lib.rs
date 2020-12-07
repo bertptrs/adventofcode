@@ -7,6 +7,7 @@ mod day03;
 mod day04;
 mod day05;
 mod day06;
+mod day07;
 
 pub trait Solution {
     fn part1(&mut self, input: &mut dyn Read) -> String;
@@ -24,10 +25,12 @@ pub fn get_implementation(day: usize) -> Box<dyn Solution> {
         4 => Box::new(day04::Day04::default()),
         5 => Box::new(day05::Day05::default()),
         6 => Box::new(day06::Day06::default()),
+        7 => Box::new(day07::Day07::default()),
         _ => panic!("Unsupported day {}", day),
     }
 }
 
+#[cfg(test)]
 #[macro_export]
 macro_rules! test_implementation {
     ($impl:ident, 1, $source:ident, $output:expr) => {

@@ -19,7 +19,7 @@ fn compute_answers(group: &str) -> Answers {
 
 fn count_answers_all(group: &str) -> u32 {
     let combined = group
-        .split('\n')
+        .lines()
         .map(compute_answers)
         .fold(0xffff_ffff, |a, b| a & b);
 
