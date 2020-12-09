@@ -1,6 +1,8 @@
 use std::cmp::Ordering;
 use std::io::Read;
 
+use itertools::Itertools;
+
 use crate::common::from_lines;
 use crate::Solution;
 
@@ -29,26 +31,22 @@ fn find_missing(numbers: &[u64], size: usize) -> Option<u64> {
     None
 }
 
-fn find_range(numbers: &[u64], target: u64) -> Option<(usize, usize)> {
-    let mut sums = Vec::with_capacity(numbers.len() + 1);
-    sums.push(0);
-    sums.extend_from_slice(numbers);
-
-    // Compute cumulative sums
-    for i in 1..numbers.len() {
-        sums[i] += sums[i - 1];
-    }
-
+fn find_range(numbers: &[u64], target: u64) -> Option<&[u64]> {
     let mut i = 0;
-    let mut j = 1;
+    let mut j = 0;
+    let mut current = 0;
 
-    while i < sums.len() && j < sums.len() && numbers[j] < target {
-        let current = sums[j] - sums[i];
-
+    while i < numbers.len() && j < numbers.len() {
         match current.cmp(&target) {
-            Ordering::Less => j += 1,
-            Ordering::Equal => return Some((i, j - 1)),
-            Ordering::Greater => i += 1,
+            Ordering::Less => {
+                current += numbers[j];
+                j += 1
+            }
+            Ordering::Equal => return Some(&numbers[i..j]),
+            Ordering::Greater => {
+                current -= numbers[i];
+                i += 1
+            }
         }
     }
 
@@ -67,12 +65,9 @@ impl Solution for Day09 {
 
         let target = find_missing(&numbers, 25).unwrap();
 
-        let (first, last) = find_range(&numbers, target).unwrap();
+        let range = find_range(&numbers, target).unwrap();
 
-        let range = &numbers[first..=last];
-
-        let min = range.iter().min().unwrap();
-        let max = range.iter().max().unwrap();
+        let (min, max) = range.iter().minmax().into_option().unwrap();
 
         (min + max).to_string()
     }
@@ -93,9 +88,9 @@ mod tests {
 
     #[test]
     fn sample_part2() {
-        let (first, last) = find_range(NUMBERS, 127).unwrap();
+        let range = find_range(NUMBERS, 127).unwrap();
 
-        assert_eq!(NUMBERS[first], 15);
-        assert_eq!(NUMBERS[last], 40);
+        assert_eq!(*range.first().unwrap(), 15);
+        assert_eq!(*range.last().unwrap(), 40);
     }
 }
