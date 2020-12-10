@@ -11,6 +11,21 @@ mod day07;
 mod day08;
 mod day09;
 mod day10;
+mod day11;
+mod day12;
+mod day13;
+mod day14;
+mod day15;
+mod day16;
+mod day17;
+mod day18;
+mod day19;
+mod day20;
+mod day21;
+mod day22;
+mod day23;
+mod day24;
+mod day25;
 
 pub trait Solution {
     fn part1(&mut self, input: &mut dyn Read) -> String;
@@ -32,6 +47,21 @@ pub fn get_implementation(day: usize) -> Box<dyn Solution> {
         8 => Box::new(day08::Day08::default()),
         9 => Box::new(day09::Day09::default()),
         10 => Box::new(day10::Day10::default()),
+        11 => Box::new(day11::Day11::default()),
+        12 => Box::new(day12::Day12::default()),
+        13 => Box::new(day13::Day13::default()),
+        14 => Box::new(day14::Day14::default()),
+        15 => Box::new(day15::Day15::default()),
+        16 => Box::new(day16::Day16::default()),
+        17 => Box::new(day17::Day17::default()),
+        18 => Box::new(day18::Day18::default()),
+        19 => Box::new(day19::Day19::default()),
+        20 => Box::new(day20::Day20::default()),
+        21 => Box::new(day21::Day21::default()),
+        22 => Box::new(day22::Day22::default()),
+        23 => Box::new(day23::Day23::default()),
+        24 => Box::new(day24::Day24::default()),
+        25 => Box::new(day25::Day25::default()),
         _ => panic!("Unsupported day {}", day),
     }
 }
