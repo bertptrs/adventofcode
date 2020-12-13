@@ -40,6 +40,21 @@ pub fn read_char_grid(input: &mut dyn Read) -> Vec<Vec<u8>> {
         .collect()
 }
 
+pub fn numbers_and_stuff<T, C>(input: &mut dyn Read) -> C
+where
+    T: FromStr,
+    C: FromIterator<T>,
+{
+    let mut buffer = String::new();
+
+    input.read_to_string(&mut buffer).unwrap();
+
+    buffer
+        .split(|c: char| !c.is_ascii_digit())
+        .filter_map(|t| t.parse().ok())
+        .collect()
+}
+
 /// An interface to count elements in particular categories.
 pub trait GroupingCount {
     /// The type of the categories under inspection
