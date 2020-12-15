@@ -1,12 +1,61 @@
 use std::io::Read;
 
+use crate::common::numbers_and_stuff;
 use crate::Solution;
+
+fn nth_number(start: &[usize], n: usize) -> usize {
+    // Don't want to special case this
+    assert!(n >= start.len());
+
+    let mut history = vec![0; n];
+
+    let mut prev = 0;
+
+    for (i, &n) in start.iter().enumerate() {
+        history[prev] = i;
+        prev = n;
+    }
+
+    for i in start.len()..n {
+        let last_seen = history[prev];
+        history[prev] = i;
+
+        prev = if last_seen == 0 { 0 } else { i - last_seen };
+    }
+
+    prev
+}
 
 #[derive(Default)]
 pub struct Day15;
 
 impl Solution for Day15 {
-    fn part1(&mut self, _input: &mut dyn Read) -> String {
-        todo!()
+    fn part1(&mut self, input: &mut dyn Read) -> String {
+        let numbers: Vec<usize> = numbers_and_stuff(input);
+
+        nth_number(&numbers, 2020).to_string()
+    }
+
+    fn part2(&mut self, input: &mut dyn Read) -> String {
+        let numbers: Vec<usize> = numbers_and_stuff(input);
+
+        nth_number(&numbers, 30000000).to_string()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_nth_number() {
+        assert_eq!(0, nth_number(&[0, 3, 6], 10));
+        assert_eq!(436, nth_number(&[0, 3, 6], 2020));
+        assert_eq!(1, nth_number(&[1, 3, 2], 2020));
+        assert_eq!(10, nth_number(&[2, 1, 3], 2020));
+        assert_eq!(27, nth_number(&[1, 2, 3], 2020));
+        assert_eq!(78, nth_number(&[2, 3, 1], 2020));
+        assert_eq!(438, nth_number(&[3, 2, 1], 2020));
+        assert_eq!(1836, nth_number(&[3, 1, 2], 2020));
     }
 }
