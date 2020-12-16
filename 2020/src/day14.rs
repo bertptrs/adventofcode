@@ -65,7 +65,7 @@ fn x_mask_permutations(mut x_mask: u64, permutations: &mut Vec<u64>) {
     while x_mask > 0 {
         let trailing = x_mask.trailing_zeros();
 
-        let bit = 1 << trailing + offset;
+        let bit = 1 << (trailing + offset);
 
         x_mask >>= trailing + 1;
         offset += trailing + 1;

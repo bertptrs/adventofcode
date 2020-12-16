@@ -1,6 +1,8 @@
 use std::io::Read;
 use std::mem::swap;
 
+use bytecount::naive_count_32;
+
 use crate::common::read_char_grid;
 use crate::Solution;
 
@@ -9,12 +11,12 @@ fn neighbours(grid: &[Vec<u8>], r: usize, c: usize) -> usize {
 
     if r > 0 {
         let range = c.saturating_sub(1)..grid[r - 1].len().min(c + 2);
-        n += grid[r - 1][range].iter().filter(|&&s| s == b'#').count();
+        n += naive_count_32(&grid[r - 1][range], b'#');
     }
 
     if r < grid.len() - 1 {
         let range = c.saturating_sub(1)..grid[r + 1].len().min(c + 2);
-        n += grid[r + 1][range].iter().filter(|&&s| s == b'#').count();
+        n += naive_count_32(&grid[r + 1][range], b'#');
     }
 
     if c > 0 && grid[r][c - 1] == b'#' {
