@@ -15,6 +15,8 @@ fn split_nums<'a>(s: &'a str) -> impl Iterator<Item = u32> + 'a {
     })
 }
 
+// Clippy allow here because this type is used exactly once
+#[allow(clippy::type_complexity)]
 fn read_input(input: &mut dyn Read) -> (HashMap<String, Vec<RangeInclusive<u32>>>, Vec<Vec<u32>>) {
     let mut lines = Lines::new(input).filter(|s| !s.is_empty());
 
