@@ -100,6 +100,8 @@ impl Solution for Day16 {
             }
         }
 
+        let mut can_fit: HashMap<&str, u64> = rules.keys().map(|k| (k.as_str(), 0)).collect();
+
         while fixed_fields.len() != rules.len() {
             // Fix fields that are the only option for a certain spot
             for pos in 0..pos_can_be.len() {
@@ -119,22 +121,22 @@ impl Solution for Day16 {
                 }
             }
 
-            // Check if there are fields that only fit a single spot
-            let mut can_fit: HashMap<_, Vec<usize>> = HashMap::new();
+            // Reset can_fit
+            can_fit.values_mut().for_each(|v| *v = 0);
 
             for (pos, candiates) in pos_can_be.iter().enumerate() {
                 for candidate in candiates {
-                    can_fit.entry(candidate.clone()).or_default().push(pos);
+                    *can_fit.get_mut(candidate.as_str()).unwrap() |= 1 << pos;
                 }
             }
 
-            for (field, pos) in can_fit.into_iter().filter(|(_, v)| v.len() == 1) {
-                let pos = pos[0];
-                assert!(!fixed_fields.contains_key(&field));
+            for (&field, &pos) in can_fit.iter().filter(|(_, v)| v.count_ones() == 1) {
+                let pos = pos.trailing_zeros() as usize;
+                assert!(!fixed_fields.contains_key(field));
 
                 pos_can_be[pos].clear();
 
-                fixed_fields.insert(field, pos);
+                fixed_fields.insert(field.to_owned(), pos);
             }
         }
 
