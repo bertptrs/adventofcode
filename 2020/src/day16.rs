@@ -1,5 +1,4 @@
 use std::collections::HashMap;
-use std::collections::HashSet;
 use std::io::Read;
 use std::ops::RangeInclusive;
 
@@ -36,7 +35,7 @@ fn read_input(input: &mut dyn Read) -> (HashMap<String, Vec<RangeInclusive<u32>>
         rules.insert(line[..colon].to_owned(), ranges);
     }
 
-    while let Some(line) = lines.next() {
+    for line in lines {
         if line.as_str() == "nearby tickets:" {
             continue;
         }
@@ -71,72 +70,77 @@ impl Solution for Day16 {
         let (rules, tickets) = read_input(input);
         let mut tickets = tickets;
 
-        // O(n) operation but it's fine
-        let my_ticket = tickets.remove(0);
-
         // Filter out invalid tickets
         tickets.retain(|t| {
             t.iter()
                 .all(|v| rules.values().flatten().any(|r| r.contains(v)))
         });
 
-        let all_fields: HashSet<_> = rules.keys().cloned().collect();
+        let fields: Vec<_> = rules.keys().collect();
+        let ranges: Vec<_> = rules.values().collect();
 
-        let mut pos_can_be = vec![all_fields; my_ticket.len()];
+        let my_ticket = &tickets[0];
+
+        let mut pos_can_be = vec![(1u64 << fields.len()) - 1; my_ticket.len()];
 
         let mut fixed_fields = HashMap::new();
 
         for ticket in &tickets {
-            for (field, ranges) in &rules {
+            for (r, &ranges) in ranges.iter().enumerate() {
                 for (pos, value) in ticket.iter().enumerate() {
-                    if pos_can_be[pos].len() <= 1 {
+                    if pos_can_be[pos].count_ones() <= 1 {
                         continue;
                     }
 
                     if !ranges.iter().any(|r| r.contains(value)) {
-                        pos_can_be[pos].remove(field);
+                        pos_can_be[pos] &= !(1 << r);
                     }
                 }
             }
         }
 
-        let mut can_fit: HashMap<&str, u64> = rules.keys().map(|k| (k.as_str(), 0)).collect();
+        let mut can_fit = vec![0u64; fields.len()];
 
         while fixed_fields.len() != rules.len() {
             // Fix fields that are the only option for a certain spot
             for pos in 0..pos_can_be.len() {
-                if pos_can_be[pos].len() == 1 {
-                    let field = pos_can_be[pos]
-                        .drain()
-                        .next()
-                        .expect("Safe because if statement");
+                if pos_can_be[pos].count_ones() == 1 {
+                    let field_num = pos_can_be[pos].trailing_zeros();
+                    let field = fields[field_num as usize];
 
                     assert!(!fixed_fields.contains_key(&field));
 
                     for can_be in pos_can_be.iter_mut() {
-                        can_be.remove(&field);
+                        *can_be &= !(1 << field_num);
                     }
 
                     fixed_fields.insert(field, pos);
                 }
             }
 
-            // Reset can_fit
-            can_fit.values_mut().for_each(|v| *v = 0);
+            for (r, candidates) in can_fit.iter_mut().enumerate() {
+                *candidates = 0;
+                let flag = 1 << r;
 
-            for (pos, candiates) in pos_can_be.iter().enumerate() {
-                for candidate in candiates {
-                    *can_fit.get_mut(candidate.as_str()).unwrap() |= 1 << pos;
+                for (pos, valid) in pos_can_be.iter().enumerate() {
+                    if (valid & flag) != 0 {
+                        *candidates |= 1 << pos;
+                    }
                 }
             }
 
-            for (&field, &pos) in can_fit.iter().filter(|(_, v)| v.count_ones() == 1) {
+            for (field, &pos) in can_fit
+                .iter()
+                .enumerate()
+                .filter(|(_, v)| v.count_ones() == 1)
+            {
                 let pos = pos.trailing_zeros() as usize;
+                let field = fields[field];
                 assert!(!fixed_fields.contains_key(field));
 
-                pos_can_be[pos].clear();
+                pos_can_be[pos] = 0;
 
-                fixed_fields.insert(field.to_owned(), pos);
+                fixed_fields.insert(field, pos);
             }
         }
 
