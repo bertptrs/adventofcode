@@ -86,26 +86,21 @@ impl Solution for Day16 {
 
         let mut fixed_fields = HashMap::new();
 
-        while fixed_fields.len() != rules.len() {
-            for ticket in &tickets {
+        for ticket in &tickets {
+            for (field, ranges) in &rules {
                 for (pos, value) in ticket.iter().enumerate() {
                     if pos_can_be[pos].len() <= 1 {
                         continue;
                     }
 
-                    for (field, ranges) in &rules {
-                        // If we already assigned this field, don't continue
-                        if fixed_fields.contains_key(field) || !pos_can_be[pos].contains(field) {
-                            continue;
-                        }
-
-                        if !ranges.iter().any(|r| r.contains(value)) {
-                            pos_can_be[pos].remove(field);
-                        }
+                    if !ranges.iter().any(|r| r.contains(value)) {
+                        pos_can_be[pos].remove(field);
                     }
                 }
             }
+        }
 
+        while fixed_fields.len() != rules.len() {
             // Fix fields that are the only option for a certain spot
             for pos in 0..pos_can_be.len() {
                 if pos_can_be[pos].len() == 1 {
