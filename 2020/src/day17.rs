@@ -7,6 +7,7 @@ use crate::common::Lines;
 use crate::Solution;
 
 type Space = HashSet<(i32, i32, i32)>;
+type Space4 = HashSet<(i32, i32, i32, i32)>;
 
 fn read_input(input: &mut dyn Read) -> Space {
     let mut space = HashSet::new();
@@ -48,34 +49,45 @@ fn advance(current: &Space, next: &mut Space) {
     }
 }
 
-#[allow(unused)]
-fn print_state(space: &Space) {
-    let mut xmin = i32::max_value();
-    let mut xmax = i32::min_value();
-    let mut ymin = xmin;
-    let mut ymax = xmax;
-    let mut zmin = xmin;
-    let mut zmax = xmax;
+fn read_input2(input: &mut dyn Read) -> Space4 {
+    let mut space = HashSet::new();
 
-    for &(x, y, z) in space {
-        xmax = xmax.max(x);
-        xmin = xmin.min(x);
-        ymax = ymax.max(y);
-        ymin = ymin.min(y);
-        zmax = zmax.max(z);
-        zmin = zmin.min(z);
+    for (y, line) in Lines::new(input).enumerate() {
+        space.extend(line.chars().enumerate().filter_map(|(x, c)| {
+            if c == '#' {
+                Some((0, x as i32, y as i32, 0))
+            } else {
+                None
+            }
+        }))
     }
 
-    for z in zmin..=zmax {
-        println!("z={}", z);
-        for y in ymin..=ymax {
-            let line: String = (xmin..=xmax)
-                .map(|x| if space.contains(&(x, y, z)) { '#' } else { '.' })
-                .collect();
+    space
+}
 
-            println!("{}", line);
+fn advance2(current: &Space4, next: &mut Space4) {
+    let mut live_count = HashMap::new();
+
+    for &(w, x, y, z) in current {
+        for nw in (w - 1)..=(w + 1) {
+            for nx in (x - 1)..=(x + 1) {
+                for ny in (y - 1)..=(y + 1) {
+                    for nz in (z - 1)..=(z + 1) {
+                        if nw != w || x != nx || y != ny || nz != z {
+                            *live_count.entry((nw, nx, ny, nz)).or_insert(0) += 1;
+                        }
+                    }
+                }
+            }
         }
-        println!();
+    }
+
+    next.clear();
+
+    for (pos, neighbours) in live_count {
+        if (neighbours == 2 && current.contains(&pos)) || neighbours == 3 {
+            next.insert(pos);
+        }
     }
 }
 
@@ -94,6 +106,18 @@ impl Solution for Day17 {
 
         space.len().to_string()
     }
+
+    fn part2(&mut self, input: &mut dyn Read) -> String {
+        let mut space = read_input2(input);
+        let mut scratch_pad = Space4::new();
+
+        for _ in 0..6 {
+            advance2(&space, &mut scratch_pad);
+            swap(&mut space, &mut scratch_pad);
+        }
+
+        space.len().to_string()
+    }
 }
 
 #[cfg(test)]
@@ -107,5 +131,10 @@ mod tests {
     #[test]
     fn sample_part1() {
         test_implementation!(Day17, 1, SAMPLE, 112);
+    }
+
+    #[test]
+    fn sample_part2() {
+        test_implementation!(Day17, 2, SAMPLE, 848);
     }
 }
