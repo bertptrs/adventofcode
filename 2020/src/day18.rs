@@ -2,35 +2,41 @@ use std::io::Read;
 
 use crate::common::Lines;
 use crate::Solution;
-
 #[derive(Clone, Copy)]
 enum Op {
     Addition,
     Multiplication,
 }
 
-fn extract_brackets(with_brackets: &str) -> (&str, &str) {
-    let mut brackets = 1;
+fn extract_part(expression: &str) -> (&str, &str) {
+    if expression.starts_with('(') {
+        let mut brackets = 1;
 
-    let mut end = None;
+        for (end, c) in expression.chars().enumerate().skip(1) {
+            match c {
+                '(' => brackets += 1,
+                ')' => brackets -= 1,
+                _ => {}
+            }
 
-    for (i, c) in with_brackets.chars().enumerate().skip(1) {
-        match c {
-            '(' => brackets += 1,
-            ')' => brackets -= 1,
-            _ => {}
+            if brackets == 0 {
+                return (
+                    // Include the opening bracket for easier detection
+                    &expression[..end],
+                    expression.get((end + 2)..).unwrap_or(""),
+                );
+            }
         }
 
-        if brackets == 0 {
-            end = Some(i);
-            break;
-        }
+        panic!("Unmatched brackets: {}", expression);
+    } else if let Some(pos) = expression.find(' ') {
+        (
+            &expression[..pos],
+            expression.get((pos + 1)..).unwrap_or(""),
+        )
+    } else {
+        (expression, "")
     }
-
-    let end = end.expect("Unmatched brackets");
-    let next_start = with_brackets.len().min(end + 2);
-
-    (&with_brackets[1..end], &with_brackets[next_start..])
 }
 
 fn compute_value(expression: &str) -> u64 {
@@ -38,42 +44,28 @@ fn compute_value(expression: &str) -> u64 {
     let mut value = 0;
     let mut op = None;
 
-    let mut apply_value = |n, op| match op {
-        Some(Op::Addition) => value += n,
-        Some(Op::Multiplication) => value *= n,
-        None => value = n,
-    };
-
     while !remainder.is_empty() {
-        let pos = remainder.find(' ');
+        let (part, rest) = extract_part(remainder);
+        remainder = rest;
 
-        let part = if let Some(pos) = pos {
-            &remainder[..pos]
-        } else {
-            remainder
-        };
-
-        match part.chars().next().unwrap() {
-            '+' => op = Some(Op::Addition),
-            '*' => op = Some(Op::Multiplication),
-            '(' => {
-                let (in_brackets, rest) = extract_brackets(remainder);
-                remainder = rest;
-                let n = compute_value(in_brackets);
-
-                apply_value(n, op);
-                // Skip the remainder update
+        let n = match part.chars().next().unwrap() {
+            '+' => {
+                op = Some(Op::Addition);
                 continue;
             }
-            c if c.is_ascii_digit() => {
-                let n = part.parse().unwrap();
-                apply_value(n, op);
+            '*' => {
+                op = Some(Op::Multiplication);
+                continue;
             }
-            _ => panic!("Not a valid expression part {}", part),
-        }
+            '(' => compute_value(&part[1..]),
+            _ => part.parse().unwrap(),
+        };
 
-        let pos = pos.map(|n| n + 1).unwrap_or_else(|| remainder.len());
-        remainder = &remainder[pos..];
+        match op {
+            Some(Op::Addition) => value += n,
+            Some(Op::Multiplication) => value *= n,
+            None => value = n,
+        }
     }
 
     value
@@ -85,46 +77,31 @@ fn compute_value2(expression: &str) -> u64 {
     let mut result = 1;
     let mut op = None;
 
-    let mut apply_value = |n, op| match op {
-        Some(Op::Addition) => value += n,
-        Some(Op::Multiplication) => {
-            result *= value;
-            value = n;
-        }
-        None => value = n,
-    };
-
     while !remainder.is_empty() {
-        let pos = remainder.find(' ');
+        let (part, rest) = extract_part(remainder);
+        remainder = rest;
 
-        let part = if let Some(pos) = pos {
-            &remainder[..pos]
-        } else {
-            remainder
-        };
-
-        match part.chars().next().unwrap() {
-            '+' => op = Some(Op::Addition),
-            '*' => op = Some(Op::Multiplication),
-            '(' => {
-                let (in_brackets, rest) = extract_brackets(remainder);
-                remainder = rest;
-                let n = compute_value2(in_brackets);
-
-                apply_value(n, op);
-                // Skip the remainder update
+        let n = match part.chars().next().unwrap() {
+            '+' => {
+                op = Some(Op::Addition);
                 continue;
             }
-            c if c.is_ascii_digit() => {
-                let n = part.parse().unwrap();
-
-                apply_value(n, op);
+            '*' => {
+                op = Some(Op::Multiplication);
+                continue;
             }
-            _ => panic!("Not a valid expression part {}", part),
-        }
+            '(' => compute_value2(&part[1..]),
+            _ => part.parse().unwrap(),
+        };
 
-        let pos = pos.map(|n| n + 1).unwrap_or_else(|| remainder.len());
-        remainder = &remainder[pos..];
+        match op {
+            Some(Op::Addition) => value += n,
+            Some(Op::Multiplication) => {
+                result *= value;
+                value = n;
+            }
+            None => value = n,
+        }
     }
 
     result * value
