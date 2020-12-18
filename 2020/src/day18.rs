@@ -72,7 +72,7 @@ fn compute_value(expression: &str) -> u64 {
             _ => panic!("Not a valid expression part {}", part),
         }
 
-        let pos = pos.map(|n| n + 1).unwrap_or(remainder.len());
+        let pos = pos.map(|n| n + 1).unwrap_or_else(|| remainder.len());
         remainder = &remainder[pos..];
     }
 
@@ -123,7 +123,7 @@ fn compute_value2(expression: &str) -> u64 {
             _ => panic!("Not a valid expression part {}", part),
         }
 
-        let pos = pos.map(|n| n + 1).unwrap_or(remainder.len());
+        let pos = pos.map(|n| n + 1).unwrap_or_else(|| remainder.len());
         remainder = &remainder[pos..];
     }
 
