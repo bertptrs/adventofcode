@@ -11,5 +11,12 @@ itertools = "0.9"
 num-integer = "0.1"
 regex = "1"
 
+[dev-dependencies]
+criterion = "0.3"
+
 [profile.release]
 debug = true
+
+[[bench]]
+name = "days"
+harness = false
