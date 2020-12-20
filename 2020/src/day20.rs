@@ -339,6 +339,23 @@ fn replace_monster(image: &mut [Vec<u8>]) {
                                 }
                             })
                     });
+            } else if searchers[2].is_match(&image[i - 1][range.clone()])
+                && searchers[0].is_match(&image[i + 1][range.clone()])
+            {
+                image[(i - 1)..=(i + 1)]
+                    .iter_mut()
+                    .rev()
+                    .zip(&searchers)
+                    .for_each(|(line, expr)| {
+                        line[range.clone()]
+                            .iter_mut()
+                            .zip(expr.as_str().as_bytes().iter())
+                            .for_each(|(b, &r)| {
+                                if *b == r {
+                                    *b = b'O';
+                                }
+                            })
+                    });
             }
         }
     }
@@ -369,17 +386,13 @@ impl Solution for Day20 {
 
         let mut image = combine_tiles(&rows, &mut tiles);
 
-        for _ in 0..4 {
-            replace_monster(&mut image);
-            image = rotate(&image);
-        }
-
+        replace_monster(&mut image);
         reverse(&mut image);
-
-        for _ in 0..4 {
-            replace_monster(&mut image);
-            image = rotate(&image);
-        }
+        replace_monster(&mut image);
+        image = rotate(&image);
+        replace_monster(&mut image);
+        reverse(&mut image);
+        replace_monster(&mut image);
 
         image
             .iter()
