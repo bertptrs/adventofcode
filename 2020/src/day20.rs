@@ -50,6 +50,8 @@ fn read_input(input: &mut dyn Read) -> HashMap<u64, Tile> {
 
         let mut grid: Vec<Vec<_>> = Vec::new();
 
+        // Clippy gets it wrong, this cannot be a for loop
+        #[allow(clippy::while_let_on_iterator)]
         while let Some(line) = lines.next() {
             if line.is_empty() {
                 break;
@@ -150,7 +152,7 @@ fn complete_row(
             }
 
             for _ in 0..4 {
-                if &tiles[&last].sides[1] == &tiles[n].sides[3] {
+                if tiles[&last].sides[1] == tiles[n].sides[3] {
                     break;
                 } else if rev_eq(&tiles[&last].sides[1], &tiles[n].sides[3]) {
                     let tile = tiles.get_mut(n).unwrap();
@@ -165,7 +167,7 @@ fn complete_row(
                 }
             }
 
-            if &tiles[&last].sides[1] == &tiles[n].sides[3] {
+            if tiles[&last].sides[1] == tiles[n].sides[3] {
                 // This tile matches, add it
                 next = Some(*n);
                 break;
@@ -226,12 +228,11 @@ fn compute_image(
         // Should be just one tile that can go there.
         let next = neighbours[&prev]
             .iter()
-            .filter(|&n| !used_tiles.contains(n))
-            .next()
+            .find(|&n| !used_tiles.contains(n))
             .unwrap();
 
         for _ in 0..4 {
-            if &tiles[&prev].sides[2] == &tiles[next].sides[0] {
+            if tiles[&prev].sides[2] == tiles[next].sides[0] {
                 break;
             } else if rev_eq(&tiles[&prev].sides[2], &tiles[next].sides[0]) {
                 tiles.get_mut(next).unwrap().flip();
@@ -373,7 +374,7 @@ impl Solution for Day20 {
         neighbours
             .into_iter()
             .filter_map(|(i, n)| if n.len() == 2 { Some(i) } else { None })
-            .fold(1, |a, b| a * b)
+            .product::<u64>()
             .to_string()
     }
 
