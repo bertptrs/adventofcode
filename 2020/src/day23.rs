@@ -73,9 +73,11 @@ impl Solution for Day23 {
 mod tests {
     use super::*;
 
+    const SAMPLE: &[u8] = b"389125467";
+
     #[test]
     fn sample_part1() {
-        let sample = [3, 8, 9, 1, 2, 5, 4, 6, 7];
+        let sample = read_input(&mut SAMPLE.as_ref());
         assert_eq!("92658374", &play_game(&mut sample.clone(), 10));
         assert_eq!("67384529", &play_game(&mut sample.clone(), 100));
     }

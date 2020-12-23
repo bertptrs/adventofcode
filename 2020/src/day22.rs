@@ -1,4 +1,3 @@
-use std::collections::HashSet;
 use std::collections::VecDeque;
 use std::io::Read;
 
@@ -26,13 +25,16 @@ fn read_input(input: &mut dyn Read) -> (Deck, Deck) {
 }
 
 fn play_recursive_game(mut p1: Deck, mut p2: Deck) -> (bool, Deck) {
-    let mut seen = HashSet::new();
+    let mut c1 = p1.clone();
+    let mut c2 = p2.clone();
+    let mut iter = 0u32;
 
     while !p1.is_empty() && !p2.is_empty() {
-        if !seen.insert((p1.clone(), p2.clone())) {
-            return (true, p1);
+        if iter.count_ones() == 1 {
+            // Power of two
+            c1 = p1.clone();
+            c2 = p2.clone();
         }
-
         let v1 = p1.pop_front().unwrap();
         let v2 = p2.pop_front().unwrap();
 
@@ -52,6 +54,12 @@ fn play_recursive_game(mut p1: Deck, mut p2: Deck) -> (bool, Deck) {
             p2.push_back(v2);
             p2.push_back(v1);
         }
+
+        if p1 == c1 && p2 == c2 {
+            return (true, p1);
+        }
+
+        iter += 1;
     }
 
     if p1.is_empty() {
