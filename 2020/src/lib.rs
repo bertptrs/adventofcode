@@ -72,14 +72,14 @@ macro_rules! test_implementation {
     ($impl:ident, 1, $source:ident, $output:expr) => {
         let mut implementation = $impl::default();
 
-        let result = implementation.part1(&mut $source.as_ref());
+        let result = implementation.part1(&mut $source.clone());
         assert_eq!($output.to_string(), result);
     };
 
     ($impl:ident, 2, $source:ident, $output:expr) => {
         let mut implementation = $impl::default();
 
-        let result = implementation.part2(&mut $source.as_ref());
+        let result = implementation.part2(&mut $source.clone());
         assert_eq!($output.to_string(), result);
     };
 }
