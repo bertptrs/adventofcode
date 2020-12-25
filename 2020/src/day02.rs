@@ -65,11 +65,11 @@ mod tests {
 
     #[test]
     fn sample_part1() {
-        test_implementation!(Day02, 1, SAMPLE, 2);
+        test_implementation(Day02, 1, SAMPLE, 2);
     }
 
     #[test]
     fn sample_part2() {
-        test_implementation!(Day02, 2, SAMPLE, 1);
+        test_implementation(Day02, 2, SAMPLE, 1);
     }
 }

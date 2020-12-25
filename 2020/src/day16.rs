@@ -165,6 +165,6 @@ mod tests {
 
     #[test]
     fn sample_part1() {
-        test_implementation!(Day16, 1, SAMPLE, 71);
+        test_implementation(Day16, 1, SAMPLE, 71);
     }
 }

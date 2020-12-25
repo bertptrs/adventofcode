@@ -149,6 +149,6 @@ mod tests {
 
     #[test]
     fn sample_part2() {
-        test_implementation!(Day23, 2, SAMPLE, 149245887792u64);
+        test_implementation(Day23, 2, SAMPLE, 149245887792u64);
     }
 }
