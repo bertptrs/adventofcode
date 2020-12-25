@@ -70,6 +70,10 @@ impl Solution for Day25 {
 
         result.to_string()
     }
+
+    fn part2(&mut self, _input: &mut dyn Read) -> String {
+        "Part 2 is free!".to_string()
+    }
 }
 
 #[cfg(test)]
