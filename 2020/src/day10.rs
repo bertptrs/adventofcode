@@ -59,13 +59,13 @@ mod tests {
 
     #[test]
     fn sample_part1() {
-        test_implementation!(Day10, 1, SAMPLE, 35);
-        test_implementation!(Day10, 1, SAMPLE2, 220);
+        test_implementation(Day10, 1, SAMPLE, 35);
+        test_implementation(Day10, 1, SAMPLE2, 220);
     }
 
     #[test]
     fn sample_part2() {
-        test_implementation!(Day10, 2, SAMPLE, 8);
-        test_implementation!(Day10, 2, SAMPLE2, 19208);
+        test_implementation(Day10, 2, SAMPLE, 8);
+        test_implementation(Day10, 2, SAMPLE2, 19208);
     }
 }
