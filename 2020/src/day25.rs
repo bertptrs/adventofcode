@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use std::io::Read;
 
 use crate::common::from_lines;
@@ -7,17 +8,34 @@ const MOD_BASE: u32 = 20201227;
 const SUBJECT_NUMBER: u32 = 7;
 
 fn loop_count(public_key: u32) -> u64 {
-    let mut value = 1;
-    let mut loops = 0;
+    discrete_log(SUBJECT_NUMBER, public_key, MOD_BASE).unwrap() as u64
+}
 
-    while value != public_key {
-        value *= SUBJECT_NUMBER;
-        value %= MOD_BASE;
+// Implementation of the baby-step giant-step algorithm
+//
+// Based on:https://en.wikipedia.org/wiki/Baby-step_giant-step#C++_algorithm_(C++17)
+fn discrete_log(g: u32, h: u32, mod_base: u32) -> Option<u32> {
+    let m = (mod_base as f64).sqrt().ceil() as u32;
+    let mut table = HashMap::new();
+    let mut e: u32 = 1;
 
-        loops += 1;
+    for i in 0..m {
+        table.insert(e, i);
+        e = ((e as u64 * g as u64) % mod_base as u64) as u32;
     }
 
-    loops as u64
+    let factor = mod_exp(g as u64, (mod_base - m - 1) as u64, mod_base as u64);
+    e = h;
+
+    for i in 0..m {
+        if let Some(&val) = table.get(&e) {
+            return Some(i * m + val);
+        }
+
+        e = ((e as u64 * factor) % mod_base as u64) as u32;
+    }
+
+    None
 }
 
 #[inline]
