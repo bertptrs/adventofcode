@@ -93,6 +93,8 @@ where
     T: Read,
 {
     reader: BufReader<T>,
+    // Clippy doesn't understand the use case of an Rc which is immediately released
+    #[allow(clippy::rc_buffer)]
     buffer: Rc<String>,
 }
 
