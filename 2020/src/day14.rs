@@ -16,12 +16,12 @@ impl FromStr for Entry {
     type Err = Infallible;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        if s.starts_with("mask = ") {
+        if let Some(s) = s.strip_prefix("mask = ") {
             let mut zero_mask = 0;
             let mut one_mask = 0;
             let mut x_mask = 0;
 
-            for c in s[7..].chars() {
+            for c in s.chars() {
                 zero_mask <<= 1;
                 one_mask <<= 1;
                 x_mask <<= 1;

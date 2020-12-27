@@ -11,7 +11,7 @@ impl Solution for Day10 {
         let mut adapters: Vec<u32> = from_lines(input);
         // Outlet
         adapters.push(0);
-        adapters.sort();
+        adapters.sort_unstable();
         let device = *adapters.last().unwrap() + 3;
         adapters.push(device);
 
@@ -27,7 +27,7 @@ impl Solution for Day10 {
     fn part2(&mut self, input: &mut dyn Read) -> String {
         let mut adapters: Vec<u32> = from_lines(input);
         adapters.push(0);
-        adapters.sort();
+        adapters.sort_unstable();
 
         let mut methods = vec![0u64; adapters.len()];
         methods[0] = 1;
