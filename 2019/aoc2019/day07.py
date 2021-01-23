@@ -4,8 +4,8 @@ from typing import List, TextIO, Tuple
 from aoc2019.intcode import read_program, Computer
 
 
-def amplify(phases: Tuple[int], program: List[int]) -> int:
-    amps = []
+def amplify(phases: Tuple[int, ...], program: List[int]) -> int:
+    amps: List[Computer] = []
 
     for i, phase in enumerate(phases):
         amp = Computer(program.copy())
@@ -25,8 +25,8 @@ def amplify(phases: Tuple[int], program: List[int]) -> int:
     return amps[-1].output.pop()
 
 
-def reamplify(phases: Tuple[int], program: List[int]) -> int:
-    amps = []
+def reamplify(phases: Tuple[int, ...], program: List[int]) -> int:
+    amps: List[Computer] = []
 
     for i, _ in enumerate(phases):
         amp = Computer(program.copy())

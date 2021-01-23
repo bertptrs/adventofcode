@@ -1,6 +1,6 @@
 from typing import TextIO
 
-import networkx
+import networkx  # type: ignore
 
 
 def read_graph(data: TextIO) -> networkx.DiGraph:
