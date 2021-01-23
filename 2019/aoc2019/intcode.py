@@ -90,8 +90,35 @@ class Computer:
             self[mode[0], 1] = self.input.popleft()
             self.pointer += 2
         elif opcode == 4:
+            # Output
             self.output.append(self[mode[0], 1])
             self.pointer += 2
+        elif opcode == 5:
+            # Jump if true
+            if self[mode[0], 1] != 0:
+                self.pointer = self[mode[1], 2]
+            else:
+                self.pointer += 3
+        elif opcode == 6:
+            # Jump if false
+            if self[mode[0], 1] == 0:
+                self.pointer = self[mode[1], 2]
+            else:
+                self.pointer += 3
+        elif opcode == 7:
+            # Less than
+            if self[mode[0], 1] < self[mode[1], 2]:
+                self[mode[2], 3] = 1
+            else:
+                self[mode[2], 3] = 0
+            self.pointer += 4
+        elif opcode == 8:
+            # Equals
+            if self[mode[0], 1] == self[mode[1], 2]:
+                self[mode[2], 3] = 1
+            else:
+                self[mode[2], 3] = 0
+            self.pointer += 4
         elif opcode == 99:
             # Halt
             return False

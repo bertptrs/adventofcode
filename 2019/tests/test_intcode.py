@@ -1,3 +1,4 @@
+import itertools
 from typing import List
 
 import pytest
@@ -20,3 +21,46 @@ def test_instructions_day2(program: List[int], expected: List[int]) -> None:
     computer.run()
 
     assert computer.program == expected
+
+
+@pytest.mark.parametrize('number,program', itertools.product([7, 8, 9], [
+    [3, 9, 8, 9, 10, 9, 4, 9, 99, -1, 8],
+    [3, 3, 1108, -1, 8, 3, 4, 3, 99],
+]))
+def test_equality_opcode(program: List[int], number: int):
+    computer = Computer(program.copy())
+    computer.input.append(number)
+
+    computer.run()
+
+    assert computer.output.pop() == int(number == 8)
+
+
+@pytest.mark.parametrize('number,program', itertools.product([7, 8, 9], [
+    [3, 9, 7, 9, 10, 9, 4, 9, 99, -1, 8],
+    [3, 3, 1107, -1, 8, 3, 4, 3, 99],
+]))
+def test_less_than_opcode(program: List[int], number: int):
+    computer = Computer(program.copy())
+    computer.input.append(number)
+
+    computer.run()
+
+    assert computer.output.pop() == int(number < 8)
+
+
+@pytest.mark.parametrize('inputs,expected', [
+    (12, 1001),
+    (8, 1000),
+    (2, 999),
+])
+def test_day5_example(inputs: int, expected: int):
+    computer = Computer([3, 21, 1008, 21, 8, 20, 1005, 20, 22, 107, 8, 21, 20, 1006, 20, 31,
+                         1106, 0, 36, 98, 0, 0, 1002, 21, 125, 20, 4, 20, 1105, 1, 46, 104,
+                         999, 1105, 1, 46, 1101, 1000, 1, 20, 4, 20, 1105, 1, 46, 98, 99])
+
+    computer.input.append(inputs)
+
+    computer.run()
+
+    assert computer.output.pop() == expected
