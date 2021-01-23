@@ -21,14 +21,11 @@ class Computer:
         self.output = collections.deque()
 
     def _mode_and_key(self, item: Union[int, Tuple[int, int]]) -> Tuple[int, int]:
-        if type(item) == int:
-            mode = 0
-            key = item
+        if isinstance(item, int):
+            return 0, item
         else:
             mode, key = item
-            key = self.program[self.pointer + key]
-
-        return mode, key
+            return mode, self.program[self.pointer + key]
 
     def __getitem__(self, item: Union[int, Tuple[int, int]]) -> int:
         mode, key = self._mode_and_key(item)

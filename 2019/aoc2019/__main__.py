@@ -15,9 +15,9 @@ def main() -> None:
         day = importlib.import_module(f'.day{args.day:02d}', __package__)
 
         if args.part2:
-            function = day.part2
+            function = day.part2  # type: ignore
         else:
-            function = day.part1
+            function = day.part1  # type: ignore
 
         print(function(args.input))
 
