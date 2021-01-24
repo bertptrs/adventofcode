@@ -3,12 +3,6 @@ language: python
 
 python:
   - "3.9"
-  - "nightly"
-
-jobs:
-  allow_failures:
-    - python: nightly
-  fast_finish: true
 
 # Custom directory, for the correct year
 before_install:
