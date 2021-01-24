@@ -11,12 +11,14 @@ def read_program(data: TextIO) -> List[int]:
 class Computer:
     program: List[int]
     pointer: int
+    relative_base: int
     input: collections.deque[int]
     output: collections.deque[int]
 
     def __init__(self, program: List[int], pointer: int = 0) -> None:
         self.program = program
         self.pointer = pointer
+        self.relative_base = 0
         self.input = collections.deque()
         self.output = collections.deque()
 
@@ -30,29 +32,41 @@ class Computer:
     def __getitem__(self, item: Union[int, Tuple[int, int]]) -> int:
         mode, key = self._mode_and_key(item)
 
-        if mode == 0:
-            self._ensure_length(key + 1)
-            return self.program[key]
-        elif mode == 1:
+        if mode == 1:
             return key
+        elif mode == 0:
+            pass  # Nothing to do here, handled below
+        elif mode == 2:
+            key += self.relative_base
         else:
             raise ValueError(f'Unsupported mode "{mode}"')
+
+        self._ensure_length(key + 1)
+        return self.program[key]
 
     def __setitem__(self, item: Union[int, Tuple[int, int]], value: int) -> None:
         mode, key = self._mode_and_key(item)
 
-        if mode == 0:
-            self._ensure_length(key + 1)
-            self.program[key] = value
-        elif mode == 1:
+        if mode == 1:
             raise ValueError('Cannot assign to an immediate')
+        elif mode == 0:
+            pass # Nothing to do here, handled below
+        elif mode == 2:
+            key += self.relative_base
         else:
             raise ValueError(f'Unsupported mode "{mode}"')
 
+        self._ensure_length(key + 1)
+        self.program[key] = value
+
     def _ensure_length(self, length: int) -> None:
         if len(self.program) < length:
-            # Double current program size with 0s
-            self.program.extend(0 for _ in range(len(self.program)))
+            if 2 * len(self.program) >= length:
+                # Double current program size with 0s
+                self.program.extend(0 for _ in range(len(self.program)))
+            else:
+                # Resize until the desired length
+                self.program.extend(0 for _ in range(length - len(self.program)))
 
     def run(self) -> None:
         """ Run until failure """
@@ -116,6 +130,10 @@ class Computer:
             else:
                 self[mode[2], 3] = 0
             self.pointer += 4
+        elif opcode == 9:
+            # Adjust relative base
+            self.relative_base += self[mode[0], 1]
+            self.pointer += 2
         elif opcode == 99:
             # Halt
             return False
