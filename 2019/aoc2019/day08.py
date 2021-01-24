@@ -24,10 +24,11 @@ def format_row(row: Iterable[int]) -> str:
 
 
 def part2(data: TextIO) -> str:
-    layers = list(parse_layers(25, 6, data))
     background = numpy.zeros(25 * 6, numpy.int8)
+    background.fill(2)
 
-    for layer in reversed(layers):
-        background[layer != 2] = layer[layer != 2]
+    for layer in parse_layers(25, 6, data):
+        mask = background == 2
+        background[mask] = layer[mask]
 
     return '\n'.join(format_row(row) for row in background.reshape(6, 25))
