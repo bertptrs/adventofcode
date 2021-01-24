@@ -48,7 +48,7 @@ def part2(data: TextIO) -> int:
     dy = ys - cy
 
     angles = numpy.arctan2(dy, dx)
-    distances = numpy.abs(numpy.copy(dx)) + numpy.abs(numpy.copy(dy))
+    distances = numpy.abs(dx) + numpy.abs(dy)
 
     to_shoot = defaultdict(list)
 
