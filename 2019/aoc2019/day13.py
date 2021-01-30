@@ -17,7 +17,7 @@ def part1(data: TextIO) -> int:
     computer = Computer(read_program(data))
     computer.run()
 
-    screen = {}
+    screen: Dict[Tuple[int, int], int] = {}
 
     render_screen(computer, screen)
 
@@ -29,7 +29,7 @@ def part2(data: TextIO) -> int:
 
     computer.program[0] = 2
 
-    screen = {}
+    screen: Dict[Tuple[int, int], int] = {}
 
     finished = False
 
