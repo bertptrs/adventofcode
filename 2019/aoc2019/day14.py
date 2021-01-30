@@ -2,7 +2,7 @@ import math
 from collections import defaultdict
 from typing import TextIO, Tuple
 
-from networkx import DiGraph, topological_sort
+from networkx import DiGraph, topological_sort  # type: ignore[import]
 
 
 def read_pair(item: str) -> Tuple[str, int]:
