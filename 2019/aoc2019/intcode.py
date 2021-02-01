@@ -73,6 +73,9 @@ class Computer:
         while self._execute_current():
             pass
 
+    def get_output(self) -> int:
+        return self.output.popleft()
+
     def _execute_current(self) -> bool:
         """
         Execute a single instruction
