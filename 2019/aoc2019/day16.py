@@ -12,9 +12,9 @@ def read_input(data: TextIO) -> List[int]:
 
 def simulate(numbers: List[int]) -> str:
     numbers = numpy.array(numbers)
-    pattern = numpy.array([0, 1, 0, -1], dtype=numpy.int)
+    pattern = numpy.array([0, 1, 0, -1], dtype=numpy.int32)
 
-    matrix = numpy.zeros((len(numbers), len(numbers)), dtype=numpy.int)
+    matrix = numpy.zeros((len(numbers), len(numbers)), dtype=numpy.int32)
 
     for i in range(len(numbers)):
         base = numpy.repeat(pattern, i + 1)
@@ -28,7 +28,7 @@ def simulate(numbers: List[int]) -> str:
 
 
 def simulate2(numbers: List[int]) -> str:
-    numbers = numpy.tile(numpy.array(numbers, dtype=numpy.int), 10000)
+    numbers = numpy.tile(numpy.array(numbers, dtype=numpy.int32), 10000)
     starting_index = 0
 
     for n in numbers[:7]:
