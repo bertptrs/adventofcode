@@ -70,7 +70,7 @@ class Computer:
 
     def run(self) -> None:
         """ Run until failure """
-        while self._execute_current():
+        while self.execute_current():
             pass
 
     def get_output(self) -> int:
@@ -79,7 +79,7 @@ class Computer:
     def send_input(self, data: int):
         self.input.append(data)
 
-    def _execute_current(self) -> bool:
+    def execute_current(self) -> bool:
         """
         Execute a single instruction
         :return: True if the program should continue
