@@ -76,6 +76,9 @@ class Computer:
     def get_output(self) -> int:
         return self.output.popleft()
 
+    def send_input(self, data: int):
+        self.input.append(data)
+
     def _execute_current(self) -> bool:
         """
         Execute a single instruction
