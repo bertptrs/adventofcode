@@ -46,7 +46,7 @@ def part2(data: TextIO) -> int:
 
         for computer in computers:
             try:
-                computer._execute_current()
+                computer.execute_current()
                 is_idle = False
             except IndexError:
                 computer.send_input(-1)
