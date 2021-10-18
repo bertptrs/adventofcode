@@ -36,14 +36,22 @@ def send_command(computer: Computer, command: str):
 
 
 def force(computer: Computer, direction: str, items: Set[str]):
-    for combination in powerset(items):
-        # Drop everything, disregard what's on the ground
-        for item in items:
-            send_command(computer, f"drop {item}")
+    # First, drop everything
+    for item in items:
+        send_command(computer, f"drop {item}")
 
-        # Now pick up whatever we want to try
+    holding = tuple()
+
+    for combination in powerset(items):
+        # drop everything we don't want to keep holding
+        for item in holding:
+            if item not in combination:
+                send_command(computer, f"drop {item}")
+
+        # pick up what we want to pick up
         for item in combination:
-            send_command(computer, f"take {item}")
+            if item not in holding:
+                send_command(computer, f"take {item}")
 
         send_command(computer, direction)
 
@@ -53,6 +61,7 @@ def force(computer: Computer, direction: str, items: Set[str]):
             return True
         except IndexError:
             print_output(computer)
+            holding = combination
 
     return False
 
@@ -107,7 +116,7 @@ def part1(data: TextIO):
         elif command.startswith("force "):
             direction = command.removeprefix("force ")
             if force(computer, direction, items):
-                return
+                return "success"
             continue
 
         send_command(computer, command)
