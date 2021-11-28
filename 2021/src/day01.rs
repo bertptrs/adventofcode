@@ -1,10 +1,9 @@
-use crate::Solution;
+use std::io::Read;
 
-#[derive(Default)]
-pub struct Day01;
+pub fn part1(_input: &mut dyn Read) -> String {
+    todo!()
+}
 
-impl Solution for Day01 {
-    fn part1(&mut self, _input: &mut dyn std::io::Read) -> String {
-        todo!()
-    }
+pub fn part2(_input: &mut dyn Read) -> String {
+    todo!()
 }

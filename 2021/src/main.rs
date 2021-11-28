@@ -30,7 +30,6 @@ struct Opts {
 fn main() {
     let opts: Opts = Opts::parse();
 
-    let mut implementation = get_implementation(opts.day.get());
     let mut input: Box<dyn Read> = if let Some(input) = opts.input {
         Box::new(File::open(&input).expect("Failed to open input"))
     } else {
@@ -38,11 +37,7 @@ fn main() {
     };
 
     let begin = Instant::now();
-    let result = if opts.part2 {
-        implementation.part2(&mut input)
-    } else {
-        implementation.part1(&mut input)
-    };
+    let result = get_implementation(opts.day.get(), opts.part2)(&mut *input);
 
     if opts.time {
         eprintln!("Execution time: {:?}", Instant::now().duration_since(begin));
