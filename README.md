@@ -1,6 +1,6 @@
 # Advent of Code
 
-[![Build Status](https://travis-ci.org/bertptrs/adventofcode.svg?branch=master)](https://travis-ci.org/bertptrs/adventofcode)
+[![Advent of Code 2021](https://github.com/bertptrs/adventofcode/actions/workflows/2021.yml/badge.svg)](https://github.com/bertptrs/adventofcode/actions/workflows/2021.yml)
 
 This repository contains my solutions for Advent of Code. See:
 
@@ -10,3 +10,4 @@ This repository contains my solutions for Advent of Code. See:
 - [2018 edition](./2018)
 - [2019 edition](./2019)
 - [2020 edition](./2020)
+- [2021 edition](./2021)
