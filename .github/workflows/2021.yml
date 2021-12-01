@@ -1,0 +1,46 @@
+on:
+  - push
+
+name: Advent of Code 2021
+
+jobs:
+  ci:
+    strategy:
+      matrix:
+        toolchain:
+          - stable
+          - beta
+        experimental: [false]
+        include:
+          - toolchain: nightly
+            experimental: true
+
+    name: Continuous Integration
+    runs-on: ubuntu-latest
+    continue-on-error: ${{ matrix.experimental }}
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Install toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: ${{ matrix.toolchain }}
+          override: true
+          components: rustfmt, clippy
+
+      - name: Build binaries
+        working-directory: 2021
+        run: >
+          cargo build --all-targets
+
+      - name: Run tests
+        working-directory: 2021
+        run: >
+          cargo test
+
+      - name: Run clippy
+        working-directory: 2021
+        run: >
+          cargo clippy -- --deny warnings
