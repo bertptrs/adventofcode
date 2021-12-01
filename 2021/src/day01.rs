@@ -1,15 +1,9 @@
-use std::io::BufRead;
-use std::io::BufReader;
 use std::io::Read;
 
-fn read_input(input: &mut dyn Read) -> Vec<u32> {
-    let reader = BufReader::new(input);
+use crate::common::LineParser;
 
-    // TODO: optimize allocations out
-    reader
-        .lines()
-        .map(|l| l.unwrap().parse().unwrap())
-        .collect()
+fn read_input(input: &mut dyn Read) -> Vec<u32> {
+    LineParser::new(input).collect()
 }
 
 pub fn part1(input: &mut dyn Read) -> String {
@@ -25,20 +19,9 @@ pub fn part1(input: &mut dyn Read) -> String {
 pub fn part2(input: &mut dyn Read) -> String {
     let numbers = read_input(input);
 
-    let mut last = None;
-
     numbers
-        .windows(3)
-        .filter(|w| {
-            let sum: u32 = w.iter().sum();
-
-            let prev = last.replace(sum);
-
-            match prev {
-                Some(n) if n < sum => true,
-                _ => false,
-            }
-        })
+        .windows(4)
+        .filter(|w| w[3] > w[0])
         .count()
         .to_string()
 }
