@@ -2,6 +2,7 @@ use std::io::Read;
 
 type Solution = fn(&mut dyn Read) -> String;
 
+mod common;
 mod day01;
 mod day02;
 mod day03;
