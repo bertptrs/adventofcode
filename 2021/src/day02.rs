@@ -1,6 +1,6 @@
-use std::io::BufRead;
-use std::io::BufReader;
 use std::io::Read;
+
+use crate::common::LineIter;
 
 enum Dir {
     Up,
@@ -9,13 +9,11 @@ enum Dir {
 }
 
 fn parse_input(input: &mut dyn Read) -> Vec<(Dir, i32)> {
-    let mut reader = BufReader::new(input);
-    let mut buffer = String::new();
-
+    let mut reader = LineIter::new(input);
     let mut moves = Vec::new();
 
-    while matches!(reader.read_line(&mut buffer), Ok(n) if n > 0) {
-        let (dir, amount) = buffer.trim().split_once(" ").unwrap();
+    while let Some(line) = reader.next() {
+        let (dir, amount) = line.split_once(" ").unwrap();
 
         let dir = match dir {
             "up" => Dir::Up,
@@ -25,8 +23,6 @@ fn parse_input(input: &mut dyn Read) -> Vec<(Dir, i32)> {
         };
 
         moves.push((dir, amount.parse().unwrap()));
-
-        buffer.clear();
     }
 
     moves
