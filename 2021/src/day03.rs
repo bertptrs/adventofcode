@@ -67,14 +67,13 @@ fn find_remaining(mut strings: Vec<u32>, most: bool, len: usize) -> u32 {
 pub fn part2(input: &mut dyn Read) -> String {
     let mut strings = Vec::new();
     let mut reader = LineIter::new(input);
-    let mut len = None;
+    let mut read_line = reader.next();
+    let len = read_line.unwrap().len();
 
-    while let Some(line) = reader.next() {
+    while let Some(line) = read_line {
         strings.push(u32::from_str_radix(line, 2).unwrap());
-        len = Some(line.len());
+        read_line = reader.next();
     }
-
-    let len = len.unwrap();
 
     let oxygen = find_remaining(strings.clone(), true, len);
     let co2 = find_remaining(strings, false, len);
