@@ -42,44 +42,42 @@ pub fn part1(input: &mut dyn Read) -> String {
     (gamma * epsilon).to_string()
 }
 
-fn find_remaining(mut strings: Vec<Vec<u8>>, most: bool) -> u32 {
-    let comp: fn(usize, usize) -> bool = if most {
-        |occurrences, len| occurrences * 2 >= len
-    } else {
-        |occurrences, len| occurrences * 2 < len
-    };
-
-    for pos in 0..strings[0].len() {
+fn find_remaining(mut strings: Vec<u32>, most: bool, len: usize) -> u32 {
+    for pos in 1..=len {
         if strings.len() == 1 {
             break;
         }
 
-        let occurrences = strings.iter().filter(|b| b[pos] == b'1').count();
+        let bit = 1 << (len - pos);
 
-        let keep = if comp(occurrences, strings.len()) {
-            b'1'
+        let occurrences = strings.iter().filter(|&&b| (b & bit) == bit).count();
+
+        let keep = if (occurrences * 2 < strings.len()) ^ most {
+            bit
         } else {
-            b'0'
+            0
         };
 
-        strings.retain(|s| s[pos] == keep);
+        strings.retain(|&b| (b & bit) == keep);
     }
 
     strings[0]
-        .iter()
-        .fold(0, |n, &b| (n << 1) | (b - b'0') as u32)
 }
 
 pub fn part2(input: &mut dyn Read) -> String {
     let mut strings = Vec::new();
     let mut reader = LineIter::new(input);
+    let mut len = None;
 
     while let Some(line) = reader.next() {
-        strings.push(line.as_bytes().to_owned());
+        strings.push(u32::from_str_radix(line, 2).unwrap());
+        len = Some(line.len());
     }
 
-    let oxygen = find_remaining(strings.clone(), true);
-    let co2 = find_remaining(strings, false);
+    let len = len.unwrap();
+
+    let oxygen = find_remaining(strings.clone(), true, len);
+    let co2 = find_remaining(strings, false, len);
 
     (oxygen * co2).to_string()
 }
