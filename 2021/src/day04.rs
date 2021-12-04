@@ -26,7 +26,7 @@ impl BingoCard {
         }
 
         // Check vertical lines
-        (0..5).any(|x| (0..5).all(|y| self.ticks[y][x]))
+        (0..5).any(|x| self.ticks.iter().all(|row| row[x]))
 
         // Diagonals do not count
     }
