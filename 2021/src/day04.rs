@@ -58,7 +58,7 @@ fn read_input(input: &mut dyn Read) -> (Vec<u8>, Vec<BingoCard>) {
     let mut bingo_cards = Vec::new();
 
     while reader.next().is_some() {
-        let mut mapping = HashMap::new();
+        let mut mapping = HashMap::with_capacity(25);
 
         for y in 0..5 {
             reader
@@ -99,16 +99,20 @@ pub fn part1(input: &mut dyn Read) -> String {
 
 pub fn part2(input: &mut dyn Read) -> String {
     let (numbers, mut bingo_cards) = read_input(input);
+    let mut bingo_won = vec![false; bingo_cards.len()];
+    let mut num_won = 0;
+    let to_win = bingo_cards.len();
 
-    for number in numbers {
-        bingo_cards.iter_mut().for_each(|card| {
-            card.cross(number);
-        });
+    for num in numbers {
+        for (won, card) in bingo_won.iter_mut().zip(bingo_cards.iter_mut()) {
+            if !*won && card.cross(num) && card.has_won() {
+                *won = true;
+                num_won += 1;
 
-        if bingo_cards.len() == 1 && bingo_cards[0].cross(number) && bingo_cards[0].has_won() {
-            return (number as u32 * bingo_cards[0].remaining()).to_string();
-        } else {
-            bingo_cards.retain(|card| !card.has_won());
+                if num_won == to_win {
+                    return (num as u32 * card.remaining()).to_string();
+                }
+            }
         }
     }
 
