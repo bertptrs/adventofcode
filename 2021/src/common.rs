@@ -60,3 +60,12 @@ impl<'a, I: FromStr> Iterator for LineParser<'a, I> {
         self.iter.next()?.parse().ok()
     }
 }
+
+/// Return two arguments in their natural PartialOrd order
+pub fn ordered<O: PartialOrd>(a: O, b: O) -> (O, O) {
+    if a < b {
+        (a, b)
+    } else {
+        (b, a)
+    }
+}
