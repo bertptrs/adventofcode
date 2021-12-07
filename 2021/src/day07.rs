@@ -26,7 +26,7 @@ fn compute_groups<'a>(it: impl IntoIterator<Item = &'a usize>) -> Vec<(usize, us
     costs
 }
 
-pub fn part1(input: &mut dyn Read) -> String {
+fn read_input(input: &mut dyn Read) -> Vec<usize> {
     let mut buf = String::new();
     input.read_to_string(&mut buf).unwrap();
 
@@ -37,6 +37,12 @@ pub fn part1(input: &mut dyn Read) -> String {
         .collect();
 
     crabs.sort_unstable();
+
+    crabs
+}
+
+pub fn part1(input: &mut dyn Read) -> String {
+    let crabs = read_input(input);
 
     let forward_costs = compute_groups(&crabs);
     let backwards_costs = compute_groups(crabs.iter().rev());
@@ -55,8 +61,34 @@ pub fn part1(input: &mut dyn Read) -> String {
         .to_string()
 }
 
-pub fn part2(_input: &mut dyn Read) -> String {
-    todo!()
+pub fn sum_until(end: usize) -> usize {
+    (end * (1 + end)) / 2
+}
+
+fn cost_at(pos: usize, groups: &[(usize, usize)]) -> usize {
+    groups
+        .iter()
+        .map(|&(number, new_pos)| {
+            let (first, last) = ordered(pos, new_pos);
+
+            number * sum_until(last - first)
+        })
+        .sum()
+}
+
+pub fn part2(input: &mut dyn Read) -> String {
+    let crabs = read_input(input);
+    let groups: Vec<_> = crabs.into_iter().dedup_with_count().collect();
+
+    let min = groups.first().unwrap().1;
+    let max = groups.last().unwrap().1;
+
+    // Brute force approach, better version later
+    (min..=max)
+        .map(|pos| cost_at(pos, &groups))
+        .min()
+        .unwrap()
+        .to_string()
 }
 
 #[cfg(test)]
@@ -70,5 +102,18 @@ mod tests {
     #[test]
     fn sample_part1() {
         test_implementation(part1, SAMPLE, 37);
+    }
+
+    #[test]
+    fn sample_part2() {
+        test_implementation(part2, SAMPLE, 168);
+    }
+
+    #[test]
+    fn test_maths() {
+        assert_eq!(sum_until(1), 1);
+        assert_eq!(sum_until(2), 3);
+        assert_eq!(sum_until(3), 6);
+        assert_eq!(sum_until(4), 10);
     }
 }
