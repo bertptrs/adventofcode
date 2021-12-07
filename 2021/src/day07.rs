@@ -4,33 +4,7 @@ use itertools::Itertools;
 
 use crate::common::ordered;
 
-fn compute_cumulative<'a, I, It>(it: I) -> Vec<usize>
-where
-    I: IntoIterator<IntoIter = It>,
-    It: Iterator<Item = &'a (usize, usize)> + ExactSizeIterator,
-{
-    let mut it = it.into_iter().copied();
-    let mut costs = Vec::with_capacity(it.len());
-    costs.push(0);
-
-    let (mut population, mut last_pos) = it.next().unwrap();
-    let mut last_cost = 0;
-
-    for (number, pos) in it {
-        let (first, last) = ordered(last_pos, pos);
-        let new_cost = last_cost + population * (last - first);
-
-        population += number;
-        last_pos = pos;
-        last_cost = new_cost;
-
-        costs.push(new_cost);
-    }
-
-    costs
-}
-
-fn read_input(input: &mut dyn Read) -> Vec<(usize, usize)> {
+fn read_input(input: &mut dyn Read) -> Vec<usize> {
     let mut buf = String::new();
     input.read_to_string(&mut buf).unwrap();
 
@@ -42,27 +16,35 @@ fn read_input(input: &mut dyn Read) -> Vec<(usize, usize)> {
 
     crabs.sort_unstable();
 
-    crabs.into_iter().dedup_with_count().collect()
+    crabs
+}
+
+fn cost_at(pos: usize, crabs: &[usize]) -> usize {
+    crabs
+        .iter()
+        .map(|&crab_pos| {
+            if crab_pos > pos {
+                crab_pos - pos
+            } else {
+                pos - crab_pos
+            }
+        })
+        .sum()
 }
 
 pub fn part1(input: &mut dyn Read) -> String {
     let crabs = read_input(input);
 
-    let forwards_costs = compute_cumulative(&crabs);
-    let backwards_costs = compute_cumulative(crabs.iter().rev());
+    let median = crabs[crabs.len() / 2 + (crabs.len() % 2)];
 
-    // Note: the optimal position can be proven to be one of the original positions.
-    ternary_search(0, forwards_costs.len() - 1, |idx| {
-        forwards_costs[idx] + backwards_costs[backwards_costs.len() - 1 - idx]
-    })
-    .to_string()
+    cost_at(median, &crabs).to_string()
 }
 
 pub fn sum_until(end: usize) -> usize {
     (end * (1 + end)) / 2
 }
 
-fn cost_at(pos: usize, groups: &[(usize, usize)]) -> usize {
+fn cost_at2(pos: usize, groups: &[(usize, usize)]) -> usize {
     groups
         .iter()
         .map(|&(number, new_pos)| {
@@ -93,12 +75,12 @@ fn ternary_search(mut min: usize, mut max: usize, callback: impl Fn(usize) -> us
 }
 
 pub fn part2(input: &mut dyn Read) -> String {
-    let groups = read_input(input);
+    let groups: Vec<_> = read_input(input).into_iter().dedup_with_count().collect();
 
     let min = groups.first().unwrap().1;
     let max = groups.last().unwrap().1;
 
-    ternary_search(min, max, |pos| cost_at(pos, &groups)).to_string()
+    ternary_search(min, max, |pos| cost_at2(pos, &groups)).to_string()
 }
 
 #[cfg(test)]
