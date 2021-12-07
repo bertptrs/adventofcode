@@ -76,6 +76,25 @@ fn cost_at(pos: usize, groups: &[(usize, usize)]) -> usize {
         .sum()
 }
 
+fn ternary_search(groups: &[(usize, usize)], min: usize, max: usize) -> usize {
+    if max - min <= 6 {
+        // ternary search isn't effective in small ranges, just iterate instead.
+        (min..=max).map(|pos| cost_at(pos, groups)).min().unwrap()
+    } else {
+        let mid1 = min + (max - min) / 3;
+        let mid2 = max - (max - min) / 3;
+
+        let cost1 = cost_at(mid1, groups);
+        let cost2 = cost_at(mid2, groups);
+
+        if cost1 < cost2 {
+            ternary_search(groups, min, mid2 - 1)
+        } else {
+            ternary_search(groups, mid1 + 1, max)
+        }
+    }
+}
+
 pub fn part2(input: &mut dyn Read) -> String {
     let crabs = read_input(input);
     let groups: Vec<_> = crabs.into_iter().dedup_with_count().collect();
@@ -84,11 +103,7 @@ pub fn part2(input: &mut dyn Read) -> String {
     let max = groups.last().unwrap().1;
 
     // Brute force approach, better version later
-    (min..=max)
-        .map(|pos| cost_at(pos, &groups))
-        .min()
-        .unwrap()
-        .to_string()
+    ternary_search(&groups, min, max).to_string()
 }
 
 #[cfg(test)]
