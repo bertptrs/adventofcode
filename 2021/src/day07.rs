@@ -51,11 +51,7 @@ pub fn part1(input: &mut dyn Read) -> String {
         .into_iter()
         .rev()
         .zip(forward_costs)
-        .map(|((pos_b, cost_b), (pos_f, cost_f))| {
-            debug_assert_eq!(pos_f, pos_b);
-
-            cost_f + cost_b
-        })
+        .map(|((_, cost_b), (_, cost_f))| cost_f + cost_b)
         .min()
         .unwrap()
         .to_string()
@@ -76,11 +72,8 @@ fn cost_at(pos: usize, groups: &[(usize, usize)]) -> usize {
         .sum()
 }
 
-fn ternary_search(groups: &[(usize, usize)], min: usize, max: usize) -> usize {
-    if max - min <= 6 {
-        // ternary search isn't effective in small ranges, just iterate instead.
-        (min..=max).map(|pos| cost_at(pos, groups)).min().unwrap()
-    } else {
+fn ternary_search(groups: &[(usize, usize)], mut min: usize, mut max: usize) -> usize {
+    while max - min > 6 {
         let mid1 = min + (max - min) / 3;
         let mid2 = max - (max - min) / 3;
 
@@ -88,11 +81,14 @@ fn ternary_search(groups: &[(usize, usize)], min: usize, max: usize) -> usize {
         let cost2 = cost_at(mid2, groups);
 
         if cost1 < cost2 {
-            ternary_search(groups, min, mid2 - 1)
+            max = mid2 - 1
         } else {
-            ternary_search(groups, mid1 + 1, max)
+            min = mid1 + 1
         }
     }
+
+    // Ternary search isn't effective at such small intervals so we iterate the remaining part
+    (min..=max).map(|pos| cost_at(pos, groups)).min().unwrap()
 }
 
 pub fn part2(input: &mut dyn Read) -> String {
@@ -102,7 +98,6 @@ pub fn part2(input: &mut dyn Read) -> String {
     let min = groups.first().unwrap().1;
     let max = groups.last().unwrap().1;
 
-    // Brute force approach, better version later
     ternary_search(&groups, min, max).to_string()
 }
 
