@@ -1,30 +1,33 @@
 use std::collections::VecDeque;
 use std::io::Read;
+use std::num::NonZeroU8;
 
 use crate::common::LineIter;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
-struct Segments([bool; 7]);
+struct Segments(NonZeroU8);
 
 impl Segments {
-    pub fn overlap(&self, other: &Segments) -> usize {
-        self.0
-            .iter()
-            .zip(&other.0)
-            .filter(|&(&ours, &theirs)| ours || theirs)
-            .count()
+    pub fn overlap(self, other: Segments) -> u32 {
+        (self.0 | other.0).get().count_ones()
+    }
+
+    pub fn len(self) -> u32 {
+        self.0.get().count_ones()
     }
 }
 
-impl FromIterator<char> for Segments {
-    fn from_iter<T: IntoIterator<Item = char>>(iter: T) -> Self {
-        let mut buffer = [false; 7];
+impl<'a> From<&'a str> for Segments {
+    fn from(s: &'a str) -> Self {
+        let mut buffer = 0;
 
-        for c in iter {
-            buffer[c as usize - b'a' as usize] = true;
+        for &b in s.as_bytes() {
+            debug_assert!((b'a'..=b'g').contains(&b));
+
+            buffer |= 1 << (b - b'a');
         }
 
-        Self(buffer)
+        Self(NonZeroU8::new(buffer).unwrap())
     }
 }
 
@@ -44,28 +47,29 @@ pub fn part1(input: &mut dyn Read) -> String {
     total.to_string()
 }
 
-fn decode(line: &str) -> usize {
+fn decode(line: &str, unmatched: &mut VecDeque<Segments>) -> usize {
     let mut mapping = [None; 10];
 
-    let mut unmatched: VecDeque<_> = line.split(' ').filter(|&s| s != "|").collect();
+    unmatched.clear();
+    unmatched.extend(line.split(' ').filter(|&s| s != "|").map(Segments::from));
 
-    while let Some(digit) = unmatched.pop_front() {
-        let segments: Segments = digit.chars().collect();
-
-        match digit.len() {
+    while let Some(segments) = unmatched.pop_front() {
+        // Note: this loop might "deduce" a combination more than once, but deducing digits is
+        // idempotent so it does not interfere.
+        match segments.len() {
             2 => mapping[1] = Some(segments),
             3 => mapping[7] = Some(segments),
             4 => mapping[4] = Some(segments),
             5 => {
                 // Could be 2, 3, or 5
                 if let Some(one) = mapping[1] {
-                    if segments.overlap(&one) == 5 {
+                    if segments.overlap(one) == 5 {
                         // No lines added, so must be a three
                         mapping[3] = Some(segments);
                         continue;
                     } else if let Some(four) = mapping[4] {
                         // Should be 6 for 5 and 7 for 2
-                        if segments.overlap(&four) == 6 {
+                        if segments.overlap(four) == 6 {
                             mapping[5] = Some(segments);
                         } else {
                             mapping[2] = Some(segments);
@@ -73,27 +77,27 @@ fn decode(line: &str) -> usize {
                         continue;
                     }
                 }
-                unmatched.push_back(digit);
+                unmatched.push_back(segments);
             }
             6 => {
                 // Could be 0, 6, or 9
                 if let Some(one) = mapping[1] {
-                    if segments.overlap(&one) == 7 {
+                    if segments.overlap(one) == 7 {
                         mapping[6] = Some(segments);
                         continue;
                     } else if let Some(four) = mapping[4] {
-                        if segments.overlap(&four) == 6 {
+                        if segments.overlap(four) == 6 {
                             mapping[9] = Some(segments);
                         } else {
                             mapping[0] = Some(segments);
                         }
                         continue;
                     }
-                    unmatched.push_back(digit);
+                    unmatched.push_back(segments);
                 }
             }
             7 => mapping[8] = Some(segments),
-            _ => panic!("Invalid digit: {}", digit),
+            _ => panic!("Invalid segments!"),
         }
     }
 
@@ -101,7 +105,7 @@ fn decode(line: &str) -> usize {
         .skip_while(|&s| s != "|")
         .skip(1)
         .map(|s| {
-            let segments: Segments = s.chars().collect();
+            let segments = Segments::from(s);
             mapping.iter().position(|s| &Some(segments) == s).unwrap()
         })
         .fold(0, |acc, n| acc * 10 + n)
@@ -111,8 +115,11 @@ pub fn part2(input: &mut dyn Read) -> String {
     let mut reader = LineIter::new(input);
     let mut total = 0;
 
+    // Allocate work memory outside the decode function so we can reuse it
+    let mut work_buffer = VecDeque::new();
+
     while let Some(line) = reader.next() {
-        total += decode(line);
+        total += decode(line, &mut work_buffer);
     }
 
     total.to_string()
