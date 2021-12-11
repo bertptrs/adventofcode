@@ -82,14 +82,7 @@ pub fn part2(input: &mut dyn Read) -> String {
     let target = grid.iter().map(|line| line.len()).sum();
 
     (1..)
-        .find_map(|step| {
-            let flashes = advance(&mut grid, &mut todo);
-            if flashes == target {
-                Some(step)
-            } else {
-                None
-            }
-        })
+        .find(|_| advance(&mut grid, &mut todo) == target)
         .unwrap()
         .to_string()
 }
