@@ -9,6 +9,13 @@ clap = { version = "3.0.0-rc.0", features = ["derive"] }
 itertools = "0.10"
 nom = "7"
 
+[dev-dependencies]
+criterion = "0.3"
+
 [profile.release]
 # Keep debug information in release for better flamegraphs
 debug = true
+
+[[bench]]
+name = "days"
+harness = false
