@@ -13,7 +13,7 @@ fn parse_input(input: &mut dyn Read) -> Vec<(Dir, i32)> {
     let mut moves = Vec::new();
 
     while let Some(line) = reader.next() {
-        let (dir, amount) = line.split_once(" ").unwrap();
+        let (dir, amount) = line.split_once(' ').unwrap();
 
         let dir = match dir {
             "up" => Dir::Up,
