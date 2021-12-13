@@ -54,27 +54,19 @@ fn read_input(input: &mut dyn Read) -> (Vec<Coords>, Vec<Fold>) {
     parse_input(&input_buffer).finish().unwrap().1
 }
 
-fn apply_fold(dots: &mut Vec<Coords>, fold: Fold, to_fold: &mut Vec<Coords>) {
+fn apply_fold(dots: &mut Vec<Coords>, fold: Fold) {
     match fold {
-        Fold::X(coord) => dots.retain(|&(x, y)| {
-            if x < coord {
-                true
-            } else {
-                to_fold.push((2 * coord - x, y));
-                false
+        Fold::X(coord) => dots.iter_mut().for_each(|(x, _)| {
+            if *x >= coord {
+                *x = 2 * coord - *x;
             }
         }),
-        Fold::Y(coord) => dots.retain(|&(x, y)| {
-            if y < coord {
-                true
-            } else {
-                to_fold.push((x, 2 * coord - y));
-                false
+        Fold::Y(coord) => dots.iter_mut().for_each(|(_, y)| {
+            if *y >= coord {
+                *y = 2 * coord - *y;
             }
         }),
     }
-
-    dots.append(to_fold);
 }
 
 fn print_dots(dots: &[Coords]) -> String {
@@ -98,7 +90,7 @@ fn print_dots(dots: &[Coords]) -> String {
 pub fn part1(input: &mut dyn Read) -> String {
     let (mut dots, folds) = read_input(input);
 
-    apply_fold(&mut dots, folds[0], &mut Vec::new());
+    apply_fold(&mut dots, folds[0]);
 
     dots.sort_unstable();
 
@@ -108,11 +100,9 @@ pub fn part1(input: &mut dyn Read) -> String {
 pub fn part2(input: &mut dyn Read) -> String {
     let (mut dots, folds) = read_input(input);
 
-    let mut to_fold = Vec::new();
-
     folds
         .into_iter()
-        .for_each(|fold| apply_fold(&mut dots, fold, &mut to_fold));
+        .for_each(|fold| apply_fold(&mut dots, fold));
 
     print_dots(&dots)
 }
