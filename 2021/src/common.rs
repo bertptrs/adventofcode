@@ -53,11 +53,20 @@ impl<'a, I: FromStr> LineParser<'a, I> {
     }
 }
 
-impl<'a, I: FromStr> Iterator for LineParser<'a, I> {
+impl<I: FromStr> Iterator for LineParser<'_, I> {
     type Item = I;
 
     fn next(&mut self) -> Option<Self::Item> {
         self.iter.next()?.parse().ok()
+    }
+}
+
+impl<'a, I: FromStr> From<LineIter<'a>> for LineParser<'a, I> {
+    fn from(iter: LineIter<'a>) -> Self {
+        Self {
+            iter,
+            _data: PhantomData,
+        }
     }
 }
 

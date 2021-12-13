@@ -1,18 +1,37 @@
 use std::collections::HashSet;
 use std::io::Read;
+use std::str::FromStr;
 
 use nom::branch::alt;
 use nom::bytes::complete::tag;
+use nom::error::Error;
 use nom::sequence::tuple;
+use nom::Finish;
 use nom::IResult;
 
 use crate::common::LineIter;
+use crate::common::LineParser;
 
 type Coords = (u16, u16);
 
 enum Fold {
     X(u16),
     Y(u16),
+}
+
+impl FromStr for Fold {
+    type Err = Error<String>;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let (_, fold) = parse_fold(s)
+            .finish()
+            .map_err(|Error { input, code }| Error {
+                input: input.to_string(),
+                code,
+            })?;
+
+        Ok(fold)
+    }
 }
 
 fn parse_coordinates(input: &str) -> IResult<&str, Coords> {
@@ -44,9 +63,23 @@ fn parse_fold(input: &str) -> IResult<&str, Fold> {
     Ok((input, fold))
 }
 
-fn apply_fold(dots: &mut HashSet<Coords>, fold: Fold) {
-    let mut to_fold = Vec::new();
+fn read_dots(reader: &mut LineIter<'_>) -> HashSet<Coords> {
+    let mut dots = HashSet::new();
 
+    while let Some(line) = reader.next() {
+        if line.is_empty() {
+            break;
+        }
+
+        let (_, coords) = parse_coordinates(line).unwrap();
+
+        dots.insert(coords);
+    }
+
+    dots
+}
+
+fn apply_fold(dots: &mut HashSet<Coords>, fold: Fold, to_fold: &mut Vec<Coords>) {
     match fold {
         Fold::X(coord) => dots.retain(|&(x, y)| {
             if x < coord {
@@ -95,20 +128,10 @@ fn print_dots(dots: &HashSet<Coords>) -> String {
 pub fn part1(input: &mut dyn Read) -> String {
     let mut reader = LineIter::new(input);
 
-    let mut dots = HashSet::new();
+    let mut dots = read_dots(&mut reader);
 
-    while let Some(line) = reader.next() {
-        if line == "" {
-            break;
-        }
-
-        let (_, coords) = parse_coordinates(line).unwrap();
-
-        dots.insert(coords);
-    }
-
-    let fold = parse_fold(reader.next().unwrap()).unwrap().1;
-    apply_fold(&mut dots, fold);
+    let fold = reader.next().unwrap().parse().unwrap();
+    apply_fold(&mut dots, fold, &mut Vec::new());
 
     dots.len().to_string()
 }
@@ -116,22 +139,10 @@ pub fn part1(input: &mut dyn Read) -> String {
 pub fn part2(input: &mut dyn Read) -> String {
     let mut reader = LineIter::new(input);
 
-    let mut dots = HashSet::new();
+    let mut dots = read_dots(&mut reader);
+    let mut to_fold = Vec::new();
 
-    while let Some(line) = reader.next() {
-        if line == "" {
-            break;
-        }
-
-        let (_, coords) = parse_coordinates(line).unwrap();
-
-        dots.insert(coords);
-    }
-
-    while let Some(line) = reader.next() {
-        let fold = parse_fold(line).unwrap().1;
-        apply_fold(&mut dots, fold);
-    }
+    LineParser::from(reader).for_each(|fold| apply_fold(&mut dots, fold, &mut to_fold));
 
     print_dots(&dots)
 }
