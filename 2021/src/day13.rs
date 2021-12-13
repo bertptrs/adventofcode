@@ -107,22 +107,17 @@ fn print_dots(dots: &[Coords]) -> String {
         (xc.max(xn as usize + 1), yc.max(yn as usize + 1))
     });
 
-    let mut buffer = vec![b' '; width * height];
+    let mut buffer = vec![b' '; (width + 1) * height - 1];
 
     for &(x, y) in dots {
-        buffer[x as usize + width * y as usize] = b'#';
+        buffer[x as usize + (width + 1) * y as usize] = b'#';
     }
 
-    let mut result = String::with_capacity((width + 1) * height);
-
-    for line in buffer.chunks_exact(width) {
-        result += std::str::from_utf8(line).unwrap();
-        result.push('\n');
+    for line in buffer.chunks_exact_mut(width + 1) {
+        line[width] = b'\n';
     }
 
-    result.pop();
-
-    result
+    String::from_utf8(buffer).unwrap()
 }
 
 pub fn part1(input: &mut dyn Read) -> String {
