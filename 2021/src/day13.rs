@@ -1,7 +1,7 @@
-use std::collections::HashSet;
 use std::io::Read;
 use std::str::FromStr;
 
+use itertools::Itertools;
 use nom::branch::alt;
 use nom::bytes::complete::tag;
 use nom::error::Error;
@@ -63,8 +63,8 @@ fn parse_fold(input: &str) -> IResult<&str, Fold> {
     Ok((input, fold))
 }
 
-fn read_dots(reader: &mut LineIter<'_>) -> HashSet<Coords> {
-    let mut dots = HashSet::new();
+fn read_dots(reader: &mut LineIter<'_>) -> Vec<Coords> {
+    let mut dots = Vec::new();
 
     while let Some(line) = reader.next() {
         if line.is_empty() {
@@ -73,13 +73,13 @@ fn read_dots(reader: &mut LineIter<'_>) -> HashSet<Coords> {
 
         let (_, coords) = parse_coordinates(line).unwrap();
 
-        dots.insert(coords);
+        dots.push(coords);
     }
 
     dots
 }
 
-fn apply_fold(dots: &mut HashSet<Coords>, fold: Fold, to_fold: &mut Vec<Coords>) {
+fn apply_fold(dots: &mut Vec<Coords>, fold: Fold, to_fold: &mut Vec<Coords>) {
     match fold {
         Fold::X(coord) => dots.retain(|&(x, y)| {
             if x < coord {
@@ -99,30 +99,30 @@ fn apply_fold(dots: &mut HashSet<Coords>, fold: Fold, to_fold: &mut Vec<Coords>)
         }),
     }
 
-    dots.extend(to_fold.drain(..));
+    dots.append(to_fold);
 }
 
-fn print_dots(dots: &HashSet<Coords>) -> String {
-    let (x, y) = dots
-        .iter()
-        .fold((0, 0), |(xc, yc), &(xn, yn)| (xc.max(xn), yc.max(yn)));
+fn print_dots(dots: &[Coords]) -> String {
+    let (width, height) = dots.iter().fold((0, 0), |(xc, yc), &(xn, yn)| {
+        (xc.max(xn as usize + 1), yc.max(yn as usize + 1))
+    });
 
-    let mut buffer = String::with_capacity((x as usize + 1) * y as usize);
+    let mut buffer = vec![b' '; width * height];
 
-    for y in 0..=y {
-        for x in 0..=x {
-            if dots.contains(&(x, y)) {
-                buffer.push('#');
-            } else {
-                buffer.push(' ');
-            }
-        }
-        buffer.push('\n');
+    for &(x, y) in dots {
+        buffer[x as usize + width * y as usize] = b'#';
     }
 
-    buffer.pop();
+    let mut result = String::with_capacity((width + 1) * height);
 
-    buffer
+    for line in buffer.chunks_exact(width) {
+        result += std::str::from_utf8(line).unwrap();
+        result.push('\n');
+    }
+
+    result.pop();
+
+    result
 }
 
 pub fn part1(input: &mut dyn Read) -> String {
@@ -133,7 +133,9 @@ pub fn part1(input: &mut dyn Read) -> String {
     let fold = reader.next().unwrap().parse().unwrap();
     apply_fold(&mut dots, fold, &mut Vec::new());
 
-    dots.len().to_string()
+    dots.sort_unstable();
+
+    dots.into_iter().unique().count().to_string()
 }
 
 pub fn part2(input: &mut dyn Read) -> String {
