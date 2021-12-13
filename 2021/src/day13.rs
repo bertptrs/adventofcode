@@ -1,82 +1,57 @@
 use std::io::Read;
-use std::str::FromStr;
 
 use itertools::Itertools;
 use nom::branch::alt;
 use nom::bytes::complete::tag;
-use nom::error::Error;
-use nom::sequence::tuple;
+use nom::combinator::map;
+use nom::multi::many0;
+use nom::sequence::preceded;
+use nom::sequence::separated_pair;
+use nom::sequence::terminated;
 use nom::Finish;
 use nom::IResult;
 
-use crate::common::LineIter;
-use crate::common::LineParser;
-
 type Coords = (u16, u16);
 
+#[derive(Copy, Clone)]
 enum Fold {
     X(u16),
     Y(u16),
 }
 
-impl FromStr for Fold {
-    type Err = Error<String>;
+fn parse_input(input: &[u8]) -> IResult<&[u8], (Vec<Coords>, Vec<Fold>)> {
+    use nom::character::complete::char;
 
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let (_, fold) = parse_fold(s)
-            .finish()
-            .map_err(|Error { input, code }| Error {
-                input: input.to_string(),
-                code,
-            })?;
+    let parse_coordinates = many0(terminated(parse_coordinate, char('\n')));
+    let parse_folds = many0(terminated(parse_fold, char('\n')));
 
-        Ok(fold)
-    }
+    separated_pair(parse_coordinates, char('\n'), parse_folds)(input)
 }
 
-fn parse_coordinates(input: &str) -> IResult<&str, Coords> {
+fn parse_coordinate(input: &[u8]) -> IResult<&[u8], Coords> {
     use nom::character::complete::char;
     use nom::character::complete::u16;
 
-    let (input, (x, _, y)) = tuple((u16, char(','), u16))(input)?;
-
-    Ok((input, (x, y)))
+    separated_pair(u16, char(','), u16)(input)
 }
 
-fn parse_fold(input: &str) -> IResult<&str, Fold> {
-    use nom::character::complete::char;
+fn parse_fold(input: &[u8]) -> IResult<&[u8], Fold> {
     use nom::character::complete::u16;
 
-    let (input, (_, axis, _, coord)) = tuple((
+    preceded(
         tag("fold along "),
-        alt((char('x'), char('y'))),
-        char('='),
-        u16,
-    ))(input)?;
-
-    let fold = match axis {
-        'x' => Fold::X(coord),
-        'y' => Fold::Y(coord),
-        _ => unreachable!("Should be filtered by nom"),
-    };
-
-    Ok((input, fold))
+        alt((
+            preceded(tag("x="), map(u16, Fold::X)),
+            preceded(tag("y="), map(u16, Fold::Y)),
+        )),
+    )(input)
 }
 
-fn read_dots(reader: &mut LineIter<'_>) -> Vec<Coords> {
-    let mut dots = Vec::new();
+fn read_input(input: &mut dyn Read) -> (Vec<Coords>, Vec<Fold>) {
+    let mut input_buffer = Vec::new();
+    input.read_to_end(&mut input_buffer).unwrap();
 
-    while let Some(line) = reader.next() {
-        if line.is_empty() {
-            break;
-        }
-
-        let (_, coords) = parse_coordinates(line).unwrap();
-
-        dots.push(coords);
-    }
-
-    dots
+    parse_input(&input_buffer).finish().unwrap().1
 }
 
 fn apply_fold(dots: &mut Vec<Coords>, fold: Fold, to_fold: &mut Vec<Coords>) {
@@ -121,12 +96,9 @@ fn print_dots(dots: &[Coords]) -> String {
 }
 
 pub fn part1(input: &mut dyn Read) -> String {
-    let mut reader = LineIter::new(input);
+    let (mut dots, folds) = read_input(input);
 
-    let mut dots = read_dots(&mut reader);
-
-    let fold = reader.next().unwrap().parse().unwrap();
-    apply_fold(&mut dots, fold, &mut Vec::new());
+    apply_fold(&mut dots, folds[0], &mut Vec::new());
 
     dots.sort_unstable();
 
@@ -134,12 +106,13 @@ pub fn part1(input: &mut dyn Read) -> String {
 }
 
 pub fn part2(input: &mut dyn Read) -> String {
-    let mut reader = LineIter::new(input);
+    let (mut dots, folds) = read_input(input);
 
-    let mut dots = read_dots(&mut reader);
     let mut to_fold = Vec::new();
 
-    LineParser::from(reader).for_each(|fold| apply_fold(&mut dots, fold, &mut to_fold));
+    folds
+        .into_iter()
+        .for_each(|fold| apply_fold(&mut dots, fold, &mut to_fold));
 
     print_dots(&dots)
 }
