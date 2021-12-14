@@ -16,6 +16,10 @@ criterion = "0.3"
 # Keep debug information in release for better flamegraphs
 debug = true
 
+[profile.bench]
+# And same for benchmarking
+debug = true
+
 [[bench]]
 name = "days"
 harness = false

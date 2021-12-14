@@ -1,18 +1,21 @@
-use std::collections::HashMap;
 use std::io::Read;
 
-use crate::common::LineIter;
+use nom::bytes::complete::tag;
+use nom::character::complete::multispace1;
+use nom::multi::many1;
+use nom::multi::separated_list1;
+use nom::sequence::preceded;
+use nom::sequence::tuple;
+use nom::Finish;
+use nom::IResult;
 
 #[derive(Debug)]
-struct BingoCard {
-    ticks: [[bool; 5]; 5],
-    mapping: HashMap<u8, (u8, u8)>,
-}
+struct BingoCard([(bool, u8); 25]);
 
 impl BingoCard {
     pub fn cross(&mut self, num: u8) -> bool {
-        if let Some(&(x, y)) = self.mapping.get(&num) {
-            self.ticks[y as usize][x as usize] = true;
+        if let Some(card) = self.0.iter_mut().find(|&&mut (_, x)| x == num) {
+            card.0 = true;
             true
         } else {
             false
@@ -21,66 +24,56 @@ impl BingoCard {
 
     pub fn has_won(&self) -> bool {
         // Check horizontal lines
-        if self.ticks.iter().any(|s| s.iter().all(|&b| b)) {
+        if self.0.chunks_exact(5).any(|s| s.iter().all(|&b| b.0)) {
             return true;
         }
 
         // Check vertical lines
-        (0..5).any(|x| self.ticks.iter().all(|row| row[x]))
+        (0..5).any(|x| self.0.iter().skip(x).step_by(5).all(|b| b.0))
 
         // Diagonals do not count
     }
 
     pub fn remaining(&self) -> u32 {
-        self.mapping
+        self.0
             .iter()
-            .filter_map(|(&num, &(x, y))| {
-                if self.ticks[y as usize][x as usize] {
-                    None
-                } else {
-                    Some(num as u32)
-                }
-            })
+            .filter_map(|&(ticked, num)| if !ticked { Some(num as u32) } else { None })
             .sum()
     }
 }
 
-fn read_input(input: &mut dyn Read) -> (Vec<u8>, Vec<BingoCard>) {
-    let mut reader = LineIter::new(input);
+fn parse_numbers(input: &[u8]) -> IResult<&[u8], Vec<u8>> {
+    use nom::character::complete::u8;
+    separated_list1(tag(","), u8)(input)
+}
 
-    let numbers: Vec<u8> = reader
-        .next()
-        .unwrap()
-        .split(',')
-        .map(|num| num.parse().unwrap())
-        .collect();
+fn parse_bingo(mut input: &[u8]) -> IResult<&[u8], BingoCard> {
+    use nom::character::complete::u8;
 
-    let mut bingo_cards = Vec::new();
+    let mut card = [0; 25];
 
-    while reader.next().is_some() {
-        let mut mapping = HashMap::with_capacity(25);
+    let mut parse_num = preceded(multispace1, u8);
 
-        for y in 0..5 {
-            reader
-                .next()
-                .unwrap()
-                .split(' ')
-                .filter_map(|s| if s.is_empty() { None } else { s.parse().ok() })
-                .enumerate()
-                .for_each(|(x, num)| {
-                    mapping.insert(num, (x as u8, y));
-                });
-        }
-
-        let card = BingoCard {
-            mapping,
-            ticks: Default::default(),
-        };
-
-        bingo_cards.push(card);
+    // fill doesn't work with preceded
+    for i in 0..25 {
+        let result = parse_num(input)?;
+        card[i] = result.1;
+        input = result.0;
     }
 
-    (numbers, bingo_cards)
+    Ok((input, BingoCard(card.map(|x| (false, x)))))
+}
+
+fn parse_input(input: &[u8]) -> IResult<&[u8], (Vec<u8>, Vec<BingoCard>)> {
+    tuple((parse_numbers, many1(parse_bingo)))(input)
+}
+
+fn read_input(input: &mut dyn Read) -> (Vec<u8>, Vec<BingoCard>) {
+    let mut buffer = Vec::new();
+
+    input.read_to_end(&mut buffer).unwrap();
+
+    parse_input(&buffer).finish().unwrap().1
 }
 
 pub fn part1(input: &mut dyn Read) -> String {
