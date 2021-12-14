@@ -67,9 +67,9 @@ fn parse_bingo(mut input: &[u8]) -> IResult<&[u8], BingoCard> {
     let mut parse_num = preceded(multispace1, u8);
 
     // fill doesn't work with preceded
-    for i in 0..25 {
+    for num in &mut card {
         let result = parse_num(input)?;
-        card[i] = result.1;
+        *num = result.1;
         input = result.0;
     }
 
