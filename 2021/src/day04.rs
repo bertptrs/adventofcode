@@ -13,23 +13,35 @@ use nom::IResult;
 struct BingoCard([(bool, u8); 25]);
 
 impl BingoCard {
-    pub fn cross(&mut self, num: u8) -> bool {
-        if let Some(card) = self.0.iter_mut().find(|&&mut (_, x)| x == num) {
-            card.0 = true;
-            true
-        } else {
-            false
-        }
+    pub fn cross(&mut self, num: u8) -> Option<usize> {
+        self.0
+            .iter_mut()
+            .enumerate()
+            .find_map(|(pos, (ticked, x))| {
+                if *x == num {
+                    *ticked = true;
+                    Some(pos)
+                } else {
+                    None
+                }
+            })
     }
 
-    pub fn has_won(&self) -> bool {
+    pub fn has_won(&self, crossed: usize) -> bool {
         // Check horizontal lines
-        if self.0.chunks_exact(5).any(|s| s.iter().all(|&b| b.0)) {
+        if self
+            .0
+            .chunks_exact(5)
+            .nth(crossed / 5)
+            .unwrap()
+            .iter()
+            .all(|&b| b.0)
+        {
             return true;
         }
 
         // Check vertical lines
-        (0..5).any(|x| self.0.iter().skip(x).step_by(5).all(|b| b.0))
+        self.0.iter().skip(crossed % 5).step_by(5).all(|b| b.0)
 
         // Diagonals do not count
     }
@@ -81,7 +93,7 @@ pub fn part1(input: &mut dyn Read) -> String {
 
     for number in numbers {
         for card in &mut bingo_cards {
-            if card.cross(number) && card.has_won() {
+            if matches!(card.cross(number), Some(pos) if card.has_won(pos)) {
                 return (number as u32 * card.remaining()).to_string();
             }
         }
@@ -98,7 +110,11 @@ pub fn part2(input: &mut dyn Read) -> String {
 
     for num in numbers {
         for (won, card) in bingo_won.iter_mut().zip(bingo_cards.iter_mut()) {
-            if !*won && card.cross(num) && card.has_won() {
+            if *won {
+                continue;
+            }
+
+            if matches!(card.cross(num), Some(pos) if card.has_won(pos)) {
                 *won = true;
                 num_won += 1;
 
