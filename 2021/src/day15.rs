@@ -71,7 +71,7 @@ impl Map {
         let mut todo = BinaryHeap::new();
         todo.push(Reverse((0, start)));
 
-        let mut visited = vec![false; self.data.len()];
+        let mut best = vec![u32::MAX; self.data.len()];
 
         let height = self.height() as i32;
 
@@ -80,11 +80,9 @@ impl Map {
                 return distance;
             }
 
-            if visited[self.index(pos)] {
+            if best[self.index(pos)] < distance {
                 continue;
             }
-
-            visited[self.index(pos)] = true;
 
             let (x, y) = pos;
 
@@ -100,12 +98,13 @@ impl Map {
 
                     let new = (x + dx, y + dy);
                     let index = self.index(new);
+                    let new_distance = distance + self.data[index] as u32;
 
-                    if visited[index] {
+                    if best[index] <= new_distance {
                         continue;
                     }
 
-                    let new_distance = distance + self.data[index] as u32;
+                    best[index] = new_distance;
 
                     todo.push(Reverse((new_distance, new)));
                 }
