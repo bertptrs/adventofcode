@@ -69,13 +69,13 @@ impl Map {
 
     pub fn shortest_path(&self, start: Point, end: Point) -> u32 {
         let mut todo = BinaryHeap::new();
-        todo.push(Reverse((Self::manhattan(start, end), 0, start)));
+        todo.push(Reverse((0, start)));
 
         let mut visited = vec![false; self.data.len()];
 
         let height = self.height() as i32;
 
-        while let Some(Reverse((_, distance, pos))) = todo.pop() {
+        while let Some(Reverse((distance, pos))) = todo.pop() {
             if pos == end {
                 return distance;
             }
@@ -106,18 +106,13 @@ impl Map {
                     }
 
                     let new_distance = distance + self.data[index] as u32;
-                    let new_guess = Self::manhattan(new, end) + new_distance;
 
-                    todo.push(Reverse((new_guess, new_distance, new)));
+                    todo.push(Reverse((new_distance, new)));
                 }
             }
         }
 
         panic!("No route found from {:?} to {:?}", start, end);
-    }
-
-    fn manhattan((xa, ya): Point, (xb, yb): Point) -> u32 {
-        (xa - xb).abs() as u32 + (ya - yb).abs() as u32
     }
 
     pub fn height(&self) -> usize {
