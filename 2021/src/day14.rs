@@ -104,7 +104,6 @@ pub fn part2(input: &mut dyn Read) -> String {
 }
 
 #[cfg(test)]
-#[cfg(test)]
 mod tests {
     use super::*;
 
