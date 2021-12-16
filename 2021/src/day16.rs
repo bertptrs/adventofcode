@@ -13,7 +13,7 @@ type Input<'a> = (&'a [u8], usize);
 
 #[derive(Debug, Eq, PartialEq)]
 enum Contents {
-    Literal(Vec<u8>),
+    Literal(u64),
     Operator(u8, Vec<Packet>),
 }
 
@@ -21,6 +21,10 @@ enum Contents {
 struct Packet {
     version: u8,
     contents: Contents,
+}
+
+fn capacity(input: Input) -> usize {
+    8 * input.0.len() - input.1 as usize
 }
 
 impl Packet {
@@ -35,9 +39,7 @@ impl Packet {
 
     pub fn value(&self) -> u64 {
         match &self.contents {
-            Contents::Literal(chunks) => chunks
-                .iter()
-                .fold(0, |acc, &chunk| (acc << 4) | (chunk as u64)),
+            Contents::Literal(val) => *val,
             Contents::Operator(0, sub_packets) => sub_packets.iter().map(Packet::value).sum(),
             Contents::Operator(1, sub_packets) => sub_packets.iter().map(Packet::value).product(),
             Contents::Operator(2, sub_packets) => {
@@ -60,64 +62,51 @@ impl Packet {
     }
 }
 
-fn parse_literal(mut input: Input) -> IResult<Input, (usize, Contents)> {
-    let mut contents = Vec::new();
+fn parse_literal(mut input: Input) -> IResult<Input, Contents> {
+    let mut val = 0;
 
     loop {
         let (new_input, result) = take::<_, u8, usize, _>(5)(input)?;
         input = new_input;
 
-        contents.push(result & 0xF);
+        val = (val << 4) | (result as u64 & 0xF);
 
         if (result & 0x10) == 0 {
-            let len = 5 * contents.len();
-            let contents = Contents::Literal(contents);
-
-            return Ok((input, (len, contents)));
+            return Ok((input, Contents::Literal(val)));
         }
     }
 }
 
-fn parse_operator_len(input: Input) -> IResult<Input, (usize, Vec<Packet>)> {
+fn parse_operator_len(input: Input) -> IResult<Input, Vec<Packet>> {
     const SIZE_LEN: usize = 15;
 
     let (mut input, to_read) = take(SIZE_LEN)(input)?;
 
-    let mut read = 0;
     let mut packets = Vec::new();
 
-    while read < to_read {
-        let (new_input, (len, packet)) = parse_packet(input)?;
+    let initial = capacity(input);
+
+    while initial - capacity(input) < to_read {
+        let (new_input, packet) = parse_packet(input)?;
         input = new_input;
-        read += len;
         packets.push(packet);
     }
 
-    Ok((input, (to_read + SIZE_LEN, packets)))
+    Ok((input, packets))
 }
 
-fn parse_operator_count(input: Input) -> IResult<Input, (usize, Vec<Packet>)> {
+fn parse_operator_count(input: Input) -> IResult<Input, Vec<Packet>> {
     const SIZE_LEN: usize = 11;
 
     let (input, to_read) = take::<_, usize, _, _>(SIZE_LEN)(input)?;
 
-    let (input, packets) = count(parse_packet, to_read)(input)?;
-
-    let read_total = SIZE_LEN + packets.iter().map(|(len, _)| *len).sum::<usize>();
-
-    Ok((
-        input,
-        (
-            read_total,
-            packets.into_iter().map(|(_, packet)| packet).collect(),
-        ),
-    ))
+    count(parse_packet, to_read)(input)
 }
 
-fn parse_packet(input: Input) -> IResult<Input, (usize, Packet)> {
+fn parse_packet(input: Input) -> IResult<Input, Packet> {
     let parse_literal_packet = map(
         tuple((take(3usize), preceded(tag(4u8, 3usize), parse_literal))),
-        |(version, (len, contents))| (len + 6, Packet { version, contents }),
+        |(version, contents)| Packet { version, contents },
     );
 
     let parse_operator_len_packet = map(
@@ -126,14 +115,9 @@ fn parse_packet(input: Input) -> IResult<Input, (usize, Packet)> {
             take(3usize),
             preceded(tag(0u8, 1usize), parse_operator_len),
         )),
-        |(version, operator, (len, contents))| {
-            (
-                len + 7,
-                Packet {
-                    version,
-                    contents: Contents::Operator(operator, contents),
-                },
-            )
+        |(version, operator, contents)| Packet {
+            version,
+            contents: Contents::Operator(operator, contents),
         },
     );
 
@@ -143,14 +127,9 @@ fn parse_packet(input: Input) -> IResult<Input, (usize, Packet)> {
             take(3usize),
             preceded(tag(1u8, 1usize), parse_operator_count),
         )),
-        |(version, operator, (len, contents))| {
-            (
-                len + 7,
-                Packet {
-                    version,
-                    contents: Contents::Operator(operator, contents),
-                },
-            )
+        |(version, operator, contents)| Packet {
+            version,
+            contents: Contents::Operator(operator, contents),
         },
     );
 
@@ -185,7 +164,7 @@ pub fn part1(input: &mut dyn Read) -> String {
     input.read_to_end(&mut buffer).unwrap();
 
     let binary_data = convert_hex(&buffer);
-    let (_, (_, packet)) = parse_packet((&binary_data, 0)).unwrap();
+    let (_, packet) = parse_packet((&binary_data, 0)).unwrap();
 
     packet.version_sum().to_string()
 }
@@ -195,7 +174,7 @@ pub fn part2(input: &mut dyn Read) -> String {
     input.read_to_end(&mut buffer).unwrap();
 
     let binary_data = convert_hex(&buffer);
-    let (_, (_, packet)) = parse_packet((&binary_data, 0)).unwrap();
+    let (_, packet) = parse_packet((&binary_data, 0)).unwrap();
 
     packet.value().to_string()
 }
@@ -224,23 +203,21 @@ mod tests {
 
     #[test]
     fn test_parse_literal() {
-        let (_, (len, packet)) = parse_packet((&convert_hex(b"D2FE28"), 0)).unwrap();
+        let (_, packet) = parse_packet((&convert_hex(b"D2FE28"), 0)).unwrap();
 
-        assert_eq!(len, 21);
         assert_eq!(
             packet,
             Packet {
                 version: 6,
-                contents: Contents::Literal(vec![7, 14, 5])
+                contents: Contents::Literal(2021)
             }
         );
     }
 
     #[test]
     fn test_parse_operator_len() {
-        let (_, (len, packet)) = parse_packet((&convert_hex(b"38006F45291200"), 0)).unwrap();
+        let (_, packet) = parse_packet((&convert_hex(b"38006F45291200"), 0)).unwrap();
 
-        assert_eq!(len, 22 + 27);
         assert_eq!(packet.version, 1);
 
         assert!(matches!(packet.contents, Contents::Operator(6, _)));
@@ -248,9 +225,8 @@ mod tests {
 
     #[test]
     fn test_parse_operator_count() {
-        let (_, (len, packet)) = parse_packet((&convert_hex(b"EE00D40C823060"), 0)).unwrap();
+        let (_, packet) = parse_packet((&convert_hex(b"EE00D40C823060"), 0)).unwrap();
 
-        assert_eq!(len, 7 + 11 + 33);
         assert_eq!(packet.version, 7);
 
         assert!(matches!(packet.contents, Contents::Operator(3, _)));
