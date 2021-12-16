@@ -162,9 +162,22 @@ fn parse_packet(input: Input) -> IResult<Input, (usize, Packet)> {
 }
 
 fn convert_hex(hex: &[u8]) -> Vec<u8> {
-    hex.chunks_exact(2)
-        .map(|chunk| u8::from_str_radix(std::str::from_utf8(chunk).unwrap(), 16).unwrap())
-        .collect()
+    fn val(c: u8) -> u8 {
+        match c {
+            b'A'..=b'F' => c - b'A' + 10,
+            b'0'..=b'9' => c - b'0',
+            _ => panic!("Invalid hex digit {}", c),
+        }
+    }
+
+    let mut binary = Vec::with_capacity(hex.len() / 2);
+
+    binary.extend(
+        hex.chunks_exact(2)
+            .map(|chunk| (val(chunk[0]) << 4) | val(chunk[1])),
+    );
+
+    binary
 }
 
 pub fn part1(input: &mut dyn Read) -> String {
