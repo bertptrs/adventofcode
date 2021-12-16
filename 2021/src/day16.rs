@@ -98,46 +98,32 @@ fn parse_operator_len(input: Input) -> IResult<Input, Vec<Packet>> {
 fn parse_operator_count(input: Input) -> IResult<Input, Vec<Packet>> {
     const SIZE_LEN: usize = 11;
 
-    let (input, to_read) = take::<_, usize, _, _>(SIZE_LEN)(input)?;
+    let (input, to_read) = take(SIZE_LEN)(input)?;
 
     count(parse_packet, to_read)(input)
 }
 
 fn parse_packet(input: Input) -> IResult<Input, Packet> {
-    let parse_literal_packet = map(
-        tuple((take(3usize), preceded(tag(4u8, 3usize), parse_literal))),
+    let parse_literal_packet = preceded(tag(4u8, 3usize), parse_literal);
+
+    let parse_operator_packet = map(
+        tuple((
+            take(3usize),
+            alt((
+                preceded(tag(0u8, 1usize), parse_operator_len),
+                preceded(tag(1u8, 1usize), parse_operator_count),
+            )),
+        )),
+        |(operator, contents)| Contents::Operator(operator, contents),
+    );
+
+    map(
+        tuple((
+            take(3usize),
+            alt((parse_literal_packet, parse_operator_packet)),
+        )),
         |(version, contents)| Packet { version, contents },
-    );
-
-    let parse_operator_len_packet = map(
-        tuple((
-            take(3usize),
-            take(3usize),
-            preceded(tag(0u8, 1usize), parse_operator_len),
-        )),
-        |(version, operator, contents)| Packet {
-            version,
-            contents: Contents::Operator(operator, contents),
-        },
-    );
-
-    let parse_operator_count_packet = map(
-        tuple((
-            take(3usize),
-            take(3usize),
-            preceded(tag(1u8, 1usize), parse_operator_count),
-        )),
-        |(version, operator, contents)| Packet {
-            version,
-            contents: Contents::Operator(operator, contents),
-        },
-    );
-
-    alt((
-        parse_literal_packet,
-        parse_operator_len_packet,
-        parse_operator_count_packet,
-    ))(input)
+    )(input)
 }
 
 fn convert_hex(hex: &[u8]) -> Vec<u8> {
