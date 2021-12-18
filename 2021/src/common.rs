@@ -4,6 +4,9 @@ use std::io::Read;
 use std::marker::PhantomData;
 use std::str::FromStr;
 
+use nom::Finish;
+use nom::IResult;
+
 pub struct LineIter<'a> {
     reader: BufReader<&'a mut dyn Read>,
     buffer: String,
@@ -77,4 +80,16 @@ pub fn ordered<O: PartialOrd>(a: O, b: O) -> (O, O) {
     } else {
         (b, a)
     }
+}
+
+pub fn read_input<P, O>(input: &mut dyn Read, parser: P) -> O
+where
+    P: for<'a> FnOnce(&'a [u8]) -> IResult<&'a [u8], O>,
+{
+    let mut buffer = Vec::new();
+    input.read_to_end(&mut buffer).unwrap();
+
+    let (_, output) = parser(&buffer).finish().unwrap();
+
+    output
 }
