@@ -7,8 +7,9 @@ use nom::bytes::complete::tag;
 use nom::combinator::map;
 use nom::sequence::preceded;
 use nom::sequence::separated_pair;
-use nom::Finish;
 use nom::IResult;
+
+use crate::common::read_input;
 
 #[inline]
 fn solve_quadratic(a: f64, b: f64, c: f64) -> Option<f64> {
@@ -108,10 +109,7 @@ fn parse_input(input: &[u8]) -> IResult<&[u8], (RangeInclusive<i32>, RangeInclus
 }
 
 pub fn part1(input: &mut dyn Read) -> String {
-    let mut buffer = Vec::new();
-    input.read_to_end(&mut buffer).unwrap();
-
-    let (x_range, y_range) = parse_input(&buffer).finish().unwrap().1;
+    let (x_range, y_range) = read_input(input, parse_input);
 
     let check_value = |y_speed| {
         let mut time = find_hit(y_speed, &y_range)?;
@@ -127,10 +125,7 @@ pub fn part1(input: &mut dyn Read) -> String {
 }
 
 pub fn part2(input: &mut dyn Read) -> String {
-    let mut buffer = Vec::new();
-    input.read_to_end(&mut buffer).unwrap();
-
-    let (x_range, y_range) = parse_input(&buffer).finish().unwrap().1;
+    let (x_range, y_range) = read_input(input, parse_input);
 
     let num_options = |y_speed| {
         let time = find_hit(y_speed, &y_range)?;

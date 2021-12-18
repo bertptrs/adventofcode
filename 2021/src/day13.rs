@@ -8,8 +8,9 @@ use nom::multi::many0;
 use nom::sequence::preceded;
 use nom::sequence::separated_pair;
 use nom::sequence::terminated;
-use nom::Finish;
 use nom::IResult;
+
+use crate::common::read_input;
 
 type Coords = (u16, u16);
 
@@ -47,13 +48,6 @@ fn parse_fold(input: &[u8]) -> IResult<&[u8], Fold> {
     )(input)
 }
 
-fn read_input(input: &mut dyn Read) -> (Vec<Coords>, Vec<Fold>) {
-    let mut input_buffer = Vec::new();
-    input.read_to_end(&mut input_buffer).unwrap();
-
-    parse_input(&input_buffer).finish().unwrap().1
-}
-
 fn apply_fold(dots: &mut Vec<Coords>, fold: Fold) {
     match fold {
         Fold::X(coord) => dots.iter_mut().for_each(|(x, _)| {
@@ -88,7 +82,7 @@ fn print_dots(dots: &[Coords]) -> String {
 }
 
 pub fn part1(input: &mut dyn Read) -> String {
-    let (mut dots, folds) = read_input(input);
+    let (mut dots, folds) = read_input(input, parse_input);
 
     apply_fold(&mut dots, folds[0]);
 
@@ -98,7 +92,7 @@ pub fn part1(input: &mut dyn Read) -> String {
 }
 
 pub fn part2(input: &mut dyn Read) -> String {
-    let (mut dots, folds) = read_input(input);
+    let (mut dots, folds) = read_input(input, parse_input);
 
     folds
         .into_iter()
