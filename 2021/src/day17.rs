@@ -19,7 +19,11 @@ fn solve_quadratic(a: f64, b: f64, c: f64) -> Option<f64> {
         None
     } else {
         // Don't care about the smaller solution due to problem statement
-        Some((-b - d.sqrt()) / 2. / a)
+        if a > 0. {
+            Some((-b + d.sqrt()) / 2. / a)
+        } else {
+            Some((-b - d.sqrt()) / 2. / a)
+        }
     }
 }
 
@@ -60,37 +64,27 @@ fn find_hit(initial: i32, range: &RangeInclusive<i32>) -> Option<RangeInclusive<
 }
 
 fn find_speed(x: i32, range: &RangeInclusive<i32>) -> Option<RangeInclusive<i32>> {
-    let mut min = 0;
-    let mut max = *range.end();
+    if *range.end() <= position(x, x) {
+        // Can and should come to a full stop
+        let max = solve_quadratic(0.5, 0.5, -*range.end() as f64)? as i32;
 
-    // Need to tweak the formula as x slows down
-    let x_pos = |speed| position(speed, speed.min(x));
+        let min = (0..=max)
+            .rev()
+            .take_while(|&n| range.contains(&position(n, n)))
+            .last()?;
 
-    while max >= min {
-        let speed = (max + min) / 2;
+        Some(min..=max)
+    } else {
+        // Might hit the target at speed
+        let max = (x * x + 2 * *range.end() - x) / (2 * x);
 
-        let pos = x_pos(speed);
+        let min = (0..=max)
+            .rev()
+            .take_while(|&n| range.contains(&position(n, n.min(x))))
+            .last()?;
 
-        if range.contains(&x_pos(speed)) {
-            let min_speed = (0..speed)
-                .rev()
-                .take_while(|&speed| range.contains(&x_pos(speed)))
-                .min()
-                .unwrap_or(speed);
-
-            let max_speed = ((speed + 1)..)
-                .take_while(|&speed| range.contains(&x_pos(speed)))
-                .max()
-                .unwrap_or(speed);
-            return Some(min_speed..=max_speed);
-        } else if pos < *range.start() {
-            min = speed + 1;
-        } else {
-            max = speed - 1;
-        }
+        Some(min..=max)
     }
-
-    None
 }
 
 fn parse_range(input: &[u8]) -> IResult<&[u8], RangeInclusive<i32>> {
