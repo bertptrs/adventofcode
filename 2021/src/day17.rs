@@ -36,18 +36,18 @@ fn find_hit(initial: i32, range: &RangeInclusive<i32>) -> impl Iterator<Item = i
     // to hit, find x := (max(box) + min(box)) / 2 = f(x)
     //                                             = -1/2x^2 + (initial + 0.5)x
     // -1/2x^2 + (initial + 0.5)x - (max(box) + min(box)) / 2 = 0
-    let middle = (*range.start() + *range.end()) as f64 / 2.;
+    let middle = *range.start() as f64;
     let b = initial as f64 + 0.5;
     let hit = if let Some(hit) = solve_quadratic(-0.5, b, -middle) {
         hit as i32
     } else {
+        // Cause an empty range
         -1
     };
 
     (0..=hit)
         .rev()
         .take_while(move |&n| range.contains(&position(initial, n)))
-        .chain(((hit + 1)..).take_while(move |&n| range.contains(&position(initial, n))))
 }
 
 fn find_speed(x: i32, range: &RangeInclusive<i32>) -> Option<(i32, i32)> {
@@ -135,7 +135,7 @@ mod tests {
     fn test_find_hit() {
         assert_eq!(find_hit(2, &(-10..=-5)).collect::<Vec<_>>(), vec![7]);
         assert_eq!(find_hit(3, &(-10..=-5)).collect::<Vec<_>>(), vec![9]);
-        assert_eq!(find_hit(0, &(-10..=-5)).collect::<Vec<_>>(), vec![4, 5]);
+        assert_eq!(find_hit(0, &(-10..=-5)).collect::<Vec<_>>(), vec![5, 4]);
     }
 
     #[test]
