@@ -6,8 +6,9 @@ use nom::multi::many1;
 use nom::multi::separated_list1;
 use nom::sequence::preceded;
 use nom::sequence::tuple;
-use nom::Finish;
 use nom::IResult;
+
+use crate::common::read_input;
 
 #[derive(Debug)]
 struct BingoCard([(bool, u8); 25]);
@@ -80,16 +81,8 @@ fn parse_input(input: &[u8]) -> IResult<&[u8], (Vec<u8>, Vec<BingoCard>)> {
     tuple((parse_numbers, many1(parse_bingo)))(input)
 }
 
-fn read_input(input: &mut dyn Read) -> (Vec<u8>, Vec<BingoCard>) {
-    let mut buffer = Vec::new();
-
-    input.read_to_end(&mut buffer).unwrap();
-
-    parse_input(&buffer).finish().unwrap().1
-}
-
 pub fn part1(input: &mut dyn Read) -> String {
-    let (numbers, mut bingo_cards) = read_input(input);
+    let (numbers, mut bingo_cards) = read_input(input, parse_input);
 
     for number in numbers {
         for card in &mut bingo_cards {
@@ -103,7 +96,7 @@ pub fn part1(input: &mut dyn Read) -> String {
 }
 
 pub fn part2(input: &mut dyn Read) -> String {
-    let (numbers, mut bingo_cards) = read_input(input);
+    let (numbers, mut bingo_cards) = read_input(input, parse_input);
     let mut bingo_won = vec![false; bingo_cards.len()];
     let mut num_won = 0;
     let to_win = bingo_cards.len();
