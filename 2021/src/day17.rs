@@ -121,7 +121,14 @@ pub fn part1(input: &mut dyn Read) -> String {
         }
     };
 
-    (0..1000).filter_map(check_value).max().unwrap().to_string()
+    debug_assert!(*y_range.start() < 0);
+    let y_max = -*y_range.start();
+
+    (0..y_max)
+        .filter_map(check_value)
+        .max()
+        .unwrap()
+        .to_string()
 }
 
 pub fn part2(input: &mut dyn Read) -> String {
@@ -141,7 +148,10 @@ pub fn part2(input: &mut dyn Read) -> String {
         })
     };
 
-    (-1000..1000)
+    debug_assert!(*y_range.start() < 0);
+    let y_max = -*y_range.start();
+
+    (-y_max..y_max)
         .filter_map(num_options)
         .sum::<i32>()
         .to_string()
