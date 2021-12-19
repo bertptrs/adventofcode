@@ -82,8 +82,9 @@ pub fn ordered<O: PartialOrd>(a: O, b: O) -> (O, O) {
     }
 }
 
-pub fn read_input<P, O>(input: &mut dyn Read, parser: P) -> O
+pub fn read_input<I, P, O>(mut input: I, parser: P) -> O
 where
+    I: Read,
     P: for<'a> FnOnce(&'a [u8]) -> IResult<&'a [u8], O>,
 {
     let mut buffer = Vec::new();
