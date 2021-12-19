@@ -19,6 +19,12 @@ use crate::common::read_input;
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash, Default)]
 struct Point3(pub [i32; 3]);
 
+impl Point3 {
+    pub fn manhattan(&self) -> i32 {
+        self.0.into_iter().map(i32::abs).sum()
+    }
+}
+
 impl Sub for Point3 {
     type Output = Self;
 
@@ -121,7 +127,10 @@ fn parse_input(input: &[u8]) -> IResult<&[u8], Vec<Vec<Point3>>> {
     separated_list1(newline, parse_scanner)(input)
 }
 
-fn try_overlap(correct: &[(Point3, HashSet<Point3>)], candidate: &[Point3]) -> Option<Vec<Point3>> {
+fn try_overlap(
+    correct: &[(Point3, HashSet<Point3>)],
+    candidate: &[Point3],
+) -> Option<(Point3, Vec<Point3>)> {
     let mut relative = HashSet::new();
     for rot in Rotations::new(candidate) {
         for &start in &rot {
@@ -135,7 +144,7 @@ fn try_overlap(correct: &[(Point3, HashSet<Point3>)], candidate: &[Point3]) -> O
                 // Found a solution, build the correct output
                 let translated = relative.drain().map(|point| point + *base).collect();
 
-                return Some(translated);
+                return Some((start - *base, translated));
             }
         }
     }
@@ -149,7 +158,6 @@ pub fn part1(input: &mut dyn Read) -> String {
     let mut points: HashSet<_> = scanners[0].iter().copied().collect();
 
     let mut todo = vec![std::mem::take(&mut scanners[0])];
-    println!("Scanners: {}", scanners.len());
 
     while let Some(matched) = todo.pop() {
         if scanners.iter().all(Vec::is_empty) {
@@ -166,7 +174,7 @@ pub fn part1(input: &mut dyn Read) -> String {
                 continue;
             }
 
-            if let Some(result) = try_overlap(&relative, candidate) {
+            if let Some((_, result)) = try_overlap(&relative, candidate) {
                 points.extend(result.iter().copied());
                 todo.push(result);
                 candidate.clear();
@@ -174,13 +182,49 @@ pub fn part1(input: &mut dyn Read) -> String {
         }
     }
 
-    scanners.retain(|s| !s.is_empty());
-
     points.len().to_string()
 }
 
-pub fn part2(_input: &mut dyn Read) -> String {
-    todo!()
+pub fn part2(input: &mut dyn Read) -> String {
+    let mut scanners = read_input(input, parse_input);
+
+    let mut found_scanners = vec![Point3::default()];
+    let mut todo = vec![std::mem::take(&mut scanners[0])];
+
+    while let Some(matched) = todo.pop() {
+        if scanners.iter().all(Vec::is_empty) {
+            break;
+        }
+
+        let relative: Vec<(Point3, HashSet<Point3>)> = matched
+            .iter()
+            .map(|&base| (base, matched.iter().map(|&other| (other - base)).collect()))
+            .collect();
+
+        for candidate in &mut scanners {
+            if candidate.is_empty() {
+                continue;
+            }
+
+            if let Some((new_offset, result)) = try_overlap(&relative, candidate) {
+                todo.push(result);
+                candidate.clear();
+
+                found_scanners.push(new_offset);
+            }
+        }
+    }
+
+    found_scanners
+        .iter()
+        .flat_map(|&first| {
+            found_scanners
+                .iter()
+                .map(move |&second| (first - second).manhattan())
+        })
+        .max()
+        .unwrap()
+        .to_string()
 }
 
 pub fn next_permutation<T: Ord>(list: &mut [T]) -> bool {
@@ -257,5 +301,10 @@ mod tests {
     #[test]
     fn sample_part1() {
         test_implementation(part1, SAMPLE, 79);
+    }
+
+    #[test]
+    fn sample_part2() {
+        test_implementation(part2, SAMPLE, 3621);
     }
 }
