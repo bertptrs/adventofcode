@@ -152,12 +152,13 @@ fn try_overlap(
     None
 }
 
-pub fn part1(input: &mut dyn Read) -> String {
+fn parts_common(input: &mut dyn Read) -> (HashSet<Point3>, Vec<Point3>) {
     let mut scanners = read_input(input, parse_input);
 
     let mut points: HashSet<_> = scanners[0].iter().copied().collect();
 
     let mut todo = vec![std::mem::take(&mut scanners[0])];
+    let mut scanners_found = vec![Point3::default()];
 
     while let Some(matched) = todo.pop() {
         if scanners.iter().all(Vec::is_empty) {
@@ -174,7 +175,8 @@ pub fn part1(input: &mut dyn Read) -> String {
                 continue;
             }
 
-            if let Some((_, result)) = try_overlap(&relative, candidate) {
+            if let Some((scanner, result)) = try_overlap(&relative, candidate) {
+                scanners_found.push(scanner);
                 points.extend(result.iter().copied());
                 todo.push(result);
                 candidate.clear();
@@ -182,43 +184,21 @@ pub fn part1(input: &mut dyn Read) -> String {
         }
     }
 
+    (points, scanners_found)
+}
+
+pub fn part1(input: &mut dyn Read) -> String {
+    let (points, _) = parts_common(input);
     points.len().to_string()
 }
 
 pub fn part2(input: &mut dyn Read) -> String {
-    let mut scanners = read_input(input, parse_input);
+    let (_, scanners) = parts_common(input);
 
-    let mut found_scanners = vec![Point3::default()];
-    let mut todo = vec![std::mem::take(&mut scanners[0])];
-
-    while let Some(matched) = todo.pop() {
-        if scanners.iter().all(Vec::is_empty) {
-            break;
-        }
-
-        let relative: Vec<(Point3, HashSet<Point3>)> = matched
-            .iter()
-            .map(|&base| (base, matched.iter().map(|&other| (other - base)).collect()))
-            .collect();
-
-        for candidate in &mut scanners {
-            if candidate.is_empty() {
-                continue;
-            }
-
-            if let Some((new_offset, result)) = try_overlap(&relative, candidate) {
-                todo.push(result);
-                candidate.clear();
-
-                found_scanners.push(new_offset);
-            }
-        }
-    }
-
-    found_scanners
+    scanners
         .iter()
         .flat_map(|&first| {
-            found_scanners
+            scanners
                 .iter()
                 .map(move |&second| (first - second).manhattan())
         })
