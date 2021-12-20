@@ -39,27 +39,29 @@ fn find_dimensions(field: &Field) -> ((i32, i32), (i32, i32)) {
 }
 
 fn advance(translation: &Translation, field: &Field, new_field: &mut Field, infinity: &mut bool) {
+    const INDEX_MASK: usize = (1 << 9) - 1;
     new_field.clear();
 
     let ((xmin, xmax), (ymin, ymax)) = find_dimensions(field);
 
     for x in (xmin - 1)..=(xmax + 1) {
+        let mut index = if *infinity { INDEX_MASK } else { 0 };
+
         for y in (ymin - 1)..=(ymax + 1) {
-            let mut index = 0;
-            for dy in -1..=1 {
-                for dx in -1..=1 {
-                    index <<= 1;
+            for dx in -1..=1 {
+                index <<= 1;
 
-                    let nx = x + dx;
-                    let ny = y + dy;
+                let nx = x + dx;
+                let ny = y + 1;
 
-                    if nx < xmin || nx > xmax || ny < ymin || ny > ymax {
-                        index |= *infinity as usize;
-                    } else if field.contains(&(x + dx, y + dy)) {
-                        index |= 1;
-                    }
+                if nx < xmin || nx > xmax || ny < ymin || ny > ymax {
+                    index |= *infinity as usize;
+                } else if field.contains(&(nx, ny)) {
+                    index |= 1;
                 }
             }
+
+            index &= INDEX_MASK;
 
             if translation[index] {
                 new_field.insert((x, y));
