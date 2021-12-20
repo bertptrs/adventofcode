@@ -1,5 +1,6 @@
 use std::collections::HashSet;
 use std::io::Read;
+use std::mem::swap;
 
 type Translation = [bool; 512];
 type Point = (i32, i32);
@@ -37,8 +38,8 @@ fn find_dimensions(field: &Field) -> ((i32, i32), (i32, i32)) {
         })
 }
 
-fn advance(translation: &Translation, field: &Field, infinity: bool) -> (bool, Field) {
-    let mut new_field = Field::new();
+fn advance(translation: &Translation, field: &Field, new_field: &mut Field, infinity: &mut bool) {
+    new_field.clear();
 
     let ((xmin, xmax), (ymin, ymax)) = find_dimensions(field);
 
@@ -53,11 +54,9 @@ fn advance(translation: &Translation, field: &Field, infinity: bool) -> (bool, F
                     let ny = y + dy;
 
                     if nx < xmin || nx > xmax || ny < ymin || ny > ymax {
-                        index |= infinity as usize;
-                    } else {
-                        if field.contains(&(x + dx, y + dy)) {
-                            index |= 1;
-                        }
+                        index |= *infinity as usize;
+                    } else if field.contains(&(x + dx, y + dy)) {
+                        index |= 1;
                     }
                 }
             }
@@ -68,17 +67,17 @@ fn advance(translation: &Translation, field: &Field, infinity: bool) -> (bool, F
         }
     }
 
-    (translation[infinity.then(|| 511).unwrap_or(0)], new_field)
+    *infinity = translation[if *infinity { 511 } else { 0 }]
 }
 
 fn parts_common(input: &mut dyn Read, count: usize) -> String {
     let (translation, mut field) = read_input(input);
+    let mut new_field = Field::new();
     let mut infinity = false;
 
     for _ in 0..count {
-        let (new_inf, new_field) = advance(&translation, &field, infinity);
-        field = new_field;
-        infinity = new_inf;
+        advance(&translation, &field, &mut new_field, &mut infinity);
+        swap(&mut field, &mut new_field);
     }
 
     field.len().to_string()
