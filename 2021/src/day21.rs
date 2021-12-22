@@ -139,11 +139,7 @@ pub fn part2(input: &mut dyn Read) -> String {
     let (a_wins, a_alive) = multiverse(a);
     let (b_wins, b_alive) = multiverse(b);
 
-    let a_winner: u64 = a_wins[1..]
-        .into_iter()
-        .zip(b_alive)
-        .map(|(&a, b)| a * b)
-        .sum();
+    let a_winner: u64 = a_wins[1..].iter().zip(b_alive).map(|(&a, b)| a * b).sum();
     let b_winner: u64 = b_wins.into_iter().zip(a_alive).map(|(a, b)| a * b).sum();
 
     a_winner.max(b_winner).to_string()
