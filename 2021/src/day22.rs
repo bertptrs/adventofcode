@@ -23,14 +23,17 @@ fn parse_range(input: &[u8]) -> IResult<&[u8], CRange> {
     })(input)
 }
 
-fn parse_input<'a>(input: &[u8]) -> IResult<&[u8], Vec<(bool, CRange, CRange, CRange)>> {
+fn parse_input(input: &[u8]) -> IResult<&[u8], Vec<(bool, [CRange; 3])>> {
     let parse_state = alt((map(tag("on x="), |_| true), map(tag("off x="), |_| false)));
-    let parse_line = tuple((
-        parse_state,
-        parse_range,
-        preceded(tag(",y="), parse_range),
-        preceded(tag(",z="), parse_range),
-    ));
+    let parse_line = map(
+        tuple((
+            parse_state,
+            parse_range,
+            preceded(tag(",y="), parse_range),
+            preceded(tag(",z="), parse_range),
+        )),
+        |(b, x, y, z)| (b, [x, y, z]),
+    );
 
     separated_list1(newline, parse_line)(input)
 }
@@ -45,7 +48,7 @@ pub fn part1(input: &mut dyn Read) -> String {
 
     let ranges = read_input(input, parse_input);
 
-    for (toggle, xr, yr, zr) in ranges {
+    for (toggle, [xr, yr, zr]) in ranges {
         for z in zr {
             if !valid_range.contains(&z) {
                 continue;
