@@ -96,39 +96,50 @@ pub fn part1(input: &mut dyn Read) -> String {
     (loser_score * rolls).to_string()
 }
 
-const MAX_TURNS: usize = 21; // Trivial upper bound, could be lower
+const MAX_TURNS: usize = 13;
 const ROLLS: [i32; 7] = [3, 4, 5, 6, 7, 8, 9];
 const FREQS: [u64; 7] = [1, 3, 6, 7, 6, 3, 1];
 
-fn multiverse_recursive(
-    remaining: &mut [u64],
-    wins: &mut [u64],
-    turn: usize,
-    alive: u64,
-    pos: i32,
-    score: i32,
-) {
-    for (roll, freq) in ROLLS.into_iter().zip(FREQS) {
-        let new_pos = (pos + roll - 1) % 10 + 1;
-        let new_score = score + new_pos;
-        let new_alive = alive * freq;
-
-        if new_score >= 21 {
-            wins[turn] += new_alive;
-        } else {
-            remaining[turn] += new_alive;
-            multiverse_recursive(remaining, wins, turn + 1, new_alive, new_pos, new_score);
-        }
-    }
-}
-
 fn multiverse(pos: i32) -> ([u64; MAX_TURNS], [u64; MAX_TURNS]) {
+    type State = [[u64; 10]; 21];
+
+    // Let's work with pos - 1 as pos for now, indexes nicer;
+    let pos = pos as usize - 1;
+
     let mut alive = [0; MAX_TURNS];
     let mut wins = [0; MAX_TURNS];
 
     alive[0] = 1;
 
-    multiverse_recursive(&mut alive, &mut wins, 1, 1, pos, 0);
+    let mut current = [[0u64; 10]; 21];
+    current[0][pos] = 1;
+    let mut next = [[0u64; 10]; 21];
+
+    let mut helper = |turn, current: &State, next: &mut State| {
+        next.iter_mut().flatten().for_each(|v| *v = 0);
+
+        for (score, score_row) in current.iter().enumerate() {
+            for (pos, &pop) in score_row.iter().enumerate() {
+                for (roll, freq) in ROLLS.into_iter().zip(FREQS) {
+                    let new_pos = (pos + (roll as usize)) % 10;
+                    let new_score = score + new_pos + 1; // +1 because above
+                    let new_pop = freq * pop;
+
+                    if new_score >= next.len() {
+                        wins[turn] += new_pop;
+                    } else {
+                        alive[turn] += new_pop;
+                        next[new_score][new_pos] += new_pop;
+                    }
+                }
+            }
+        }
+    };
+
+    for turn in (1..MAX_TURNS).step_by(2) {
+        helper(turn, &current, &mut next);
+        helper(turn + 1, &next, &mut current);
+    }
 
     (wins, alive)
 }
