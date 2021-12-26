@@ -5,23 +5,19 @@ use crate::common::LineIter;
 fn read_input(input: &mut dyn Read) -> (i32, i32) {
     let mut reader = LineIter::new(input);
 
-    let a = reader
-        .next()
-        .unwrap()
-        .split(' ')
-        .last()
-        .unwrap()
-        .parse()
-        .unwrap();
+    let mut helper = || {
+        reader
+            .next()
+            .unwrap()
+            .split(' ')
+            .last()
+            .unwrap()
+            .parse()
+            .unwrap()
+    };
 
-    let b = reader
-        .next()
-        .unwrap()
-        .split(' ')
-        .last()
-        .unwrap()
-        .parse()
-        .unwrap();
+    let a = helper();
+    let b = helper();
 
     (a, b)
 }
@@ -46,7 +42,7 @@ fn find_repetition(mut pos: i32, mut die: i32) -> i32 {
 pub fn part1(input: &mut dyn Read) -> String {
     const TARGET_SCORE: i32 = 1000;
 
-    let (a, b) = read_input(input);
+    let (mut a, mut b) = read_input(input);
 
     let a10 = find_repetition(a, 1);
     let b10 = find_repetition(b, 4);
@@ -54,22 +50,21 @@ pub fn part1(input: &mut dyn Read) -> String {
     let a_win = TARGET_SCORE / a10;
     let b_win = TARGET_SCORE / b10;
 
-    let mut rolls = 3 * 20 * a_win.min(b_win);
-    let mut a_score = rolls / 3 / 20 * a10;
-    let mut b_score = rolls / 3 / 20 * b10;
-    let mut a_pos = a;
-    let mut b_pos = b;
+    let win = a_win.min(b_win);
+    let mut a_score = win * a10;
+    let mut b_score = win * b10;
     let mut die = 1;
+    let mut rolls = 3 * 20 * win;
 
     let (loser_score, rolls) = if a_win < b_win {
         while a_score < TARGET_SCORE {
-            a_pos = simulate(die, a_pos);
-            a_score += a_pos;
+            a = simulate(die, a);
+            a_score += a;
             rolls += 3;
 
             if a_score < TARGET_SCORE {
-                b_pos = simulate(die + 3, b_pos);
-                b_score += b_pos;
+                b = simulate(die + 3, b);
+                b_score += b;
                 rolls += 3;
             }
 
@@ -79,11 +74,11 @@ pub fn part1(input: &mut dyn Read) -> String {
         (b_score, rolls)
     } else {
         while b_score < TARGET_SCORE {
-            a_pos = simulate(die, a_pos);
-            a_score += a_pos;
+            a = simulate(die, a);
+            a_score += a;
 
-            b_pos = simulate(die + 3, b_pos);
-            b_score += b_pos;
+            b = simulate(die + 3, b);
+            b_score += b;
 
             rolls += 6;
 
