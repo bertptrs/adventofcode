@@ -35,7 +35,7 @@ fn advance(width: usize, state: &mut [u8]) -> bool {
         }
     }
 
-    // Now the southbound herd. Y in the outer loop for better cache locality
+    // Then move the southbound herd. Need to do by column because of the first entry special case
     for x in 0..width {
         let last_index = state.len() - width + x;
         let swap_last = state[x] == b'.' && state[last_index] == b'v';
