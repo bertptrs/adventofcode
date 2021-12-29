@@ -12,36 +12,49 @@ fn read_input(input: &mut dyn Read) -> (usize, Vec<u8>) {
 
 fn advance(width: usize, state: &mut [u8]) -> bool {
     debug_assert_eq!(state.len() % width, 0);
-
-    let mut helper = state.to_owned();
     let mut changes = false;
 
     // Move the eastbound herd
-    for (src, dest) in state
-        .chunks_exact(width)
-        .zip(helper.chunks_exact_mut(width))
-    {
-        for x in 0..width {
-            if src[x] == b'>' && src[(x + 1) % width] == b'.' {
-                dest[x] = b'.';
-                dest[(x + 1) % width] = b'>';
+    for src in state.chunks_exact_mut(width) {
+        let swap_last = src[0] == b'.' && src[width - 1] == b'>';
+        let mut x = 0;
+
+        while x < src.len() - 1 {
+            if src[x] == b'>' && src[x + 1] == b'.' {
+                src.swap(x, x + 1);
                 changes = true;
+                x += 2;
+            } else {
+                x += 1;
             }
+        }
+
+        if swap_last {
+            src.swap(0, width - 1);
+            changes = true;
         }
     }
 
-    state.copy_from_slice(&helper);
-
     // Now the southbound herd. Y in the outer loop for better cache locality
-    for y_offset in (0..helper.len()).step_by(width) {
-        let n_offset = (y_offset + width) % helper.len();
+    for x in 0..width {
+        let last_index = state.len() - width + x;
+        let swap_last = state[x] == b'.' && state[last_index] == b'v';
 
-        for x in 0..width {
-            if helper[x + y_offset] == b'v' && helper[x + n_offset] == b'.' {
-                state[x + y_offset] = b'.';
-                state[x + n_offset] = b'v';
+        let mut offset = x;
+
+        while offset < state.len() - width {
+            if state[offset] == b'v' && state[offset + width] == b'.' {
+                state.swap(offset, offset + width);
                 changes = true;
+                offset += 2 * width;
+            } else {
+                offset += width;
             }
+        }
+
+        if swap_last {
+            state.swap(x, last_index);
+            changes = true;
         }
     }
 
