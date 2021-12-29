@@ -7,7 +7,7 @@ use criterion::criterion_main;
 use criterion::BenchmarkId;
 use criterion::Criterion;
 
-const DAYS_IMPLEMENTED: usize = 21;
+const DAYS_IMPLEMENTED: usize = 22;
 
 fn read_input(day: usize) -> Vec<u8> {
     let input_path = format!("inputs/{:02}.txt", day);

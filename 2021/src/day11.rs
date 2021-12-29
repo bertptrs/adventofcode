@@ -79,7 +79,7 @@ pub fn part2(input: &mut dyn Read) -> String {
     let mut grid = read_grid(input, &mut buffer);
     let mut todo = Vec::new();
 
-    let target = grid.iter().map(|line| line.len()).sum();
+    let target: usize = grid.iter().map(|line| line.len()).sum();
 
     (1..)
         .find(|_| advance(&mut grid, &mut todo) == target)
