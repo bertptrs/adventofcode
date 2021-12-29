@@ -61,55 +61,33 @@ impl Cuboid {
             return true;
         }
 
-        if other.lower[0] > self.lower[0] {
-            // We have a set of X-coordinates below the overlap, add a cube for that
-            new_cubes.push(Self::new_internal(
-                self.lower,
-                [other.lower[0], self.upper[1], self.upper[2]],
-            ));
-        }
+        let mut lower = self.lower;
+        let mut upper = self.upper;
 
-        if other.upper[0] < self.upper[0] {
-            // Similarly, we can remove an upper section.
-            new_cubes.push(Self::new_internal(
-                [other.upper[0], self.lower[1], self.lower[2]],
-                self.upper,
-            ));
-        }
+        for axis in 0..3 {
+            if other.lower[axis] > self.lower[axis] {
+                let mut new_upper = upper;
+                new_upper[axis] = other.lower[axis];
 
-        // Now we can fix the X-coordinates of the overlap section
-        let overlap_xl = self.lower[0].max(other.lower[0]);
-        let overlap_xh = self.upper[0].min(other.upper[0]);
+                new_cubes.push(Cuboid {
+                    lower,
+                    upper: new_upper,
+                });
 
-        // Same strategy for the Y axis
-        if other.lower[1] > self.lower[1] {
-            new_cubes.push(Self::new_internal(
-                [overlap_xl, self.lower[1], self.lower[2]],
-                [overlap_xh, other.lower[1], self.upper[2]],
-            ))
-        }
-        if other.upper[1] < self.upper[1] {
-            new_cubes.push(Self::new_internal(
-                [overlap_xl, other.upper[1], self.lower[2]],
-                [overlap_xh, self.upper[1], self.upper[2]],
-            ))
-        }
+                lower[axis] = other.lower[axis];
+            }
 
-        let overlap_yl = self.lower[1].max(other.lower[1]);
-        let overlap_yh = self.upper[1].min(other.upper[1]);
+            if other.upper[axis] < self.upper[axis] {
+                let mut new_lower = lower;
+                new_lower[axis] = other.upper[axis];
 
-        // Finally, handle the last axis
-        if other.lower[2] > self.lower[2] {
-            new_cubes.push(Self::new_internal(
-                [overlap_xl, overlap_yl, self.lower[2]],
-                [overlap_xh, overlap_yh, other.lower[2]],
-            ))
-        }
-        if other.upper[2] < self.upper[2] {
-            new_cubes.push(Self::new_internal(
-                [overlap_xl, overlap_yl, other.upper[2]],
-                [overlap_xh, overlap_yh, self.upper[2]],
-            ))
+                new_cubes.push(Cuboid {
+                    lower: new_lower,
+                    upper,
+                });
+
+                upper[axis] = other.upper[axis];
+            }
         }
 
         false
