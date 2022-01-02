@@ -6,12 +6,11 @@ use std::fmt::Display;
 use std::io::Read;
 use std::mem::swap;
 
-use crate::common::ordered;
 use crate::common::LineIter;
 
-type Item = (u32, u32, State);
-type Todo = BinaryHeap<Reverse<Item>>;
-type Visited = HashMap<State, u32>;
+type Item<const S: usize> = (u32, State<S>);
+type Todo<const S: usize> = BinaryHeap<Reverse<Item<S>>>;
+type Visited<const S: usize> = HashMap<State<S>, u32>;
 
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Copy, Clone, Hash)]
 enum Pod {
@@ -46,42 +45,40 @@ impl TryFrom<char> for Pod {
     }
 }
 
-#[derive(Debug, Default, PartialEq, Eq, PartialOrd, Ord, Clone, Hash)]
-struct State {
+#[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Clone, Hash)]
+struct State<const S: usize> {
     hallway: [Option<Pod>; 11],
-    rooms: [[Option<Pod>; 2]; 4],
+    rooms: [[Option<Pod>; S]; 4],
 }
 
 fn room_hallway_pos(room: usize) -> usize {
     room * 2 + 2
 }
 
-fn hallway_room_pos(hallway: usize) -> Option<usize> {
-    match hallway {
-        2 => Some(0),
-        4 => Some(1),
-        6 => Some(2),
-        8 => Some(3),
-        _ => None,
+fn abs_delta(a: usize, b: usize) -> usize {
+    if a < b {
+        b - a
+    } else {
+        a - b
     }
 }
 
-impl State {
+impl<const S: usize> State<S> {
     const VALID_HALLWAY_POS: [usize; 7] = [0, 1, 3, 5, 7, 9, 10];
 
     pub fn is_done(&self) -> bool {
         self == &State {
             hallway: Default::default(),
             rooms: [
-                [Some(Pod::A); 2],
-                [Some(Pod::B); 2],
-                [Some(Pod::C); 2],
-                [Some(Pod::D); 2],
+                [Some(Pod::A); S],
+                [Some(Pod::B); S],
+                [Some(Pod::C); S],
+                [Some(Pod::D); S],
             ],
         }
     }
 
-    fn add_to_queue(self, cost: u32, todo: &mut Todo, visited: &mut Visited) {
+    fn add_to_queue(self, cost: u32, todo: &mut Todo<S>, visited: &mut Visited<S>) {
         let entry = visited.entry(self.clone());
 
         if matches!(&entry, Entry::Occupied(entry) if *entry.get() <= cost) {
@@ -89,13 +86,11 @@ impl State {
             return;
         }
 
-        // print!("Next: \n{}", self);
-
         // nightly only :'(
         // entry.insert(cost);
         *entry.or_default() = cost;
 
-        todo.push(Reverse((cost + self.estimate(), cost, self)))
+        todo.push(Reverse((cost + self.estimate(), self)))
     }
 
     fn estimate(&self) -> u32 {
@@ -118,13 +113,9 @@ impl State {
 
                 room.iter()
                     .enumerate()
-                    .filter_map(|(index, &entry)| {
-                        if Some(pod) != entry {
-                            Some(index as u32 + 1)
-                        } else {
-                            None
-                        }
-                    })
+                    .rev()
+                    .skip_while(|&(_, &entry)| entry == Some(pod))
+                    .map(|(index, _)| index as u32 + 1)
                     .sum::<u32>()
                     * pod.cost()
             })
@@ -140,9 +131,7 @@ impl State {
 
                 let destination_pos = room_hallway_pos(pod as usize);
 
-                let (a, b) = ordered(pos, destination_pos);
-
-                Some((b - a) as u32 * pod.cost())
+                Some(abs_delta(pos, destination_pos) as u32 * pod.cost())
             })
             .sum();
 
@@ -156,17 +145,16 @@ impl State {
 
                 room.iter()
                     .enumerate()
+                    .rev()
+                    .skip_while(|&(_, &entry)| {
+                        entry.map(|pod| pod as usize == room_index).unwrap_or(false)
+                    })
                     .filter_map(|(room_pos, &pod)| {
                         let pod = pod?;
 
-                        if pod as usize == room_index {
-                            return None;
-                        }
-
                         let destination_pos = room_hallway_pos(pod as usize);
-                        let (a, b) = ordered(hallway_pos, destination_pos);
 
-                        let steps = 1 + room_pos + b - a;
+                        let steps = 1 + room_pos + abs_delta(hallway_pos, destination_pos).max(2);
 
                         Some(steps as u32 * pod.cost())
                     })
@@ -177,12 +165,12 @@ impl State {
         enter_estimate + hallway_estimate + rooms_estimate
     }
 
-    pub fn generate_next(&self, cost: u32, todo: &mut Todo, visited: &mut Visited) {
+    pub fn generate_next(&self, cost: u32, todo: &mut Todo<S>, visited: &mut Visited<S>) {
         self.room_to_hallway(cost, todo, visited);
         self.hallway_to_room(cost, todo, visited);
     }
 
-    fn room_to_hallway(&self, cost: u32, todo: &mut Todo, visited: &mut Visited) {
+    fn room_to_hallway(&self, cost: u32, todo: &mut Todo<S>, visited: &mut Visited<S>) {
         for (index, room) in self.rooms.iter().enumerate() {
             // Check if we even want to move anything out of this room
             if room
@@ -245,69 +233,78 @@ impl State {
         }
     }
 
-    fn hallway_to_room(&self, cost: u32, todo: &mut Todo, visited: &mut Visited) {
+    fn hallway_to_room(&self, cost: u32, todo: &mut Todo<S>, visited: &mut Visited<S>) {
         for (pos, pod) in self
             .hallway
             .iter()
             .enumerate()
             .filter_map(|(pos, pod)| pod.map(|pod| (pos, pod)))
         {
-            let mut enqueue_room = |base_cost, room_index: usize| {
-                for (room_pos, entry) in self.rooms[room_index].iter().enumerate() {
-                    if entry.is_some() {
-                        // Occupied
-                        break;
-                    }
+            let room = pod as usize;
+            let new_hallway_pos = room_hallway_pos(room);
 
-                    let new_cost = (room_pos + base_cost) as u32 * pod.cost();
-                    let mut new_state = self.clone();
-                    swap(
-                        &mut new_state.hallway[pos],
-                        &mut new_state.rooms[room_index][room_pos],
-                    );
-
-                    new_state.add_to_queue(new_cost + cost, todo, visited)
-                }
+            // Check if the path is free
+            let in_between = if new_hallway_pos < pos {
+                &self.hallway[(new_hallway_pos + 1)..pos]
+            } else {
+                &self.hallway[(pos + 1)..new_hallway_pos]
             };
 
-            // Try moving into a room to the left
-            for new_hallway_pos in (2..pos).rev() {
-                if self.hallway[new_hallway_pos].is_some() {
-                    // Blocked
-                    break;
-                }
-
-                let room_index = if let Some(room) = hallway_room_pos(new_hallway_pos) {
-                    room
-                } else {
-                    continue;
-                };
-
-                let base_cost = pos - new_hallway_pos + 1;
-                enqueue_room(base_cost, room_index);
+            if in_between.iter().any(Option::is_some) {
+                // Something's in the way
+                continue;
             }
 
-            // And the right
-            for new_hallway_pos in (pos + 1)..=8 {
-                if self.hallway[new_hallway_pos].is_some() {
-                    // Blocked
-                    break;
-                }
-
-                let room_index = if let Some(room) = hallway_room_pos(new_hallway_pos) {
-                    room
-                } else {
-                    continue;
-                };
-
-                let base_cost = new_hallway_pos - pos + 1;
-                enqueue_room(base_cost, room_index);
+            // Check if we can move into the room
+            if self.rooms[room]
+                .iter()
+                .copied()
+                .flatten()
+                .any(|other| other != pod)
+            {
+                // Scared of other pods
+                continue;
             }
+
+            let room_pos = if let Some(pos) = self.rooms[room].iter().rposition(Option::is_none) {
+                pos
+            } else {
+                continue;
+            };
+
+            let new_cost = (abs_delta(pos, new_hallway_pos) + room_pos + 1) as u32 * pod.cost();
+            let mut new_state = self.clone();
+            swap(
+                &mut new_state.hallway[pos],
+                &mut new_state.rooms[room][room_pos],
+            );
+            new_state.add_to_queue(cost + new_cost, todo, visited);
         }
+    }
+
+    pub fn solve(&self) -> u32 {
+        let mut todo = Todo::new();
+
+        let mut visited = HashMap::new();
+        visited.insert(self.clone(), 0);
+
+        todo.push(Reverse((self.estimate(), self.clone())));
+
+        while let Some(Reverse((_, state))) = todo.pop() {
+            let cost = *visited.get(&state).unwrap_or(&0);
+
+            if state.is_done() {
+                return cost;
+            }
+
+            state.generate_next(cost, &mut todo, &mut visited);
+        }
+
+        panic!("No route found!")
     }
 }
 
-impl Display for State {
+impl<const S: usize> Display for State<S> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let helper = |opt_pod| match opt_pod {
             Some(Pod::A) => 'A',
@@ -324,7 +321,7 @@ impl Display for State {
         }
         writeln!(f, "#")?;
 
-        for i in 0..(self.rooms[0].len()) {
+        for i in 0..S {
             writeln!(
                 f,
                 "  #{}#{}#{}#{}#",
@@ -339,9 +336,12 @@ impl Display for State {
     }
 }
 
-fn read_input(input: &mut dyn Read) -> State {
+fn read_input(input: &mut dyn Read) -> State<2> {
     let mut reader = LineIter::new(input);
-    let mut state = State::default();
+    let mut state = State {
+        hallway: Default::default(),
+        rooms: Default::default(),
+    };
 
     let _ = reader.next();
     let _ = reader.next();
@@ -364,26 +364,44 @@ fn read_input(input: &mut dyn Read) -> State {
 
 pub fn part1(input: &mut dyn Read) -> String {
     let state = read_input(input);
-    let mut todo = Todo::new();
 
-    let mut visited = HashMap::new();
-    visited.insert(state.clone(), 0);
-
-    todo.push(Reverse((state.estimate(), 0, state)));
-
-    while let Some(Reverse((_, cost, state))) = todo.pop() {
-        if state.is_done() {
-            return cost.to_string();
-        }
-
-        state.generate_next(cost, &mut todo, &mut visited);
-    }
-
-    panic!("No route found!")
+    state.solve().to_string()
 }
 
-pub fn part2(_input: &mut dyn Read) -> String {
-    todo!()
+pub fn part2(input: &mut dyn Read) -> String {
+    let state2 = read_input(input);
+
+    let state4 = State {
+        hallway: Default::default(),
+        rooms: [
+            [
+                state2.rooms[0][0],
+                Some(Pod::D),
+                Some(Pod::D),
+                state2.rooms[0][1],
+            ],
+            [
+                state2.rooms[1][0],
+                Some(Pod::C),
+                Some(Pod::B),
+                state2.rooms[1][1],
+            ],
+            [
+                state2.rooms[2][0],
+                Some(Pod::B),
+                Some(Pod::A),
+                state2.rooms[2][1],
+            ],
+            [
+                state2.rooms[3][0],
+                Some(Pod::A),
+                Some(Pod::C),
+                state2.rooms[3][1],
+            ],
+        ],
+    };
+
+    state4.solve().to_string()
 }
 
 #[cfg(test)]
@@ -400,9 +418,9 @@ mod tests {
             hallway: Default::default(),
             rooms: [
                 [Some(Pod::A); 2],
-                [Some(Pod::B), Some(Pod::B)],
-                [Some(Pod::C), Some(Pod::C)],
-                [Some(Pod::D), Some(Pod::D)],
+                [Some(Pod::B); 2],
+                [Some(Pod::C); 2],
+                [Some(Pod::D); 2],
             ],
         };
 
@@ -412,5 +430,10 @@ mod tests {
     #[test]
     fn sample_part1() {
         test_implementation(part1, SAMPLE, 12521);
+    }
+
+    #[test]
+    fn sample_part2() {
+        test_implementation(part2, SAMPLE, 44169);
     }
 }
