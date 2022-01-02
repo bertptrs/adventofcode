@@ -90,7 +90,14 @@ where
     let mut buffer = Vec::new();
     input.read_to_end(&mut buffer).unwrap();
 
-    let (_, output) = parser(&buffer).finish().unwrap();
-
-    output
+    match parser(&buffer).finish() {
+        Ok((_, output)) => output,
+        Err(err) => {
+            panic!(
+                "Failed to parse input with error {:?} at \"{}\"",
+                err.code,
+                String::from_utf8_lossy(err.input)
+            );
+        }
+    }
 }
