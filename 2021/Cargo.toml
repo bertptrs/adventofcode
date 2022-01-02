@@ -5,7 +5,7 @@ edition = "2021"
 
 
 [dependencies]
-clap = { version = "3.0.0-rc.0", features = ["derive"] }
+clap = { version = "3", features = ["derive"] }
 itertools = "0.10"
 nom = "7"
 
