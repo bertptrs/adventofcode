@@ -35,6 +35,20 @@ impl Pod {
     }
 }
 
+impl TryFrom<usize> for Pod {
+    type Error = usize;
+
+    fn try_from(index: usize) -> Result<Self, Self::Error> {
+        match index {
+            0 => Ok(Pod::A),
+            1 => Ok(Pod::B),
+            2 => Ok(Pod::C),
+            3 => Ok(Pod::D),
+            _ => Err(index),
+        }
+    }
+}
+
 impl TryFrom<char> for Pod {
     type Error = &'static str;
 
@@ -107,13 +121,7 @@ impl<const S: usize> State<S> {
             .iter()
             .enumerate()
             .map(|(index, room)| {
-                let pod = match index {
-                    0 => Pod::A,
-                    1 => Pod::B,
-                    2 => Pod::C,
-                    3 => Pod::D,
-                    _ => unreachable!(),
-                };
+                let pod = Pod::try_from(index).unwrap();
 
                 room.iter()
                     .enumerate()
