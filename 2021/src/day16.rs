@@ -182,7 +182,7 @@ mod tests {
     fn sample_part1() {
         let answers = [16, 12, 23, 31];
 
-        for (&sample, answer) in SAMPLE.into_iter().zip(answers) {
+        for (&sample, answer) in SAMPLE.iter().zip(answers) {
             test_implementation(part1, sample, answer);
         }
     }

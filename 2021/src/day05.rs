@@ -1,69 +1,91 @@
-use std::collections::HashMap;
 use std::io::Read;
 use std::iter::repeat;
 
 use nom::bytes::complete::tag;
-use nom::sequence::tuple;
-use nom::Finish;
+use nom::character::complete::newline;
+use nom::combinator::map;
+use nom::multi::separated_list1;
+use nom::sequence::separated_pair;
 use nom::IResult;
 
 use crate::common::ordered;
-use crate::common::LineIter;
+use crate::common::read_input;
+use crate::common::BitSet;
 
 type Coord = (u16, u16);
 
-fn coordinates(input: &str) -> IResult<&str, Coord> {
-    use nom::character::complete;
+fn coordinates(input: &[u8]) -> IResult<&[u8], Coord> {
+    use nom::character::complete::char;
+    use nom::character::complete::u16;
 
-    let (input, (x, _, y)) = tuple((complete::u16, complete::char(','), complete::u16))(input)?;
-
-    Ok((input, (x, y)))
+    separated_pair(u16, char(','), u16)(input)
 }
 
-fn line_definition(input: &str) -> IResult<&str, (Coord, Coord)> {
-    let (input, (begin, _, end)) = tuple((coordinates, tag(" -> "), coordinates))(input)?;
+fn parse_input(input: &[u8]) -> IResult<&[u8], Vec<(Coord, Coord)>> {
+    let read_line = map(
+        separated_pair(coordinates, tag(" -> "), coordinates),
+        |(begin, end)| ordered(begin, end),
+    );
 
-    // Sorting the coordinates saves trouble later
-    Ok((input, ordered(begin, end)))
+    separated_list1(newline, read_line)(input)
 }
 
 fn stripe(
-    map: &mut HashMap<Coord, u16>,
+    once: &mut BitSet,
+    twice: &mut BitSet,
+    width: usize,
     xs: impl Iterator<Item = u16>,
     ys: impl Iterator<Item = u16>,
 ) {
     for (x, y) in xs.zip(ys) {
-        *map.entry((x, y)).or_default() += 1;
+        let index = x as usize + y as usize * width;
+        if !once.insert(index) {
+            twice.insert(index);
+        }
     }
 }
 
 fn part_common(input: &mut dyn Read, diagonals: bool) -> String {
-    let mut reader = LineIter::new(input);
-    let mut map = HashMap::new();
+    let lines = read_input(input, parse_input);
 
-    while let Some(line) = reader.next() {
-        let (begin, end) = line_definition(line).finish().unwrap().1;
+    let width = lines.iter().map(|&((_, x_max), _)| x_max).max().unwrap() as usize + 1;
 
+    let mut once_map = BitSet::new();
+    let mut twice_map = BitSet::new();
+
+    for (begin, end) in lines {
         if begin.0 == end.0 {
             let y_range = begin.1..=end.1;
-            stripe(&mut map, repeat(begin.0), y_range);
+            stripe(
+                &mut once_map,
+                &mut twice_map,
+                width,
+                repeat(begin.0),
+                y_range,
+            );
         } else if begin.1 == end.1 {
             let x_range = begin.0..=end.0;
-            stripe(&mut map, x_range, repeat(begin.1));
+            stripe(
+                &mut once_map,
+                &mut twice_map,
+                width,
+                x_range,
+                repeat(begin.1),
+            );
         } else if diagonals {
             let x_range = begin.0..=end.0;
             let y_range = (begin.1.min(end.1))..=(begin.1.max(end.1));
 
             if begin.1 > end.1 {
                 // For a downward slope we need to reverse Y
-                stripe(&mut map, x_range, y_range.rev());
+                stripe(&mut once_map, &mut twice_map, width, x_range, y_range.rev());
             } else {
-                stripe(&mut map, x_range, y_range);
+                stripe(&mut once_map, &mut twice_map, width, x_range, y_range);
             }
         }
     }
 
-    map.values().filter(|&&v| v > 1).count().to_string()
+    twice_map.len().to_string()
 }
 
 pub fn part1(input: &mut dyn Read) -> String {
@@ -81,11 +103,6 @@ mod tests {
     use super::*;
 
     const SAMPLE: &[u8] = include_bytes!("samples/05.txt");
-
-    #[test]
-    fn test_parser() {
-        assert_eq!(line_definition("6,4 -> 2,0"), Ok(("", ((2, 0), (6, 4)))));
-    }
 
     #[test]
     fn sample_part1() {

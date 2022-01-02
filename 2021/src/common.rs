@@ -101,3 +101,38 @@ where
         }
     }
 }
+
+pub struct BitSet {
+    buffer: Vec<u32>,
+}
+
+impl BitSet {
+    pub fn new() -> Self {
+        Self::with_capacity(0)
+    }
+
+    pub fn with_capacity(capacity: usize) -> Self {
+        let buffer = Vec::with_capacity(capacity);
+
+        Self { buffer }
+    }
+
+    pub fn insert(&mut self, value: usize) -> bool {
+        let chunk = value / 32;
+        let bit = 1 << (31 - (value % 32));
+
+        if self.buffer.len() <= chunk + 1 {
+            self.buffer.resize(chunk + 1, 0);
+        }
+
+        let not_present = self.buffer[chunk] & bit;
+
+        self.buffer[chunk] |= bit;
+
+        not_present == 0
+    }
+
+    pub fn len(&self) -> usize {
+        self.buffer.iter().map(|c| c.count_ones() as usize).sum()
+    }
+}

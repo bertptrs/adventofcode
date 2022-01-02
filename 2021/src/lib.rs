@@ -92,7 +92,7 @@ pub fn get_implementation(day: usize, part2: bool) -> Solution {
 
 #[cfg(test)]
 fn test_implementation(solution: Solution, data: &[u8], answer: impl ToString) {
-    let result = solution(&mut &data[..]);
+    let result = solution(&mut &*data);
 
     assert_eq!(answer.to_string(), result);
 }
