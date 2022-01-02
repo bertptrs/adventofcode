@@ -1,4 +1,3 @@
-use crate::common::LineIter;
 use std::cmp::Reverse;
 use std::collections::hash_map::Entry;
 use std::collections::BinaryHeap;
@@ -6,6 +5,9 @@ use std::collections::HashMap;
 use std::fmt::Display;
 use std::io::Read;
 use std::mem::swap;
+
+use crate::common::ordered;
+use crate::common::LineIter;
 
 type Item = (u32, u32, State);
 type Todo = BinaryHeap<Reverse<Item>>;
@@ -99,8 +101,80 @@ impl State {
     fn estimate(&self) -> u32 {
         // A* estimate. For every entry that is not already "at rest", the cost is the cost
         // required to get it to the top of its intended room.
-        // TODO: actually implement
-        0
+
+        // Cost to enter the hole for all pods that still need to
+        let enter_estimate: u32 = self
+            .rooms
+            .iter()
+            .enumerate()
+            .map(|(index, room)| {
+                let pod = match index {
+                    0 => Pod::A,
+                    1 => Pod::B,
+                    2 => Pod::C,
+                    3 => Pod::D,
+                    _ => unreachable!(),
+                };
+
+                room.iter()
+                    .enumerate()
+                    .filter_map(|(index, &entry)| {
+                        if Some(pod) != entry {
+                            Some(index as u32 + 1)
+                        } else {
+                            None
+                        }
+                    })
+                    .sum::<u32>()
+                    * pod.cost()
+            })
+            .sum();
+
+        // Cost for all of the hallway to move to above their intended rooms
+        let hallway_estimate: u32 = self
+            .hallway
+            .iter()
+            .enumerate()
+            .filter_map(|(pos, &pod)| {
+                let pod = pod?;
+
+                let destination_pos = room_hallway_pos(pod as usize);
+
+                let (a, b) = ordered(pos, destination_pos);
+
+                Some((b - a) as u32 * pod.cost())
+            })
+            .sum();
+
+        // Cost to move out of the room and above the correct rooms
+        let rooms_estimate: u32 = self
+            .rooms
+            .iter()
+            .enumerate()
+            .map(|(room_index, room)| {
+                let hallway_pos = room_hallway_pos(room_index);
+
+                room.iter()
+                    .enumerate()
+                    .filter_map(|(room_pos, &pod)| {
+                        let pod = pod?;
+
+                        if pod as usize == room_index {
+                            return None;
+                        }
+
+                        let destination_pos = room_hallway_pos(pod as usize);
+                        let (a, b) = ordered(hallway_pos, destination_pos);
+
+                        let steps = 1 + room_pos + b - a;
+
+                        Some(steps as u32 * pod.cost())
+                    })
+                    .sum::<u32>()
+            })
+            .sum();
+
+        enter_estimate + hallway_estimate + rooms_estimate
     }
 
     pub fn generate_next(&self, cost: u32, todo: &mut Todo, visited: &mut Visited) {
