@@ -29,6 +29,10 @@ impl Pod {
             Pod::D => 1000,
         }
     }
+
+    pub fn dest(self) -> usize {
+        self as usize
+    }
 }
 
 impl TryFrom<char> for Pod {
@@ -129,7 +133,7 @@ impl<const S: usize> State<S> {
             .filter_map(|(pos, &pod)| {
                 let pod = pod?;
 
-                let destination_pos = room_hallway_pos(pod as usize);
+                let destination_pos = room_hallway_pos(pod.dest());
 
                 Some(abs_delta(pos, destination_pos) as u32 * pod.cost())
             })
@@ -147,12 +151,12 @@ impl<const S: usize> State<S> {
                     .enumerate()
                     .rev()
                     .skip_while(|&(_, &entry)| {
-                        entry.map(|pod| pod as usize == room_index).unwrap_or(false)
+                        entry.map(|pod| pod.dest() == room_index).unwrap_or(false)
                     })
                     .filter_map(|(room_pos, &pod)| {
                         let pod = pod?;
 
-                        let destination_pos = room_hallway_pos(pod as usize);
+                        let destination_pos = room_hallway_pos(pod.dest());
 
                         let steps = 1 + room_pos + abs_delta(hallway_pos, destination_pos).max(2);
 
@@ -175,7 +179,7 @@ impl<const S: usize> State<S> {
             // Check if we even want to move anything out of this room
             if room
                 .iter()
-                .all(|entry| entry.map(|pod| pod as usize == index).unwrap_or(true))
+                .all(|entry| entry.map(|pod| pod.dest() == index).unwrap_or(true))
             {
                 continue;
             }
@@ -240,7 +244,7 @@ impl<const S: usize> State<S> {
             .enumerate()
             .filter_map(|(pos, pod)| pod.map(|pod| (pos, pod)))
         {
-            let room = pod as usize;
+            let room = pod.dest();
             let new_hallway_pos = room_hallway_pos(room);
 
             // Check if the path is free
