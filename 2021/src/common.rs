@@ -102,24 +102,31 @@ where
     }
 }
 
+#[derive(Default)]
 pub struct BitSet {
     buffer: Vec<u32>,
 }
 
 impl BitSet {
     pub fn new() -> Self {
-        Self::with_capacity(0)
+        Self::default()
     }
 
     pub fn with_capacity(capacity: usize) -> Self {
-        let buffer = Vec::with_capacity(capacity);
+        let buffer = Vec::with_capacity(capacity / 32);
 
         Self { buffer }
     }
 
-    pub fn insert(&mut self, value: usize) -> bool {
+    fn convert_value(value: usize) -> (usize, u32) {
         let chunk = value / 32;
         let bit = 1 << (31 - (value % 32));
+
+        (chunk, bit)
+    }
+
+    pub fn insert(&mut self, value: usize) -> bool {
+        let (chunk, bit) = Self::convert_value(value);
 
         if self.buffer.len() <= chunk + 1 {
             self.buffer.resize(chunk + 1, 0);
@@ -134,5 +141,14 @@ impl BitSet {
 
     pub fn len(&self) -> usize {
         self.buffer.iter().map(|c| c.count_ones() as usize).sum()
+    }
+
+    pub fn contains(&self, value: usize) -> bool {
+        let (chunk, bit) = Self::convert_value(value);
+
+        self.buffer
+            .get(chunk)
+            .map(|&c| c & bit != 0)
+            .unwrap_or(false)
     }
 }
