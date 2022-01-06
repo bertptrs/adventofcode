@@ -50,24 +50,23 @@ impl Field {
 
         let mut new_finite = BitSet::with_capacity(new_width * new_height);
 
-        // Now we can just do a normal loop
         for y in 0..new_height {
+            let mut mask = if self.infinity { INDEX_MASK } else { 0 };
+
             for x in 0..new_width {
-                let mut mask = if self.infinity { INDEX_MASK } else { 0 };
+                const COLUMN_MASK: usize = 0b001001001;
+                let mut submask = if self.infinity { COLUMN_MASK } else { 0 };
 
                 for y in y.saturating_sub(2)..=y {
-                    if x < 2 {
-                        for _ in 0..(2 - x) {
-                            mask = self.infinity as usize | (mask << 1);
-                        }
-                    }
-
-                    for x in x.saturating_sub(2)..=x {
-                        mask = (mask << 1) | (self[(x, y)] as usize);
-                    }
+                    submask = (submask << 3) | (self[(x, y)] as usize);
                 }
 
-                if translation[mask & INDEX_MASK] {
+                mask <<= 1;
+                mask &= !COLUMN_MASK;
+                mask |= submask;
+                mask &= INDEX_MASK;
+
+                if translation[mask] {
                     let index = x + y * new_width;
                     new_finite.insert(index);
                 }
