@@ -48,7 +48,11 @@ fn stripe(
 fn part_common(input: &mut dyn Read, diagonals: bool) -> String {
     let lines = read_input(input, parse_input);
 
-    let width = lines.iter().map(|&((_, x_max), _)| x_max).max().unwrap() as usize + 1;
+    let width = lines
+        .iter()
+        .map(|&(_, (x, _))| x as usize + 1)
+        .max()
+        .unwrap();
 
     let mut once_map = BitSet::new();
     let mut twice_map = BitSet::new();
