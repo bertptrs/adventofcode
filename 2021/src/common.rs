@@ -113,7 +113,7 @@ impl BitSet {
     }
 
     pub fn with_capacity(capacity: usize) -> Self {
-        let buffer = Vec::with_capacity(capacity / 32);
+        let buffer = vec![0; capacity / 32];
 
         Self { buffer }
     }
