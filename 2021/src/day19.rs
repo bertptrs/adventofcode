@@ -1,6 +1,8 @@
+use std::collections::HashMap;
 use std::collections::HashSet;
 use std::io::Read;
 use std::ops::Add;
+use std::ops::Deref;
 use std::ops::Sub;
 
 use nom::bytes::complete::tag;
@@ -22,6 +24,10 @@ struct Point3(pub [i32; 3]);
 impl Point3 {
     pub fn manhattan(&self) -> i32 {
         self.0.into_iter().map(i32::abs).sum()
+    }
+
+    pub fn euler_square(&self) -> i32 {
+        self.0.into_iter().map(|c| c * c).sum()
     }
 }
 
@@ -46,6 +52,44 @@ impl Add for Point3 {
             self.0[1] + rhs.0[1],
             self.0[2] + rhs.0[2],
         ])
+    }
+}
+
+struct Scanner {
+    visible: Vec<Point3>,
+    distances: HashMap<i32, (Point3, Point3)>,
+}
+
+impl Scanner {
+    pub fn new(visible: Vec<Point3>) -> Self {
+        let distances = visible
+            .iter()
+            .enumerate()
+            .flat_map(|(skip, &a)| {
+                visible[(skip + 1)..]
+                    .iter()
+                    .map(move |&b| ((a - b).euler_square(), (a, b)))
+            })
+            .collect();
+
+        Self { visible, distances }
+    }
+
+    pub fn can_overlap(&self, other: &Self) -> bool {
+        other
+            .distances
+            .keys()
+            .filter(|&k| self.distances.contains_key(k))
+            .count()
+            >= 11
+    }
+}
+
+impl Deref for Scanner {
+    type Target = [Point3];
+
+    fn deref(&self) -> &Self::Target {
+        &self.visible
     }
 }
 
@@ -119,20 +163,29 @@ fn parse_point(input: &[u8]) -> IResult<&[u8], Point3> {
     )(input)
 }
 
-fn parse_input(input: &[u8]) -> IResult<&[u8], Vec<Vec<Point3>>> {
+fn parse_input(input: &[u8]) -> IResult<&[u8], Vec<Scanner>> {
     use nom::character::complete::i32;
     let parse_header = delimited(tag("--- scanner "), i32, tag(" ---\n"));
 
-    let parse_scanner = preceded(parse_header, many1(terminated(parse_point, newline)));
+    let parse_scanner = map(
+        preceded(parse_header, many1(terminated(parse_point, newline))),
+        Scanner::new,
+    );
     separated_list1(newline, parse_scanner)(input)
 }
 
-fn try_overlap(
-    correct: &[(Point3, HashSet<Point3>)],
-    candidate: &[Point3],
-) -> Option<(Point3, Vec<Point3>)> {
+fn try_overlap(matched: &Scanner, candidate: &Scanner) -> Option<(Point3, Scanner)> {
+    if !matched.can_overlap(candidate) {
+        return None;
+    }
+
+    let correct: Vec<(Point3, HashSet<Point3>)> = matched
+        .iter()
+        .map(|&base| (base, matched.iter().map(|&other| (other - base)).collect()))
+        .collect();
+
     let mut relative = HashSet::new();
-    for rot in Rotations::new(candidate) {
+    for rot in Rotations::new(&candidate.visible) {
         for &start in &rot {
             relative.clear();
 
@@ -144,7 +197,7 @@ fn try_overlap(
                 // Found a solution, build the correct output
                 let translated = relative.drain().map(|point| point + *base).collect();
 
-                return Some((start - *base, translated));
+                return Some((start - *base, Scanner::new(translated)));
             }
         }
     }
@@ -157,29 +210,24 @@ fn parts_common(input: &mut dyn Read) -> (HashSet<Point3>, Vec<Point3>) {
 
     let mut points: HashSet<_> = scanners[0].iter().copied().collect();
 
-    let mut todo = vec![std::mem::take(&mut scanners[0])];
+    let mut todo = vec![scanners.remove(0)];
     let mut scanners_found = vec![Point3::default()];
 
     while let Some(matched) = todo.pop() {
-        if scanners.iter().all(Vec::is_empty) {
+        if scanners.is_empty() {
             break;
         }
 
-        let relative: Vec<(Point3, HashSet<Point3>)> = matched
-            .iter()
-            .map(|&base| (base, matched.iter().map(|&other| (other - base)).collect()))
-            .collect();
+        let mut i = 0;
 
-        for candidate in &mut scanners {
-            if candidate.is_empty() {
-                continue;
-            }
-
-            if let Some((scanner, result)) = try_overlap(&relative, candidate) {
+        while i < scanners.len() {
+            if let Some((scanner, result)) = try_overlap(&matched, &scanners[i]) {
+                scanners.remove(i);
                 scanners_found.push(scanner);
                 points.extend(result.iter().copied());
                 todo.push(result);
-                candidate.clear();
+            } else {
+                i += 1;
             }
         }
     }
