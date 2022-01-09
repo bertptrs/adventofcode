@@ -199,19 +199,18 @@ fn try_overlap(matched: &Scanner, candidate: &Scanner) -> Option<(Point3, Scanne
 
     let correct: HashSet<_> = matched.iter().map(|&base| base - matched_pivot).collect();
 
-    let mut relative = HashSet::new();
-    for rot in Rotations::new(&candidate.visible) {
+    for rot in Rotations::new(candidate) {
         for &start in &rot {
-            relative.clear();
+            let translated_iter = rot.iter().map(|&other| other - start);
 
-            relative.extend(rot.iter().map(|&other| other - start));
-
-            if correct.intersection(&relative).count() >= 12 {
+            if translated_iter
+                .clone()
+                .filter(|p| correct.contains(p))
+                .count()
+                >= 12
+            {
                 // Found a solution, build the correct output
-                let translated = relative
-                    .drain()
-                    .map(|point| point + matched_pivot)
-                    .collect();
+                let translated = translated_iter.map(|point| point + matched_pivot).collect();
 
                 return Some((start - matched_pivot, Scanner::new(translated)));
             }
@@ -247,6 +246,8 @@ fn parts_common(input: &mut dyn Read) -> (HashSet<Point3>, Vec<Point3>) {
             }
         }
     }
+
+    assert!(scanners.is_empty());
 
     (points, scanners_found)
 }
