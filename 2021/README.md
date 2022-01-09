@@ -20,3 +20,15 @@ OPTIONS:
     -i, --input <INPUT>    Read input from the given file instead of stdin
     -t, --time             Print time taken
 ```
+
+## That goal was achieved
+
+Runtime benchmarked with [Criterion], reading input directly from memory to avoid disk IO
+inconsistencies.
+
+![Cumulative time](./cumulative-time.svg)
+
+![Time by day](./individual-time.svg)
+
+
+[Criterion]: https://github.com/bheisler/criterion.rs
