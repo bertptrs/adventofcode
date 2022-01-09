@@ -174,15 +174,30 @@ fn parse_input(input: &[u8]) -> IResult<&[u8], Vec<Scanner>> {
     separated_list1(newline, parse_scanner)(input)
 }
 
+fn find_pivot(group: &Scanner, related: &Scanner) -> Option<Point3> {
+    let mut counter = HashMap::new();
+
+    for (distance, &(a, b)) in &group.distances {
+        if related.distances.contains_key(distance) {
+            *counter.entry(a).or_insert(0) += 1;
+            *counter.entry(b).or_insert(0) += 1;
+        }
+    }
+
+    counter
+        .into_iter()
+        .max_by_key(|(_, count)| *count)
+        .map(|t| t.0)
+}
+
 fn try_overlap(matched: &Scanner, candidate: &Scanner) -> Option<(Point3, Scanner)> {
     if !matched.can_overlap(candidate) {
         return None;
     }
 
-    let correct: Vec<(Point3, HashSet<Point3>)> = matched
-        .iter()
-        .map(|&base| (base, matched.iter().map(|&other| (other - base)).collect()))
-        .collect();
+    let matched_pivot = find_pivot(matched, candidate)?;
+
+    let correct: HashSet<_> = matched.iter().map(|&base| base - matched_pivot).collect();
 
     let mut relative = HashSet::new();
     for rot in Rotations::new(&candidate.visible) {
@@ -191,13 +206,14 @@ fn try_overlap(matched: &Scanner, candidate: &Scanner) -> Option<(Point3, Scanne
 
             relative.extend(rot.iter().map(|&other| other - start));
 
-            if let Some((base, _)) = correct.iter().find(|(_, correct_relative)| {
-                correct_relative.intersection(&relative).count() >= 12
-            }) {
+            if correct.intersection(&relative).count() >= 12 {
                 // Found a solution, build the correct output
-                let translated = relative.drain().map(|point| point + *base).collect();
+                let translated = relative
+                    .drain()
+                    .map(|point| point + matched_pivot)
+                    .collect();
 
-                return Some((start - *base, Scanner::new(translated)));
+                return Some((start - matched_pivot, Scanner::new(translated)));
             }
         }
     }
