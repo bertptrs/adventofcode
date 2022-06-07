@@ -73,10 +73,10 @@ fn main() {
         let door_label = line.unwrap();
         let caps = room_pattern.captures(&door_label).unwrap();
 
-        let name = caps.at(1).unwrap();
-        let checksum = caps.at(4).unwrap();
+        let name = caps.get(1).unwrap().as_str();
+        let checksum = caps.get(4).unwrap().as_str();
         if is_valid(name, checksum) {
-            let sector_id = caps.at(3).unwrap().parse().unwrap();
+            let sector_id = caps.get(3).unwrap().as_str().parse().unwrap();
             cur_sum += sector_id;
 
             let decoded: String = name.chars()
