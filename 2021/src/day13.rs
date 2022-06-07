@@ -48,7 +48,7 @@ fn parse_fold(input: &[u8]) -> IResult<&[u8], Fold> {
     )(input)
 }
 
-fn apply_fold(dots: &mut Vec<Coords>, fold: Fold) {
+fn apply_fold(dots: &mut [Coords], fold: Fold) {
     match fold {
         Fold::X(coord) => dots.iter_mut().for_each(|(x, _)| {
             if *x >= coord {
