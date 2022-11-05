@@ -1,7 +1,7 @@
 on:
   - push
 
-name: Advent of Code 2021
+name: Advent of Code 2022
 
 jobs:
   ci:
@@ -20,7 +20,7 @@ jobs:
     continue-on-error: ${{ matrix.experimental }}
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - name: Install toolchain
         uses: actions-rs/toolchain@v1
@@ -31,16 +31,16 @@ jobs:
           components: rustfmt, clippy
 
       - name: Build binaries
-        working-directory: 2021
+        working-directory: 2022
         run: >
           cargo build --all-targets
 
       - name: Run tests
-        working-directory: 2021
+        working-directory: 2022
         run: >
           cargo test
 
       - name: Run clippy
-        working-directory: 2021
+        working-directory: 2022
         run: >
           cargo clippy -- --deny warnings
