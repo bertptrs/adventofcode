@@ -30,6 +30,12 @@ jobs:
           override: true
           components: rustfmt, clippy
 
+      - name: Set up caching
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: >
+            2022 -> target
+
       - name: Build binaries
         working-directory: 2022
         run: >
