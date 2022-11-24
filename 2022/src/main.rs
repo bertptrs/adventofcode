@@ -9,7 +9,7 @@ use clap::Parser;
 
 use aoc_2022::get_implementation;
 
-/// Advent of Code 2021 runner
+/// Advent of Code 2022 runner
 #[derive(Parser)]
 struct Opts {
     /// Which day to run
