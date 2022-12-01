@@ -3,23 +3,19 @@ use std::ops::Add;
 use anyhow::Result;
 use nom::character::complete::newline;
 use nom::combinator::opt;
-use nom::multi::fold_many1;
 use nom::multi::separated_list0;
 use nom::sequence::terminated;
 use nom::IResult;
 
 use crate::common::parse_input;
+use crate::common::reduce_many1;
 
 fn parse_elf(input: &[u8]) -> IResult<&[u8], i32> {
-    fold_many1(
-        terminated(nom::character::complete::i32, newline),
-        || 0,
-        Add::add,
-    )(input)
+    reduce_many1(terminated(nom::character::complete::i32, newline), Add::add)(input)
 }
 
 fn parse_max(input: &[u8]) -> IResult<&[u8], i32> {
-    fold_many1(terminated(parse_elf, opt(newline)), || 0, Ord::max)(input)
+    reduce_many1(terminated(parse_elf, opt(newline)), Ord::max)(input)
 }
 
 pub fn part1(input: &[u8]) -> Result<String> {
