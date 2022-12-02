@@ -2,7 +2,6 @@ use std::ops::Add;
 
 use anyhow::Result;
 use nom::character::complete::newline;
-use nom::combinator::opt;
 use nom::multi::separated_list0;
 use nom::sequence::terminated;
 use nom::IResult;
@@ -14,13 +13,9 @@ fn parse_elf(input: &[u8]) -> IResult<&[u8], i32> {
     reduce_many1(terminated(nom::character::complete::i32, newline), Add::add)(input)
 }
 
-fn parse_max(input: &[u8]) -> IResult<&[u8], i32> {
-    reduce_many1(terminated(parse_elf, opt(newline)), Ord::max)(input)
-}
-
 pub fn part1(input: &[u8]) -> Result<String> {
-    let result = parse_input(input, parse_max)?.to_string();
-    Ok(result)
+    let elves = parse_input(input, parse_elf_list)?;
+    Ok(elves.into_iter().fold(0, Ord::max).to_string())
 }
 
 fn parse_elf_list(input: &[u8]) -> IResult<&[u8], Vec<i32>> {
