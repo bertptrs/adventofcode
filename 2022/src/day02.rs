@@ -1,12 +1,15 @@
+use std::ops::Add;
+
 use anyhow::Result;
 use nom::character::complete::newline;
+use nom::combinator::map;
 use nom::combinator::map_res;
-use nom::multi::many0;
 use nom::sequence::separated_pair;
 use nom::sequence::terminated;
 use nom::IResult;
 
 use crate::common::parse_input;
+use crate::common::reduce_many1;
 
 #[derive(Copy, Clone, Eq, PartialEq)]
 enum Rps {
@@ -70,7 +73,7 @@ impl TryFrom<u8> for Rps {
     }
 }
 
-fn parse_plan(input: &[u8]) -> IResult<&[u8], Vec<(Rps, Rps)>> {
+fn parse_line(input: &[u8]) -> IResult<&[u8], (Rps, Rps)> {
     fn parse_rps(input: &[u8]) -> IResult<&[u8], Rps> {
         // Note: alpha1 also sort of works but is significantly slower
         map_res(nom::bytes::complete::take(1usize), |v: &[u8]| {
@@ -78,33 +81,34 @@ fn parse_plan(input: &[u8]) -> IResult<&[u8], Vec<(Rps, Rps)>> {
         })(input)
     }
 
-    fn parse_line(input: &[u8]) -> IResult<&[u8], (Rps, Rps)> {
-        separated_pair(parse_rps, nom::character::complete::char(' '), parse_rps)(input)
-    }
-
-    many0(terminated(parse_line, newline))(input)
+    terminated(
+        separated_pair(parse_rps, nom::character::complete::char(' '), parse_rps),
+        newline,
+    )(input)
 }
 
 pub fn part1(input: &[u8]) -> Result<String> {
-    let plan = parse_input(input, parse_plan)?;
-
-    let result: u32 = plan
-        .into_iter()
-        .map(|(them, us)| us.score() + us.score_against(them))
-        .sum();
-
-    Ok(result.to_string())
+    parse_input(
+        input,
+        reduce_many1(
+            map(parse_line, |(them, us)| us.score() + us.score_against(them)),
+            Add::add,
+        ),
+    )
+    .map(|sum| sum.to_string())
 }
 
 pub fn part2(input: &[u8]) -> Result<String> {
-    let plan = parse_input(input, parse_plan)?;
-
-    let result: u32 = plan
-        .into_iter()
-        .map(|(them, us)| us.score_result() + us.needed(them).score())
-        .sum();
-
-    Ok(result.to_string())
+    parse_input(
+        input,
+        reduce_many1(
+            map(parse_line, |(them, us)| {
+                us.score_result() + us.needed(them).score()
+            }),
+            Add::add,
+        ),
+    )
+    .map(|sum| sum.to_string())
 }
 
 #[cfg(test)]
