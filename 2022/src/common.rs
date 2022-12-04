@@ -92,3 +92,15 @@ where
         }
     }
 }
+
+/// Return the minimum and maximum of two unordered variables
+pub fn minmax<T>(a: T, b: T) -> (T, T)
+where
+    T: PartialOrd,
+{
+    if a < b {
+        (a, b)
+    } else {
+        (b, a)
+    }
+}
