@@ -49,26 +49,23 @@ fn parse_assignments(input: &[u8]) -> IResult<&[u8], Vec<(Assignment, Assignment
     many0(terminated(parse_line, newline))(input)
 }
 
-pub fn part1(input: &[u8]) -> Result<String> {
+fn parts_common(input: &[u8], filter: impl Fn(Assignment, Assignment) -> bool) -> Result<String> {
     let assigments = parse_input(input, parse_assignments)?;
 
     let overlapping = assigments
         .into_iter()
-        .filter(|&(a, b)| a.one_contains(b))
+        .filter(|&(a, b)| filter(a, b))
         .count();
 
     Ok(overlapping.to_string())
 }
 
+pub fn part1(input: &[u8]) -> Result<String> {
+    parts_common(input, Assignment::one_contains)
+}
+
 pub fn part2(input: &[u8]) -> Result<String> {
-    let assigments = parse_input(input, parse_assignments)?;
-
-    let overlapping = assigments
-        .into_iter()
-        .filter(|&(a, b)| a.one_overlaps(b))
-        .count();
-
-    Ok(overlapping.to_string())
+    parts_common(input, Assignment::one_overlaps)
 }
 
 #[cfg(test)]
