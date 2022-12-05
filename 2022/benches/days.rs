@@ -8,7 +8,7 @@ use criterion::BenchmarkId;
 use criterion::Criterion;
 
 /// Number of days we have an implementation to benchmark
-const DAYS_IMPLEMENTED: u8 = 4;
+const DAYS_IMPLEMENTED: u8 = 5;
 
 fn read_input(day: u8) -> Vec<u8> {
     let input_path = format!("inputs/{:02}.txt", day);
