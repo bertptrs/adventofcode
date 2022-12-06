@@ -1,6 +1,7 @@
 //! Common helper utilities to all days
 
 use anyhow::Result;
+use nom::combinator::map;
 use nom::error::ErrorKind;
 use nom::error::ParseError;
 use nom::Finish;
@@ -91,6 +92,17 @@ where
             }
         }
     }
+}
+
+/// Add an index to repeated successful invocations of the embedded parser.
+pub fn enumerate<I, O, E>(f: impl Parser<I, O, E>) -> impl FnMut(I) -> IResult<I, (usize, O), E> {
+    let mut index = 0usize;
+
+    map(f, move |v| {
+        let res = (index, v);
+        index += 1;
+        res
+    })
 }
 
 /// Return the minimum and maximum of two unordered variables
