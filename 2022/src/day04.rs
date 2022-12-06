@@ -1,3 +1,5 @@
+use std::ops::RangeInclusive;
+
 use anyhow::Result;
 use nom::bytes::complete::tag;
 use nom::character::complete::newline;
@@ -7,40 +9,18 @@ use nom::sequence::separated_pair;
 use nom::sequence::terminated;
 use nom::IResult;
 
-use crate::common::minmax;
 use crate::common::parse_input;
 
-#[derive(Copy, Clone, PartialOrd, PartialEq)]
-struct Assignment(u32, u32);
+type Assignment = RangeInclusive<u32>;
 
-impl Assignment {
-    fn one_contains(self, other: Self) -> bool {
-        let (first, second) = minmax(self, other);
-
-        if second.0 == first.0 {
-            first.1 <= second.1
-        } else {
-            second.0 <= first.1 && second.1 <= first.1
-        }
-    }
-
-    fn one_overlaps(self, other: Self) -> bool {
-        let (first, second) = minmax(self, other);
-
-        if second.0 == first.0 {
-            first.1 <= second.1
-        } else {
-            second.0 <= first.1
-        }
-    }
-}
-
-fn parse_assignments(input: &[u8]) -> IResult<&[u8], Vec<(Assignment, Assignment)>> {
+fn parse_assignments(
+    input: &[u8],
+) -> IResult<&[u8], Vec<(RangeInclusive<u32>, RangeInclusive<u32>)>> {
     use nom::character::complete::u32;
 
     fn parse_single(input: &[u8]) -> IResult<&[u8], Assignment> {
         map(separated_pair(u32, tag("-"), u32), |(start, end)| {
-            Assignment(start, end)
+            start..=end
         })(input)
     }
 
@@ -49,23 +29,32 @@ fn parse_assignments(input: &[u8]) -> IResult<&[u8], Vec<(Assignment, Assignment
     many0(terminated(parse_line, newline))(input)
 }
 
-fn parts_common(input: &[u8], filter: impl Fn(Assignment, Assignment) -> bool) -> Result<String> {
+fn is_contained(a: &Assignment, b: &Assignment) -> bool {
+    if a.size_hint().0 > b.size_hint().0 {
+        a.contains(b.start()) && a.contains(b.end())
+    } else {
+        b.contains(a.start()) && b.contains(a.end())
+    }
+}
+
+fn is_overlapping(a: &Assignment, b: &Assignment) -> bool {
+    b.end() >= a.start() && b.start() <= a.end() || a.end() >= b.start() && a.start() <= b.end()
+}
+
+fn parts_common(input: &[u8], filter: impl Fn(&Assignment, &Assignment) -> bool) -> Result<String> {
     let assigments = parse_input(input, parse_assignments)?;
 
-    let overlapping = assigments
-        .into_iter()
-        .filter(|&(a, b)| filter(a, b))
-        .count();
+    let overlapping = assigments.into_iter().filter(|(a, b)| filter(a, b)).count();
 
     Ok(overlapping.to_string())
 }
 
 pub fn part1(input: &[u8]) -> Result<String> {
-    parts_common(input, Assignment::one_contains)
+    parts_common(input, is_contained)
 }
 
 pub fn part2(input: &[u8]) -> Result<String> {
-    parts_common(input, Assignment::one_overlaps)
+    parts_common(input, is_overlapping)
 }
 
 #[cfg(test)]
