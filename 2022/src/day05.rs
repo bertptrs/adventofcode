@@ -16,17 +16,16 @@ use nom::sequence::terminated;
 use nom::sequence::tuple;
 use nom::IResult;
 
+use crate::common::enumerate;
 use crate::common::parse_input;
 
 type Move = (usize, usize, usize);
 type OwnedStacks = Vec<Vec<u8>>;
 
 fn parse_row<'a>(input: &'a [u8], stacks: &mut OwnedStacks) -> IResult<&'a [u8], ()> {
-    let mut index = 0usize;
-
     // Forgive me for this crime
     fold_many1(
-        terminated(
+        enumerate(terminated(
             alt((
                 // Parse a delimited value into a Some(content)
                 map(delimited(tag("["), take(1usize), tag("]")), |v: &[u8]| {
@@ -36,9 +35,9 @@ fn parse_row<'a>(input: &'a [u8], stacks: &mut OwnedStacks) -> IResult<&'a [u8],
                 map(tag("   "), |_| None),
             )),
             opt(tag(" ")),
-        ),
+        )),
         || (),
-        move |_, c| {
+        move |_, (index, c)| {
             if let Some(b) = c {
                 if stacks.len() <= index {
                     stacks.resize_with(index + 1, Vec::new);
@@ -46,8 +45,6 @@ fn parse_row<'a>(input: &'a [u8], stacks: &mut OwnedStacks) -> IResult<&'a [u8],
 
                 stacks[index].push(b)
             }
-
-            index += 1;
         },
     )(input)
 }
