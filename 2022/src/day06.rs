@@ -1,19 +1,15 @@
 use anyhow::Result;
 
 fn find_first(input: &[u8], unique: usize) -> Result<usize> {
-    #[inline]
-    const fn index(c: u8) -> usize {
-        (c - b'a') as usize
-    }
-    let mut seen = [false; 26];
+    let mut seen = [false; 256];
 
     let mut first = 0;
 
     // Loop invariant: input[first..last] contains only unique characters
     for (last, &c) in input.iter().enumerate() {
-        if seen[index(c)] {
+        if seen[c as usize] {
             while input[first] != c {
-                seen[index(input[first])] = false;
+                seen[input[first] as usize] = false;
                 first += 1;
             }
             first += 1;
@@ -23,7 +19,7 @@ fn find_first(input: &[u8], unique: usize) -> Result<usize> {
                 return Ok(first + unique);
             }
 
-            seen[index(c)] = true;
+            seen[c as usize] = true;
         }
     }
 
