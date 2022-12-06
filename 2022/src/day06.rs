@@ -3,20 +3,22 @@ use anyhow::Result;
 fn find_first(input: &[u8], unique: usize) -> Result<usize> {
     let mut seen = [false; 256];
 
+    let mut tail_it = input.iter();
+
     let mut first = 0;
 
     // Loop invariant: input[first..last] contains only unique characters
     for (last, &c) in input.iter().enumerate() {
         if seen[c as usize] {
-            while input[first] != c {
-                seen[input[first] as usize] = false;
-                first += 1;
-            }
-            first += 1;
+            first += (&mut tail_it)
+                .take_while(|&&b| b != c)
+                .map(|&b| seen[b as usize] = false)
+                .count()
+                + 1; // +1 because take_while doesn't return the first element that didn't satisfy the condition, while we do need to count it
         } else {
             // New unique character found: input[first..=last] contains unique characters
             if last - first + 1 == unique {
-                return Ok(first + unique);
+                return Ok(last + 1);
             }
 
             seen[c as usize] = true;
