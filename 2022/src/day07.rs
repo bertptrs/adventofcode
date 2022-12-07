@@ -9,7 +9,6 @@ use nom::combinator::opt;
 use nom::multi::fold_many0;
 use nom::sequence::delimited;
 use nom::sequence::preceded;
-use nom::sequence::separated_pair;
 use nom::sequence::terminated;
 use nom::sequence::tuple;
 use nom::IResult;
@@ -37,14 +36,9 @@ fn parse_dir<'a>(
                 // of either
                 alt((
                     // A size followed by a name
-                    map(
-                        separated_pair(u32, tag(" "), take_until("\n")),
-                        |(size, _)| Entry::File(size),
-                    ),
+                    map(terminated(u32, take_until("\n")), Entry::File),
                     // Or the word "dir" followed by a name
-                    map(preceded(tag("dir "), take_until("\n")), |name| {
-                        Entry::Dir(name)
-                    }),
+                    map(preceded(tag("dir "), take_until("\n")), Entry::Dir),
                 )),
                 newline,
             ),
@@ -72,6 +66,7 @@ fn parse_dir<'a>(
     }
 
     dirs.push(size);
+    dir_stack.truncate(initial_len);
 
     Ok((input, size))
 }
