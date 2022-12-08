@@ -1,3 +1,5 @@
+use std::cmp::Ordering;
+
 use anyhow::Context;
 use anyhow::Result;
 
@@ -63,16 +65,32 @@ pub fn part1(input: &[u8]) -> Result<String> {
 fn scenery<'a>(
     values: impl IntoIterator<Item = &'a u8>,
     visible: impl IntoIterator<Item = &'a mut usize>,
+    tree_stack: &mut Vec<(usize, u8)>,
 ) {
-    let mut last_seen = [0; 10];
+    tree_stack.clear();
 
     for (i, (&val, score)) in values.into_iter().zip(visible).enumerate() {
-        let val = val - b'0';
-        let visible = i - last_seen[val as usize];
-
         if i > 0 {
-            *score *= visible;
-            last_seen[..=(val as usize)].fill(i);
+            let mut first = 0;
+
+            while let Some((pos, other)) = tree_stack.pop() {
+                match other.cmp(&val) {
+                    Ordering::Less => (),
+                    Ordering::Equal => {
+                        first = pos;
+                        break;
+                    }
+                    Ordering::Greater => {
+                        tree_stack.push((pos, other));
+                        first = pos;
+                        break;
+                    }
+                }
+            }
+
+            tree_stack.push((i, val));
+
+            *score *= i - first;
         } else {
             *score = 0;
         }
@@ -88,15 +106,18 @@ pub fn part2(input: &[u8]) -> Result<String> {
 
     let mut score = vec![1; width * height];
 
+    let mut tree_stack = Vec::new();
+
     // Horizontal striping
     for (y, row) in input.chunks_exact(width + 1).enumerate() {
         // First, left to right
-        scenery(&row[..width], &mut score[(y * width)..]);
+        scenery(&row[..width], &mut score[(y * width)..], &mut tree_stack);
 
         // Then right to left
         scenery(
             row[..width].iter().rev(),
             score[(y * width)..(y * width + width)].iter_mut().rev(),
+            &mut tree_stack,
         );
     }
 
@@ -106,12 +127,14 @@ pub fn part2(input: &[u8]) -> Result<String> {
         scenery(
             input[x..].iter().step_by(width + 1),
             score[x..].iter_mut().step_by(width),
+            &mut tree_stack,
         );
 
         // Bottom to top
         scenery(
             input[x..].iter().step_by(width + 1).rev(),
             score[x..].iter_mut().step_by(width).rev(),
+            &mut tree_stack,
         )
     }
 
