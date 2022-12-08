@@ -72,9 +72,7 @@ fn scenery<'a>(
 
         if i > 0 {
             *score *= visible;
-            for s in 0..=val {
-                last_seen[s as usize] = i;
-            }
+            last_seen[..=(val as usize)].fill(i);
         } else {
             *score = 0;
         }
