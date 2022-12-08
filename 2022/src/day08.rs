@@ -60,7 +60,7 @@ pub fn part1(input: &[u8]) -> Result<String> {
 }
 
 pub fn part2(_input: &[u8]) -> Result<String> {
-    todo!()
+    anyhow::bail!("not implemented")
 }
 
 #[cfg(test)]
