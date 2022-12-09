@@ -1,9 +1,9 @@
-use std::collections::HashSet;
 use std::ops::Add;
 use std::ops::Index;
 use std::ops::IndexMut;
 use std::ops::Sub;
 
+use ahash::AHashSet;
 use anyhow::Result;
 use nom::bytes::complete::tag;
 use nom::bytes::complete::take;
@@ -101,7 +101,7 @@ fn part_generic<const N: usize>(input: &[u8]) -> Result<String> {
     let mut head_pos = Vec2([0, 0]);
     let mut tails = [head_pos; N];
 
-    let mut visited = HashSet::new();
+    let mut visited = AHashSet::new();
     visited.insert(head_pos);
 
     for (direction, steps) in moves {
@@ -112,7 +112,7 @@ fn part_generic<const N: usize>(input: &[u8]) -> Result<String> {
 
             let mut ref_pos = head_pos;
 
-            for (i, tail_pos) in tails.iter_mut().enumerate() {
+            for tail_pos in &mut tails {
                 let delta = ref_pos - *tail_pos;
 
                 if delta[0].abs() <= 1 && delta[1].abs() <= 1 {
@@ -123,9 +123,6 @@ fn part_generic<const N: usize>(input: &[u8]) -> Result<String> {
 
                 *tail_pos = *tail_pos + step;
 
-                if i == N - 1 {
-                    visited.insert(*tail_pos);
-                }
                 ref_pos = *tail_pos;
             }
 
