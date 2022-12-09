@@ -70,30 +70,34 @@ fn scenery<'a>(
     tree_stack.clear();
 
     for (i, (&val, score)) in values.into_iter().zip(visible).enumerate() {
-        if i > 0 {
-            let mut first = 0;
+        scenery_helper(i, tree_stack, val, score);
+    }
+}
 
-            while let Some((pos, other)) = tree_stack.pop() {
-                match other.cmp(&val) {
-                    Ordering::Less => (),
-                    Ordering::Equal => {
-                        first = pos;
-                        break;
-                    }
-                    Ordering::Greater => {
-                        tree_stack.push((pos, other));
-                        first = pos;
-                        break;
-                    }
+fn scenery_helper(i: usize, tree_stack: &mut Vec<(usize, u8)>, val: u8, score: &mut usize) {
+    if i > 0 {
+        let mut first = 0;
+
+        while let Some((pos, other)) = tree_stack.pop() {
+            match other.cmp(&val) {
+                Ordering::Less => (),
+                Ordering::Equal => {
+                    first = pos;
+                    break;
+                }
+                Ordering::Greater => {
+                    tree_stack.push((pos, other));
+                    first = pos;
+                    break;
                 }
             }
-
-            tree_stack.push((i, val));
-
-            *score *= i - first;
-        } else {
-            *score = 0;
         }
+
+        tree_stack.push((i, val));
+
+        *score *= i - first;
+    } else {
+        *score = 0;
     }
 }
 
@@ -106,7 +110,7 @@ pub fn part2(input: &[u8]) -> Result<String> {
 
     let mut score = vec![1; width * height];
 
-    let mut tree_stack = Vec::new();
+    let mut tree_stack = Vec::with_capacity(10);
 
     // Horizontal striping
     for (y, row) in input.chunks_exact(width + 1).enumerate() {
