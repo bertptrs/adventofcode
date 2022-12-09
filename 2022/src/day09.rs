@@ -25,12 +25,12 @@ enum Direction {
 }
 
 impl Direction {
-    fn vec_for(self, dist: u32) -> Vec2 {
+    fn vec_for(self) -> Vec2 {
         Vec2(match self {
-            Direction::Up => [0, -(dist as i32)],
-            Direction::Left => [dist as i32, 0],
-            Direction::Right => [-(dist as i32), 0],
-            Direction::Down => [0, dist as i32],
+            Direction::Up => [0, -1],
+            Direction::Left => [1, 0],
+            Direction::Right => [-1, 0],
+            Direction::Down => [0, 1],
         })
     }
 }
@@ -105,12 +105,14 @@ fn part_generic<const N: usize>(input: &[u8]) -> Result<String> {
     visited.insert(head_pos);
 
     for (direction, steps) in moves {
-        head_pos = head_pos + direction.vec_for(steps);
+        let step = direction.vec_for();
 
-        let mut ref_pos = head_pos;
+        for _ in 0..steps {
+            head_pos = head_pos + step;
 
-        for (i, tail_pos) in tails.iter_mut().enumerate() {
-            loop {
+            let mut ref_pos = head_pos;
+
+            for (i, tail_pos) in tails.iter_mut().enumerate() {
                 let delta = ref_pos - *tail_pos;
 
                 if delta[0].abs() <= 1 && delta[1].abs() <= 1 {
@@ -124,8 +126,10 @@ fn part_generic<const N: usize>(input: &[u8]) -> Result<String> {
                 if i == N - 1 {
                     visited.insert(*tail_pos);
                 }
+                ref_pos = *tail_pos;
             }
-            ref_pos = *tail_pos;
+
+            visited.insert(*tails.last().unwrap());
         }
     }
 
@@ -137,7 +141,6 @@ pub fn part1(input: &[u8]) -> Result<String> {
 }
 
 pub fn part2(input: &[u8]) -> Result<String> {
-    // Guesses: 2363 (too low)
     part_generic::<9>(input)
 }
 
