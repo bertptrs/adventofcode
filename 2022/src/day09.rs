@@ -49,7 +49,7 @@ impl TryFrom<u8> for Direction {
     }
 }
 
-fn parse_moves<'a>(input: &'a [u8]) -> IResult<&'a [u8], Vec<(Direction, u32)>> {
+fn parse_moves(input: &[u8]) -> IResult<&[u8], Vec<(Direction, u32)>> {
     many0(terminated(
         separated_pair(
             map_res(take(1usize), |bs: &[u8]| Direction::try_from(bs[0])),
