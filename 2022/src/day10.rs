@@ -1,4 +1,3 @@
-use anyhow::Context;
 use anyhow::Result;
 use nom::branch::alt;
 use nom::bytes::complete::tag;
@@ -16,10 +15,20 @@ enum Instruction {
 }
 
 impl Instruction {
+    #[inline]
     pub fn cycles(self) -> usize {
         match self {
             Instruction::AddX(_) => 2,
             Instruction::Noop => 1,
+        }
+    }
+
+    #[inline]
+    pub fn execute(self, x: &mut i32, cycle: &mut usize) {
+        *cycle += self.cycles();
+
+        if let Instruction::AddX(v) = self {
+            *x += v;
         }
     }
 }
@@ -46,27 +55,17 @@ pub fn part1(input: &[u8]) -> Result<String> {
     let mut total = 0;
 
     for instruction in &mut input_it {
-        let cycles = instruction.cycles();
-
+        let old_cycle = cycle;
         let old_x = x;
 
-        match instruction {
-            Instruction::AddX(val) => x += val,
-            Instruction::Noop => (),
-        }
+        instruction.execute(&mut x, &mut cycle);
 
-        if cycle % 40 < 20 && (cycle + cycles) % 40 >= 20 {
-            let to_report = if (cycle + cycles) % 40 == 20 {
-                x
-            } else {
-                old_x
-            };
+        if old_cycle % 40 < 20 && cycle % 40 >= 20 {
+            let to_report = if cycle % 40 == 20 { x } else { old_x };
 
-            let checkpoint = (cycle + cycles) / 20 * 20;
+            let checkpoint = cycle / 20 * 20;
             total += to_report * (checkpoint as i32);
         }
-
-        cycle += cycles;
 
         if cycle >= 220 {
             return Ok(total.to_string());
@@ -79,22 +78,15 @@ pub fn part1(input: &[u8]) -> Result<String> {
 pub fn part2(input: &[u8]) -> Result<String> {
     let mut x = 1;
     let mut input_it = iterator(input, parse_instruction);
+    let mut input_it = (&mut input_it).peekable();
 
     let mut output = String::with_capacity(226);
 
     let mut cpu_cycle = 0;
 
-    let mut next_instruction = (&mut input_it).next().context("No instructions?")?;
-
     for crt_cycle in 1..=240 {
-        while cpu_cycle + next_instruction.cycles() < crt_cycle {
-            match next_instruction {
-                Instruction::AddX(v) => x += v,
-                Instruction::Noop => (),
-            }
-
-            cpu_cycle += next_instruction.cycles();
-            next_instruction = (&mut input_it).next().unwrap_or(next_instruction);
+        if let Some(instruction) = input_it.next_if(|i| cpu_cycle + i.cycles() < crt_cycle) {
+            instruction.execute(&mut x, &mut cpu_cycle);
         }
 
         let beam_pos = ((crt_cycle + 39) % 40) as i32;
