@@ -8,7 +8,7 @@ use nom::sequence::preceded;
 use nom::sequence::terminated;
 use nom::IResult;
 
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone)]
 enum Instruction {
     AddX(i32),
     Noop,
@@ -16,7 +16,7 @@ enum Instruction {
 
 impl Instruction {
     #[inline]
-    pub fn cycles(self) -> usize {
+    pub fn cycles(self) -> i32 {
         match self {
             Instruction::AddX(_) => 2,
             Instruction::Noop => 1,
@@ -24,7 +24,7 @@ impl Instruction {
     }
 
     #[inline]
-    pub fn execute(self, x: &mut i32, cycle: &mut usize) {
+    pub fn execute(self, x: &mut i32, cycle: &mut i32) {
         *cycle += self.cycles();
 
         if let Instruction::AddX(v) = self {
@@ -64,7 +64,7 @@ pub fn part1(input: &[u8]) -> Result<String> {
             let to_report = if cycle % 40 == 20 { x } else { old_x };
 
             let checkpoint = cycle / 20 * 20;
-            total += to_report * (checkpoint as i32);
+            total += to_report * checkpoint;
         }
 
         if cycle >= 220 {
@@ -80,7 +80,7 @@ pub fn part2(input: &[u8]) -> Result<String> {
     let mut input_it = iterator(input, parse_instruction);
     let mut input_it = (&mut input_it).peekable();
 
-    let mut output = String::with_capacity(226);
+    let mut output = String::with_capacity(6 * (40 + 1));
 
     let mut cpu_cycle = 0;
 
@@ -89,7 +89,7 @@ pub fn part2(input: &[u8]) -> Result<String> {
             instruction.execute(&mut x, &mut cpu_cycle);
         }
 
-        let beam_pos = ((crt_cycle + 39) % 40) as i32;
+        let beam_pos = (crt_cycle + 39) % 40;
 
         if (beam_pos - x).abs() <= 1 {
             output.push('#');
@@ -114,5 +114,17 @@ mod tests {
     #[test]
     fn sample_part1() {
         assert_eq!(part1(SAMPLE).unwrap(), "13140");
+    }
+
+    #[test]
+    fn sample_part2() {
+        let answer = "##  ##  ##  ##  ##  ##  ##  ##  ##  ##  
+###   ###   ###   ###   ###   ###   ### 
+####    ####    ####    ####    ####    
+#####     #####     #####     #####     
+######      ######      ######      ####
+#######       #######       #######     \n";
+
+        assert_eq!(part2(SAMPLE).unwrap(), answer);
     }
 }
