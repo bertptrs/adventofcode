@@ -6,6 +6,7 @@ use nom::character::complete::digit1;
 use nom::character::complete::newline;
 use nom::combinator::map;
 use nom::combinator::map_res;
+use nom::combinator::value;
 use nom::multi::separated_list0;
 use nom::multi::separated_list1;
 use nom::sequence::delimited;
@@ -81,7 +82,7 @@ fn parse_operation(input: &[u8]) -> IResult<&[u8], Operation> {
                     _ => Err(anyhow::anyhow!("Invalid operation {op:?}")),
                 },
             ),
-            map(tag("* old"), |_| Operation::Square),
+            value(Operation::Square, tag("* old")),
         )),
     )(input)
 }
