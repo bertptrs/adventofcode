@@ -6,6 +6,7 @@ use nom::bytes::complete::take_until;
 use nom::character::complete::newline;
 use nom::combinator::map;
 use nom::combinator::opt;
+use nom::combinator::value;
 use nom::multi::fold_many1;
 use nom::multi::many1;
 use nom::sequence::delimited;
@@ -31,7 +32,7 @@ fn parse_row<'a>(input: &'a [u8], stacks: &mut OwnedStacks) -> IResult<&'a [u8],
                     Some(v[0])
                 }),
                 // Or an empty stack into a None
-                map(tag("   "), |_| None),
+                value(None, tag("   ")),
             )),
             opt(tag(" ")),
         )),

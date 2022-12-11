@@ -4,6 +4,7 @@ use nom::bytes::complete::tag;
 use nom::character::complete::newline;
 use nom::combinator::iterator;
 use nom::combinator::map;
+use nom::combinator::value;
 use nom::sequence::preceded;
 use nom::sequence::terminated;
 use nom::IResult;
@@ -36,7 +37,7 @@ impl Instruction {
 fn parse_instruction(input: &[u8]) -> IResult<&[u8], Instruction> {
     terminated(
         alt((
-            map(tag("noop"), |_| Instruction::Noop),
+            value(Instruction::Noop, tag("noop")),
             map(preceded(tag("addx "), nom::character::complete::i32), |v| {
                 Instruction::AddX(v)
             }),
