@@ -1,5 +1,7 @@
 //! Common helper utilities to all days
 
+use std::cmp::Ordering;
+
 use anyhow::Result;
 use nom::combinator::map;
 use nom::error::ErrorKind;
@@ -114,5 +116,20 @@ where
         (a, b)
     } else {
         (b, a)
+    }
+}
+
+/// Some magic to get two mutable references into the same slice
+pub fn get_both<T>(slice: &mut [T], first: usize, second: usize) -> (&mut T, &mut T) {
+    match first.cmp(&second) {
+        Ordering::Greater => {
+            let (begin, end) = slice.split_at_mut(first);
+            (&mut end[0], &mut begin[second])
+        }
+        Ordering::Less => {
+            let (begin, end) = slice.split_at_mut(second);
+            (&mut begin[first], &mut end[0])
+        }
+        Ordering::Equal => panic!("Tried to get the same index twice {first}"),
     }
 }

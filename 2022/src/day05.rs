@@ -1,5 +1,3 @@
-use std::cmp::Ordering;
-
 use anyhow::Result;
 use nom::branch::alt;
 use nom::bytes::complete::tag;
@@ -17,6 +15,7 @@ use nom::sequence::tuple;
 use nom::IResult;
 
 use crate::common::enumerate;
+use crate::common::get_both;
 use crate::common::parse_input;
 
 type Move = (usize, usize, usize);
@@ -89,21 +88,6 @@ fn parse_task(input: &[u8]) -> IResult<&[u8], (OwnedStacks, Vec<Move>)> {
     ))(input)?;
 
     Ok((input, (stacks, moves)))
-}
-
-/// Some magic to get two mutable references into the same slice
-fn get_both(stacks: &mut [Vec<u8>], from: usize, to: usize) -> (&mut Vec<u8>, &mut Vec<u8>) {
-    match from.cmp(&to) {
-        Ordering::Greater => {
-            let (begin, end) = stacks.split_at_mut(from);
-            (&mut end[0], &mut begin[to])
-        }
-        Ordering::Less => {
-            let (begin, end) = stacks.split_at_mut(to);
-            (&mut begin[from], &mut end[0])
-        }
-        Ordering::Equal => panic!("Tried to stack from and to {from}"),
-    }
 }
 
 fn compute_answer(stacks: &mut [Vec<u8>]) -> Result<String> {
