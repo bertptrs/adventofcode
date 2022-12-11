@@ -18,13 +18,13 @@ use crate::common::parse_input;
 
 #[derive(Debug, Copy, Clone)]
 enum Operation {
-    Mul(u32),
-    Add(u32),
+    Mul(u64),
+    Add(u64),
     Square,
 }
 
 impl Operation {
-    fn transform(self, worry: u32) -> u32 {
+    fn transform(self, worry: u64) -> u64 {
         match self {
             Operation::Mul(val) => worry * val,
             Operation::Add(val) => worry + val,
@@ -35,21 +35,33 @@ impl Operation {
 
 #[derive(Debug)]
 struct Monkey {
-    items: Vec<u32>,
+    items: Vec<u64>,
     operation: Operation,
-    test_mod: u32,
+    test_mod: u64,
     targets: [usize; 2],
     inspected: usize,
 }
 
 impl Monkey {
-    fn handle_items(&mut self, drains: &mut [Vec<u32>; 2]) {
+    fn handle_items(&mut self, drains: &mut [Vec<u64>; 2]) {
         self.inspected += self.items.len();
 
         for item in self.items.drain(..) {
             let mut new_val = self.operation.transform(item);
             // Miraculously get less worried
             new_val /= 3;
+
+            drains[(new_val % self.test_mod == 0) as usize].push(new_val);
+        }
+    }
+
+    fn handle_items2(&mut self, drains: &mut [Vec<u64>], mod_base: u64) {
+        self.inspected += self.items.len();
+
+        for item in self.items.drain(..) {
+            let mut new_val = self.operation.transform(item);
+            // Modular arithmetic is a good way to get less worried
+            new_val %= mod_base;
 
             drains[(new_val % self.test_mod == 0) as usize].push(new_val);
         }
@@ -61,8 +73,8 @@ fn parse_operation(input: &[u8]) -> IResult<&[u8], Operation> {
         tag("new = old "),
         alt((
             map_res(
-                separated_pair(take(1usize), tag(" "), nom::character::complete::u32),
-                |(op, val): (&[u8], u32)| match op[0] {
+                separated_pair(take(1usize), tag(" "), nom::character::complete::u64),
+                |(op, val): (&[u8], u64)| match op[0] {
                     b'*' => Ok(Operation::Mul(val)),
                     b'+' => Ok(Operation::Add(val)),
                     _ => Err(anyhow::anyhow!("Invalid operation {op:?}")),
@@ -74,7 +86,7 @@ fn parse_operation(input: &[u8]) -> IResult<&[u8], Operation> {
 }
 
 fn parse_monkey(input: &[u8]) -> IResult<&[u8], Monkey> {
-    use nom::character::complete::u32;
+    use nom::character::complete::u64;
 
     map(
         preceded(
@@ -85,16 +97,16 @@ fn parse_monkey(input: &[u8]) -> IResult<&[u8], Monkey> {
                 // Parse the starting items
                 delimited(
                     tag("  Starting items: "),
-                    separated_list1(tag(", "), u32),
+                    separated_list1(tag(", "), u64),
                     newline,
                 ),
                 // Parse operation
                 delimited(tag("  Operation: "), parse_operation, newline),
                 // Parse the test
-                delimited(tag("  Test: divisible by "), u32, newline),
+                delimited(tag("  Test: divisible by "), u64, newline),
                 // Parse both cases
-                delimited(tag("    If true: throw to monkey "), u32, newline),
-                delimited(tag("    If false: throw to monkey "), u32, newline),
+                delimited(tag("    If true: throw to monkey "), u64, newline),
+                delimited(tag("    If false: throw to monkey "), u64, newline),
             )),
         ),
         |(items, operation, test_mod, if_true, if_false)| Monkey {
@@ -115,9 +127,9 @@ pub fn part1(input: &[u8]) -> Result<String> {
         for i in 0..monkeys.len() {
             monkeys[i].handle_items(&mut drains);
 
-            for j in 0..2 {
+            for (j, drain) in drains.iter_mut().enumerate() {
                 let target = monkeys[i].targets[j];
-                monkeys[target].items.append(&mut drains[j]);
+                monkeys[target].items.append(drain);
             }
         }
     }
@@ -129,8 +141,28 @@ pub fn part1(input: &[u8]) -> Result<String> {
     Ok(result.to_string())
 }
 
-pub fn part2(_input: &[u8]) -> Result<String> {
-    anyhow::bail!("not implemented")
+pub fn part2(input: &[u8]) -> Result<String> {
+    let mut monkeys = parse_input(input, separated_list0(newline, parse_monkey))?;
+    let mut drains = [Vec::new(), Vec::new()];
+
+    let mod_base: u64 = monkeys.iter().map(|m| m.test_mod).product();
+
+    for _ in 0..10000 {
+        for i in 0..monkeys.len() {
+            monkeys[i].handle_items2(&mut drains, mod_base);
+
+            for (j, drain) in drains.iter_mut().enumerate() {
+                let target = monkeys[i].targets[j];
+                monkeys[target].items.append(drain);
+            }
+        }
+    }
+
+    monkeys.sort_by(|a, b| b.inspected.cmp(&a.inspected));
+
+    let result: usize = monkeys[0].inspected * monkeys[1].inspected;
+
+    Ok(result.to_string())
 }
 
 #[cfg(test)]
@@ -142,5 +174,10 @@ mod tests {
     #[test]
     fn sample_part1() {
         assert_eq!(part1(SAMPLE).unwrap(), "10605");
+    }
+
+    #[test]
+    fn sample_part2() {
+        assert_eq!(part2(SAMPLE).unwrap(), "2713310158");
     }
 }
