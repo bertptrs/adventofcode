@@ -13,6 +13,7 @@ use nom::sequence::preceded;
 use nom::sequence::separated_pair;
 use nom::sequence::tuple;
 use nom::IResult;
+use strength_reduce::StrengthReducedU64;
 
 use crate::common::parse_input;
 
@@ -37,7 +38,7 @@ impl Operation {
 struct Monkey {
     items: Vec<u64>,
     operation: Operation,
-    test_mod: u64,
+    test_mod: StrengthReducedU64,
     targets: [usize; 2],
     inspected: usize,
 }
@@ -55,13 +56,13 @@ impl Monkey {
         }
     }
 
-    fn handle_items2(&mut self, drains: &mut [Vec<u64>], mod_base: u64) {
+    fn handle_items2(&mut self, drains: &mut [Vec<u64>], mod_base: StrengthReducedU64) {
         self.inspected += self.items.len();
 
         for item in self.items.drain(..) {
             let mut new_val = self.operation.transform(item);
             // Modular arithmetic is a good way to get less worried
-            new_val %= mod_base;
+            new_val = new_val % mod_base;
 
             drains[(new_val % self.test_mod == 0) as usize].push(new_val);
         }
@@ -112,15 +113,27 @@ fn parse_monkey(input: &[u8]) -> IResult<&[u8], Monkey> {
         |(items, operation, test_mod, if_true, if_false)| Monkey {
             items,
             operation,
-            test_mod,
+            test_mod: StrengthReducedU64::new(test_mod),
             targets: [if_false as usize, if_true as usize],
             inspected: 0,
         },
     )(input)
 }
 
+fn parse_monkeys(input: &[u8]) -> IResult<&[u8], Vec<Monkey>> {
+    separated_list0(newline, parse_monkey)(input)
+}
+
+fn format_result(mut monkeys: Vec<Monkey>) -> Result<String> {
+    monkeys.sort_by(|a, b| b.inspected.cmp(&a.inspected));
+
+    let result: usize = monkeys[0].inspected * monkeys[1].inspected;
+
+    Ok(result.to_string())
+}
+
 pub fn part1(input: &[u8]) -> Result<String> {
-    let mut monkeys = parse_input(input, separated_list0(newline, parse_monkey))?;
+    let mut monkeys = parse_input(input, parse_monkeys)?;
     let mut drains = [Vec::new(), Vec::new()];
 
     for _ in 0..20 {
@@ -134,18 +147,14 @@ pub fn part1(input: &[u8]) -> Result<String> {
         }
     }
 
-    monkeys.sort_by(|a, b| b.inspected.cmp(&a.inspected));
-
-    let result: usize = monkeys[0].inspected * monkeys[1].inspected;
-
-    Ok(result.to_string())
+    format_result(monkeys)
 }
 
 pub fn part2(input: &[u8]) -> Result<String> {
-    let mut monkeys = parse_input(input, separated_list0(newline, parse_monkey))?;
+    let mut monkeys = parse_input(input, parse_monkeys)?;
     let mut drains = [Vec::new(), Vec::new()];
 
-    let mod_base: u64 = monkeys.iter().map(|m| m.test_mod).product();
+    let mod_base = StrengthReducedU64::new(monkeys.iter().map(|m| m.test_mod.get()).product());
 
     for _ in 0..10000 {
         for i in 0..monkeys.len() {
@@ -158,11 +167,7 @@ pub fn part2(input: &[u8]) -> Result<String> {
         }
     }
 
-    monkeys.sort_by(|a, b| b.inspected.cmp(&a.inspected));
-
-    let result: usize = monkeys[0].inspected * monkeys[1].inspected;
-
-    Ok(result.to_string())
+    format_result(monkeys)
 }
 
 #[cfg(test)]
