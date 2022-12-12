@@ -17,6 +17,10 @@ fn can_travel(from: u8, to: u8) -> bool {
 fn parts_common(
     input: &[u8],
     starting_symbol: u8,
+    // Neither of these functions needs to be generic closures; function pointers would do as well.
+    // However, doing so causes the compiler not to inline them which in turn hurts performance by
+    // about 25%. I would have hoped the reduced code size would make up for it, but it seems that
+    // doesn't quite work for this particular benchmark.
     is_end: impl Fn(u8) -> bool,
     accessible: impl Fn(u8, u8) -> bool,
 ) -> Result<String> {
@@ -37,6 +41,13 @@ fn parts_common(
     todo.push_back((0, starting_pos));
 
     while let Some((dist, pos)) = todo.pop_front() {
+        // Implementing an early exit doesn't appear to be helpful; the additional branching appears
+        // to throw off the performance by 35%. Instead, we can simply wait for the destination to
+        // pop off of the todo queue.
+        //
+        // For reference, by the time we find the exit, the queue is roughly two dozen entries long,
+        // so the potential benefits of skipping it are minimal compared to the additional branching
+        // code involved.
         if is_end(input[pos]) {
             return Ok(dist.to_string());
         }
