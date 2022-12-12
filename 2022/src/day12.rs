@@ -7,7 +7,7 @@ use crate::common::IndexSet;
 
 fn can_travel(from: u8, to: u8) -> bool {
     match (from, to) {
-        (b'S', b'a'..=b'z') => true,
+        (b'S', b'a'..=b'b') => true,
         (b'y'..=b'z', b'E') => true,
         (b'a'..=b'z', b'a'..=b'z') => to <= from || to - from == 1,
         _ => false,
