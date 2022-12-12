@@ -133,3 +133,42 @@ pub fn get_both<T>(slice: &mut [T], first: usize, second: usize) -> (&mut T, &mu
         Ordering::Equal => panic!("Tried to get the same index twice {first}"),
     }
 }
+
+#[derive(Default)]
+pub struct IndexSet(Vec<u32>);
+
+impl IndexSet {
+    pub fn with_capacity(capacity: usize) -> Self {
+        Self(Vec::with_capacity(
+            capacity / std::mem::size_of::<u32>() / 8,
+        ))
+    }
+
+    fn ensure_item(&mut self, item: usize) -> &mut u32 {
+        if self.0.len() <= item {
+            self.0.resize(item + 1, 0);
+        }
+
+        &mut self.0[item]
+    }
+
+    #[inline]
+    fn index(index: usize) -> (usize, u8) {
+        const PER_ENTRY: usize = 8 * std::mem::size_of::<u32>();
+
+        (index / PER_ENTRY, (index % PER_ENTRY) as u8)
+    }
+
+    pub fn insert(&mut self, index: usize) -> bool {
+        let (entry, pos) = Self::index(index);
+
+        let item = self.ensure_item(entry);
+
+        if *item & (1 << pos) != 0 {
+            false
+        } else {
+            *item |= 1 << pos;
+            true
+        }
+    }
+}

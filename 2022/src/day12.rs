@@ -3,6 +3,8 @@ use std::collections::VecDeque;
 use anyhow::Context;
 use anyhow::Result;
 
+use crate::common::IndexSet;
+
 fn can_travel(from: u8, to: u8) -> bool {
     match (from, to) {
         (b'S', b'a'..=b'z') => true,
@@ -24,7 +26,7 @@ pub fn part1(input: &[u8]) -> Result<String> {
         .position(|&c| c == b'S')
         .context("Could not find starting position")?;
 
-    let mut visited = vec![false; input.len()];
+    let mut visited = IndexSet::with_capacity(input.len());
 
     let mut todo = VecDeque::new();
     todo.push_back((0, starting_pos));
@@ -35,8 +37,7 @@ pub fn part1(input: &[u8]) -> Result<String> {
         }
 
         let mut add_todo = |new: usize| {
-            if can_travel(input[pos], input[new]) && !visited[new] {
-                visited[new] = true;
+            if can_travel(input[pos], input[new]) && visited.insert(new) {
                 todo.push_back((dist + 1, new));
             }
         };
@@ -73,7 +74,7 @@ pub fn part2(input: &[u8]) -> Result<String> {
         .position(|&c| c == b'E')
         .context("Could not find starting position")?;
 
-    let mut visited = vec![false; input.len()];
+    let mut visited = IndexSet::with_capacity(input.len());
 
     let mut todo = VecDeque::new();
     todo.push_back((0, starting_pos));
@@ -84,8 +85,7 @@ pub fn part2(input: &[u8]) -> Result<String> {
         }
 
         let mut add_todo = |new: usize| {
-            if can_travel(input[new], input[pos]) && !visited[new] {
-                visited[new] = true;
+            if can_travel(input[new], input[pos]) && visited.insert(new) {
                 todo.push_back((dist + 1, new));
             }
         };
