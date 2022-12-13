@@ -6,6 +6,7 @@ use nom::branch::alt;
 use nom::bytes::complete::tag;
 use nom::character::complete::multispace1;
 use nom::character::complete::newline;
+use nom::combinator::iterator;
 use nom::combinator::map;
 use nom::multi::many0;
 use nom::multi::separated_list0;
@@ -72,21 +73,17 @@ fn parse_signal(input: &[u8]) -> IResult<&[u8], Signal> {
     ))(input)
 }
 
-fn parse_signal_pairs(input: &[u8]) -> IResult<&[u8], Vec<(Signal, Signal)>> {
-    separated_list0(
-        newline,
-        pair(
-            terminated(parse_signal, newline),
-            terminated(parse_signal, newline),
-        ),
+fn parse_signal_pair(input: &[u8]) -> IResult<&[u8], (Signal, Signal)> {
+    pair(
+        terminated(parse_signal, newline),
+        terminated(parse_signal, multispace1),
     )(input)
 }
 
 pub fn part1(input: &[u8]) -> Result<String> {
-    let signals = parse_input(input, parse_signal_pairs)?;
+    let mut iterator = iterator(input, parse_signal_pair);
 
-    let result: usize = signals
-        .into_iter()
+    let result: usize = (&mut iterator)
         .enumerate()
         .filter_map(|(i, (first, second))| (first < second).then_some(i + 1))
         .sum();
