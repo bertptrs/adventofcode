@@ -134,7 +134,7 @@ pub fn get_both<T>(slice: &mut [T], first: usize, second: usize) -> (&mut T, &mu
     }
 }
 
-#[derive(Default)]
+#[derive(Debug, Default)]
 pub struct IndexSet(Vec<u32>);
 
 impl IndexSet {
