@@ -4,7 +4,6 @@ use nom::bytes::complete::tag;
 use nom::character::complete::newline;
 use nom::combinator::map_res;
 use nom::combinator::opt;
-use nom::multi::fold_many0;
 use nom::sequence::separated_pair;
 use nom::sequence::terminated;
 use nom::IResult;
@@ -18,18 +17,19 @@ struct Cave {
     width: usize,
     height: usize,
     occupied: IndexSet,
+    floor: usize,
 }
 
 impl Cave {
     pub fn insert(&mut self, x: usize, y: usize) -> bool {
         // Note: we're indexing column major for better cache locality
-        self.occupied.insert(self.height * x + y)
+        self.occupied.insert(self.floor * x + y)
     }
 
     pub fn drop(&mut self, x: usize, y: usize, total: &mut usize) -> bool {
         if x >= self.width || y >= self.height {
             return false;
-        } else if !self.occupied.insert(x * self.height + y) {
+        } else if !self.insert(x, y) {
             return true;
         }
 
@@ -44,6 +44,18 @@ impl Cave {
 
         supported
     }
+
+    fn drop2(&mut self, x: usize, y: usize, total: &mut usize) {
+        if y >= self.floor || !self.insert(x, y) {
+            return;
+        }
+
+        *total += 1;
+
+        for dx in [0, usize::MAX, 1] {
+            self.drop2(x.wrapping_add(dx), y + 1, total);
+        }
+    }
 }
 
 fn parse_pair(input: &[u8]) -> IResult<&[u8], (usize, usize)> {
@@ -55,15 +67,16 @@ fn parse_pair(input: &[u8]) -> IResult<&[u8], (usize, usize)> {
 }
 
 fn find_dimensions(input: &[u8]) -> IResult<&[u8], (usize, usize)> {
-    fold_many0(
+    reduce_many1(
         terminated(parse_pair, alt((tag(" -> "), tag("\n")))), // Somehow this cant be `newline` because type deduction goes awry
-        || (0usize, 0usize),
         |(width, height), (x, y)| (width.max(x + 1), height.max(y + 1)),
     )(input)
 }
 
 fn parse_cave(input: &[u8]) -> IResult<&[u8], Cave> {
     let (width, height) = find_dimensions(input)?.1;
+
+    let floor = height + 1;
 
     // Assume parsing went somewhat right
     debug_assert_ne!(width, 0);
@@ -72,7 +85,8 @@ fn parse_cave(input: &[u8]) -> IResult<&[u8], Cave> {
     let mut cave = Cave {
         width,
         height,
-        occupied: IndexSet::with_capacity(width * height),
+        occupied: IndexSet::with_capacity(width * floor),
+        floor,
     };
 
     let mut input = input;
@@ -114,8 +128,13 @@ pub fn part1(input: &[u8]) -> Result<String> {
     Ok(total.to_string())
 }
 
-pub fn part2(_input: &[u8]) -> Result<String> {
-    anyhow::bail!("not implemented")
+pub fn part2(input: &[u8]) -> Result<String> {
+    let mut cave = parse_input(input, parse_cave)?;
+
+    let mut total = 0;
+    cave.drop2(500, 0, &mut total);
+
+    Ok(total.to_string())
 }
 
 #[cfg(test)]
