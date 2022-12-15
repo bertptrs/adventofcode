@@ -56,6 +56,6 @@ fn main() -> Result<()> {
         eprintln!("Execution time: {:?}", Instant::now().duration_since(begin));
     }
 
-    println!("{}", result);
+    println!("{result}");
     Ok(())
 }
