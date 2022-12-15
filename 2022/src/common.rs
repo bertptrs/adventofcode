@@ -1,6 +1,10 @@
 //! Common helper utilities to all days
 
 use std::cmp::Ordering;
+use std::ops::Add;
+use std::ops::Index;
+use std::ops::IndexMut;
+use std::ops::Sub;
 
 use anyhow::Result;
 use nom::combinator::map;
@@ -170,5 +174,40 @@ impl IndexSet {
             *item |= 1 << pos;
             true
         }
+    }
+}
+
+#[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
+pub struct Vec2(pub [i32; 2]);
+
+impl Add<Self> for Vec2 {
+    type Output = Self;
+
+    fn add(self, rhs: Self) -> Self::Output {
+        Self([self[0] + rhs[0], self[1] + rhs[1]])
+    }
+}
+
+impl Sub<Self> for Vec2 {
+    type Output = Self;
+
+    fn sub(self, rhs: Self) -> Self::Output {
+        Self([self[0] - rhs[0], self[1] - rhs[1]])
+    }
+}
+
+impl Index<usize> for Vec2 {
+    type Output = i32;
+
+    #[inline]
+    fn index(&self, index: usize) -> &Self::Output {
+        &self.0[index]
+    }
+}
+
+impl IndexMut<usize> for Vec2 {
+    #[inline]
+    fn index_mut(&mut self, index: usize) -> &mut Self::Output {
+        &mut self.0[index]
     }
 }
