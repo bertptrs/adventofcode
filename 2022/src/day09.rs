@@ -1,8 +1,3 @@
-use std::ops::Add;
-use std::ops::Index;
-use std::ops::IndexMut;
-use std::ops::Sub;
-
 use ahash::AHashSet;
 use anyhow::Result;
 use nom::bytes::complete::tag;
@@ -15,6 +10,7 @@ use nom::sequence::terminated;
 use nom::IResult;
 
 use crate::common::parse_input;
+use crate::common::Vec2;
 
 #[derive(Copy, Clone)]
 enum Direction {
@@ -58,41 +54,6 @@ fn parse_moves(input: &[u8]) -> IResult<&[u8], Vec<(Direction, u32)>> {
         ),
         newline,
     ))(input)
-}
-
-#[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
-struct Vec2(pub [i32; 2]);
-
-impl Add<Self> for Vec2 {
-    type Output = Self;
-
-    fn add(self, rhs: Self) -> Self::Output {
-        Self([self[0] + rhs[0], self[1] + rhs[1]])
-    }
-}
-
-impl Sub<Self> for Vec2 {
-    type Output = Self;
-
-    fn sub(self, rhs: Self) -> Self::Output {
-        Self([self[0] - rhs[0], self[1] - rhs[1]])
-    }
-}
-
-impl Index<usize> for Vec2 {
-    type Output = i32;
-
-    #[inline]
-    fn index(&self, index: usize) -> &Self::Output {
-        &self.0[index]
-    }
-}
-
-impl IndexMut<usize> for Vec2 {
-    #[inline]
-    fn index_mut(&mut self, index: usize) -> &mut Self::Output {
-        &mut self.0[index]
-    }
 }
 
 fn part_generic<const N: usize>(input: &[u8]) -> Result<String> {

@@ -91,7 +91,7 @@ fn parse_cave(input: &[u8]) -> IResult<&[u8], Cave> {
 
     let mut input = input;
 
-    while input != &[][..] {
+    while input != &b""[..] {
         let new_input = terminated(
             reduce_many1(
                 terminated(parse_pair, opt(tag(" -> "))),
