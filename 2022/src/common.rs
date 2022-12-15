@@ -180,6 +180,12 @@ impl IndexSet {
 #[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
 pub struct Vec2(pub [i32; 2]);
 
+impl Vec2 {
+    pub fn l1(self) -> i32 {
+        self.0.into_iter().map(i32::abs).sum()
+    }
+}
+
 impl Add<Self> for Vec2 {
     type Output = Self;
 
