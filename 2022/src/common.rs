@@ -2,6 +2,7 @@
 
 use std::cmp::Ordering;
 use std::ops::Add;
+use std::ops::Div;
 use std::ops::Index;
 use std::ops::IndexMut;
 use std::ops::Sub;
@@ -199,6 +200,14 @@ impl Sub<Self> for Vec2 {
 
     fn sub(self, rhs: Self) -> Self::Output {
         Self([self[0] - rhs[0], self[1] - rhs[1]])
+    }
+}
+
+impl Div<i32> for Vec2 {
+    type Output = Self;
+
+    fn div(self, rhs: i32) -> Self::Output {
+        Self(self.0.map(|v| v / rhs))
     }
 }
 
