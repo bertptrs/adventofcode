@@ -10,6 +10,7 @@ ahash = "0.8.2"
 anyhow = "1.0.66"
 clap = { version = "4.0.19", features = ["derive"] }
 itertools = "0.10.5"
+ndarray = "0.15.6"
 nom = "7.1.1"
 strength_reduce = "0.2.4"
 
