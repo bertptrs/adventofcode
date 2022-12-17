@@ -1,16 +1,14 @@
-use std::collections::VecDeque;
 use std::ops::Deref;
 
 use ahash::AHashMap;
-use ahash::AHashSet;
 use anyhow::Result;
-use ndarray::Array3;
+use ndarray::Array2;
 use nom::branch::alt;
 use nom::bytes::complete::tag;
 use nom::character::complete::alpha1;
 use nom::character::complete::newline;
 use nom::combinator::into;
-use nom::multi::fold_many1;
+use nom::multi::many1;
 use nom::multi::separated_list1;
 use nom::sequence::preceded;
 use nom::sequence::terminated;
@@ -19,81 +17,55 @@ use nom::IResult;
 
 use crate::common::parse_input;
 
-type ParsedNetwork<'a> = AHashMap<&'a [u8], ParsedValve<'a>>;
+type ParsedValve<'a> = (&'a [u8], u16, Vec<&'a [u8]>);
 
-struct ParsedValve<'a> {
-    connected: Vec<&'a [u8]>,
-    flow: u32,
-}
+type ParsedNetwork<'a> = Vec<ParsedValve<'a>>;
 
 #[derive(Debug)]
 struct SimpleNetwork {
     valves: Vec<SimpleValve>,
     start: usize,
+    useful: usize,
 }
 
 impl Deref for SimpleNetwork {
     type Target = [SimpleValve];
 
     fn deref(&self) -> &Self::Target {
-        &*self.valves
+        &self.valves
     }
 }
 
 #[derive(Debug)]
 struct SimpleValve {
-    connected: Vec<(usize, u8)>,
-    flow: u32,
+    connected: Vec<usize>,
+    flow: u16,
 }
 
 impl From<ParsedNetwork<'_>> for SimpleNetwork {
-    fn from(parsed: ParsedNetwork) -> Self {
+    fn from(mut parsed: ParsedNetwork) -> Self {
+        // Make sure the positive numbers are in the front
+        parsed.sort_by(|a, b| b.1.cmp(&a.1));
+
         let mapping: AHashMap<_, _> = parsed
             .iter()
-            .filter_map(|(&k, v)| (v.flow > 0 || k == b"AA").then_some(k))
             .enumerate()
-            .map(|(i, v)| (v, i))
+            .map(|(index, (name, _, _))| (*name, index))
             .collect();
 
-        let mut todo = VecDeque::new();
-        let mut seen = AHashSet::new();
-
-        let mut network = Vec::with_capacity(mapping.len());
-
-        for (&key, valve_data) in &parsed {
-            if valve_data.flow == 0 && key != b"AA" {
-                continue;
-            }
-
-            todo.extend(valve_data.connected.iter().map(|&valve| (valve, 1)));
-
-            let mut connected = Vec::new();
-
-            seen.clear();
-            while let Some((valve, dist)) = todo.pop_front() {
-                if seen.insert(valve) {
-                    let data = &parsed[&valve];
-
-                    if data.flow != 0 {
-                        connected.push((mapping[valve], dist));
-                    }
-                    for &other in &data.connected {
-                        if other != key {
-                            todo.push_back((other, dist + 1));
-                        }
-                    }
-                }
-            }
-
-            network.push(SimpleValve {
-                flow: valve_data.flow,
-                connected,
-            })
-        }
+        let useful = parsed.iter().filter(|(_, flow, _)| *flow > 0).count();
 
         Self {
-            valves: network,
+            valves: parsed
+                .into_iter()
+                .map(|(_, flow, connected)| {
+                    let connected = connected.into_iter().map(|name| mapping[&name]).collect();
+
+                    SimpleValve { flow, connected }
+                })
+                .collect(),
             start: mapping[&b"AA"[..]],
+            useful,
         }
     }
 }
@@ -104,7 +76,7 @@ fn parse_network(input: &[u8]) -> IResult<&[u8], ParsedNetwork> {
             // Parse the name of the valve
             preceded(tag("Valve "), alpha1),
             // Parse the flow of the valve
-            preceded(tag(" has flow rate="), nom::character::complete::u32),
+            preceded(tag(" has flow rate="), nom::character::complete::u16),
             // Parse the connections
             preceded(
                 // Did you really have to distinguish plural
@@ -118,15 +90,7 @@ fn parse_network(input: &[u8]) -> IResult<&[u8], ParsedNetwork> {
         newline,
     );
 
-    fold_many1(
-        parse_network,
-        ParsedNetwork::new,
-        |mut map, (valve, flow, connected)| {
-            map.insert(valve, ParsedValve { flow, connected });
-
-            map
-        },
-    )(input)
+    many1(parse_network)(input)
 }
 
 pub fn part1(input: &[u8]) -> Result<String> {
@@ -134,37 +98,35 @@ pub fn part1(input: &[u8]) -> Result<String> {
 
     let (valves_available, dp) = run_optimization(&network, 30);
 
-    // Guesses: 1802 (too low)
-    Ok(dp[(29, network.start, valves_available)].to_string())
+    Ok(dp[(network.start, valves_available)].to_string())
 }
 
-fn run_optimization(network: &SimpleNetwork, time: usize) -> (usize, Array3<u16>) {
-    let num_valves = network.len();
-    let valves_available = (1 << num_valves) - 1;
-    let mut dp = Array3::<u16>::zeros((time, network.len(), valves_available + 1));
+fn run_optimization(network: &SimpleNetwork, time: usize) -> (usize, Array2<u16>) {
+    let valves_available = (1 << network.useful) - 1;
+    let mut cur = Array2::zeros((network.len(), valves_available + 1));
+    let mut prev = cur.clone();
+
     for time_remaining in 1..time {
         for pos in 0..network.len() {
             let bit = 1 << pos;
             for open_valves in 0..=valves_available {
-                let mut optimal = if (bit & open_valves) != 0 && time_remaining > 2 {
-                    dp[(time_remaining - 1, pos, open_valves - bit)]
-                        + time_remaining as u16 * network[pos].flow as u16
+                let optimal = if (bit & open_valves) != 0 && time_remaining > 2 {
+                    prev[(pos, open_valves - bit)] + time_remaining as u16 * network[pos].flow
                 } else {
                     0
                 };
 
-                for &(other, dist) in &*network[pos].connected {
-                    let dist = usize::from(dist);
-                    if dist <= time_remaining {
-                        optimal = optimal.max(dp[(time_remaining - dist, other, open_valves)]);
-                    }
-                }
-
-                dp[(time_remaining, pos, open_valves)] = optimal;
+                cur[(pos, open_valves)] = network[pos]
+                    .connected
+                    .iter()
+                    .map(|&other| prev[(other, open_valves)])
+                    .fold(optimal, Ord::max);
             }
         }
+
+        std::mem::swap(&mut prev, &mut cur);
     }
-    (valves_available, dp)
+    (valves_available, prev)
 }
 
 pub fn part2(input: &[u8]) -> Result<String> {
@@ -177,7 +139,7 @@ pub fn part2(input: &[u8]) -> Result<String> {
         .map(|my_valves| {
             let elephant_valves = valves_available - my_valves;
 
-            dp[(25, network.start, my_valves)] + dp[(25, network.start, elephant_valves)]
+            dp[(network.start, my_valves)] + dp[(network.start, elephant_valves)]
         })
         .max()
         .unwrap_or(0);
