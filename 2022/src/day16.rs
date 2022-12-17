@@ -1,8 +1,10 @@
 use std::collections::VecDeque;
+use std::ops::Deref;
 
 use ahash::AHashMap;
 use ahash::AHashSet;
 use anyhow::Result;
+use ndarray::Array3;
 use nom::branch::alt;
 use nom::bytes::complete::tag;
 use nom::character::complete::alpha1;
@@ -28,6 +30,14 @@ struct ParsedValve<'a> {
 struct SimpleNetwork {
     valves: Vec<SimpleValve>,
     start: usize,
+}
+
+impl Deref for SimpleNetwork {
+    type Target = [SimpleValve];
+
+    fn deref(&self) -> &Self::Target {
+        &*self.valves
+    }
 }
 
 #[derive(Debug)]
@@ -119,118 +129,61 @@ fn parse_network(input: &[u8]) -> IResult<&[u8], ParsedNetwork> {
     )(input)
 }
 
-#[derive(Eq, PartialEq, Hash, Debug, Clone)]
-struct State {
-    pos: usize,
-    valves_open: u32,
-}
-
-impl State {
-    fn open(&self) -> Option<State> {
-        let bit = 1 << self.pos;
-        if (self.valves_open & bit) == 0 {
-            Some(State {
-                pos: self.pos,
-                valves_open: self.valves_open | bit,
-            })
-        } else {
-            None
-        }
-    }
-
-    pub fn is_open(&self, pos: usize) -> bool {
-        (self.valves_open & (1 << pos)) != 0
-    }
-}
-
-impl Ord for State {
-    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
-        // Reversed because having fewer valves with the same score gives more opportunities for gains
-        self.valves_open
-            .count_ones()
-            .cmp(&other.valves_open.count_ones())
-            // Compare open valves and pos. Shouldn't really matter but required for a total order.
-            .then(self.valves_open.cmp(&other.valves_open))
-            .then(self.pos.cmp(&other.pos))
-    }
-}
-
-impl PartialOrd for State {
-    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
-        Some(self.cmp(other))
-    }
-}
-
 pub fn part1(input: &[u8]) -> Result<String> {
     let network: SimpleNetwork = parse_input(input, into(parse_network))?;
 
-    let mut best = AHashMap::new();
-
-    let initial_state = State {
-        valves_open: 0,
-        pos: network.start,
-    };
-
-    best.insert(initial_state.clone(), 0);
-
-    let mut todo = VecDeque::new();
-
-    todo.push_back((0, 0, initial_state));
-
-    let mut best_score = 0;
-
-    while let Some((score, minute, state)) = todo.pop_front() {
-        if best[&state] > score {
-            continue;
-        }
-
-        let mut enqueue = |score, minute, state: State| {
-            if minute >= 29
-                || best
-                    .get(&state)
-                    .map(|&previous| previous >= score)
-                    .unwrap_or(false)
-            {
-                return;
-            }
-
-            best.insert(state.clone(), score);
-            todo.push_back((score, minute, state));
-        };
-
-        if let Some(new_state) = state.open() {
-            let pos = new_state.pos;
-            let valve_strength = network.valves[pos].flow;
-            let time_remaining = 29 - minute;
-            let new_score = score + time_remaining as u32 * network.valves[pos].flow;
-
-            println!("Opening valve {pos} for {valve_strength} for {time_remaining} minutes: {new_score} ({best_score})");
-
-            best_score = best_score.max(new_score);
-
-            enqueue(new_score, minute + 1, new_state)
-        }
-
-        for &(other, dist) in &network.valves[state.pos].connected {
-            if state.is_open(other) {
-                continue;
-            }
-
-            let new_state = State {
-                pos: other,
-                valves_open: state.valves_open,
-            };
-
-            enqueue(score, minute + dist, new_state);
-        }
-    }
+    let (valves_available, dp) = run_optimization(&network, 30);
 
     // Guesses: 1802 (too low)
-    Ok(best_score.to_string())
+    Ok(dp[(29, network.start, valves_available)].to_string())
 }
 
-pub fn part2(_input: &[u8]) -> Result<String> {
-    anyhow::bail!("not implemented")
+fn run_optimization(network: &SimpleNetwork, time: usize) -> (usize, Array3<u16>) {
+    let num_valves = network.len();
+    let valves_available = (1 << num_valves) - 1;
+    let mut dp = Array3::<u16>::zeros((time, network.len(), valves_available + 1));
+    for time_remaining in 1..time {
+        for pos in 0..network.len() {
+            let bit = 1 << pos;
+            for open_valves in 0..=valves_available {
+                let mut optimal = if (bit & open_valves) != 0 && time_remaining > 2 {
+                    dp[(time_remaining - 1, pos, open_valves - bit)]
+                        + time_remaining as u16 * network[pos].flow as u16
+                } else {
+                    0
+                };
+
+                for &(other, dist) in &*network[pos].connected {
+                    let dist = usize::from(dist);
+                    if dist <= time_remaining {
+                        optimal = optimal.max(dp[(time_remaining - dist, other, open_valves)]);
+                    }
+                }
+
+                dp[(time_remaining, pos, open_valves)] = optimal;
+            }
+        }
+    }
+    (valves_available, dp)
+}
+
+pub fn part2(input: &[u8]) -> Result<String> {
+    let network: SimpleNetwork = parse_input(input, into(parse_network))?;
+
+    let (valves_available, dp) = run_optimization(&network, 26);
+
+    // Find the minimum of all combinations of your work/elephant's work
+    let best = (0..=valves_available)
+        .map(|my_valves| {
+            let elephant_valves = valves_available - my_valves;
+
+            dp[(25, network.start, my_valves)] + dp[(25, network.start, elephant_valves)]
+        })
+        .max()
+        .unwrap_or(0);
+
+    // Guesses: 1802 (too low)
+    Ok(best.to_string())
 }
 
 #[cfg(test)]
@@ -242,5 +195,10 @@ mod tests {
     #[test]
     fn sample_part1() {
         assert_eq!(part1(SAMPLE).unwrap(), "1651");
+    }
+
+    #[test]
+    fn sample_part2() {
+        assert_eq!(part2(SAMPLE).unwrap(), "1707");
     }
 }
