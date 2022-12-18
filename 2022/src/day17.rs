@@ -35,7 +35,7 @@ fn collides(shape: &[&[bool]], cavern: &IndexSet, x: usize, y: usize) -> bool {
             return true;
         }
 
-        for (col, &on) in line.iter().enumerate() {
+        for (col, &on) in line.iter().enumerate().rev() {
             if on && cavern.contains((y - row) * WIDTH + x + col) {
                 return true;
             }
