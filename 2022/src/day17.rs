@@ -29,6 +29,22 @@ fn print_cavern(cavern: &IndexSet, max_height: usize) {
     }
 }
 
+fn collides(shape: &[&[bool]], cavern: &IndexSet, x: usize, y: usize) -> bool {
+    for (row, line) in shape.iter().enumerate() {
+        if x + line.len() > WIDTH {
+            return true;
+        }
+
+        for (col, &on) in line.iter().enumerate() {
+            if on && cavern.contains((y - row) * WIDTH + x + col) {
+                return true;
+            }
+        }
+    }
+
+    false
+}
+
 pub fn part1(input: &[u8]) -> Result<String> {
     // Poor man's trim()
     let input = if input[input.len() - 1] == b'\n' {
@@ -50,25 +66,9 @@ pub fn part1(input: &[u8]) -> Result<String> {
         let mut y = max_height + shape.len() + 2;
 
         // Acquire gust of wind
-        'falling: for offset in gusts.by_ref() {
+        for offset in gusts.by_ref() {
             if let Some(nx) = x.checked_add_signed(offset) {
-                let mut should_move = true;
-
-                'collision: for (row, line) in shape.iter().enumerate() {
-                    if nx + line.len() > WIDTH {
-                        should_move = false;
-                        break 'collision;
-                    }
-
-                    for (col, &on) in line.iter().enumerate() {
-                        if on && cavern.contains((y - row) * WIDTH + nx + col) {
-                            should_move = false;
-                            break 'collision;
-                        }
-                    }
-                }
-
-                if should_move {
+                if !collides(shape, &cavern, nx, y) {
                     x = nx;
                 }
             } else {
@@ -76,19 +76,10 @@ pub fn part1(input: &[u8]) -> Result<String> {
             }
 
             // Move down if possible
-            if y >= shape.len() {
-                let ny = y - 1;
-                for (row, line) in shape.iter().enumerate() {
-                    // No width check, should not hit that on the way down.
-                    for (col, &on) in line.iter().enumerate() {
-                        if on && cavern.contains((ny - row) * WIDTH + x + col) {
-                            break 'falling;
-                        }
-                    }
-                }
-                y = ny;
+            if y >= shape.len() && !collides(shape, &cavern, x, y - 1) {
+                y -= 1;
             } else {
-                break 'falling;
+                break;
             }
         }
 
