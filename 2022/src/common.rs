@@ -176,6 +176,15 @@ impl IndexSet {
             true
         }
     }
+
+    pub fn contains(&self, index: usize) -> bool {
+        let (entry, pos) = Self::index(index);
+
+        self.0
+            .get(entry)
+            .map(|&entry| (entry & (1 << pos) != 0))
+            .unwrap_or(false)
+    }
 }
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
