@@ -1,5 +1,4 @@
 use std::cmp::Ordering;
-use std::fmt::Write;
 use std::iter::once;
 
 use anyhow::Context;
@@ -15,41 +14,14 @@ fn parse_encrypted(input: &[u8]) -> IResult<&[u8], Vec<i64>> {
     many0(terminated(nom::character::complete::i64, newline))(input)
 }
 
-fn step(steps: &[usize], mut start: usize, count: usize) -> usize {
-    for _ in 0..(count % (steps.len() - 1)) {
-        start = steps[start];
-    }
-
-    start
-}
-
 // While looping around to find a spot to move to, you must ignore the piece itself, but for
 // computing the answer, you shouldn't. This function does the latter.
-fn step_inclusive(steps: &[usize], mut start: usize, count: usize) -> usize {
+fn step(steps: &[usize], mut start: usize, count: usize) -> usize {
     for _ in 0..(count % steps.len()) {
         start = steps[start];
     }
 
     start
-}
-
-#[allow(unused)]
-fn print(encrypted: &[i64], next: &[usize]) {
-    let mut base = String::new();
-
-    let mut start = 0;
-
-    for _ in 0..encrypted.len() {
-        if base != "" {
-            base += ", ";
-        }
-
-        write!(base, "{}", encrypted[start]).unwrap();
-
-        start = next[start];
-    }
-
-    println!("{base}");
 }
 
 fn move_between(prev: &mut [usize], next: &mut [usize], i: usize, before: usize, after: usize) {
@@ -126,7 +98,7 @@ fn shuffle(encrypted: &[i64], times: usize) -> Result<String> {
     let mut sum = 0;
 
     for _ in 0..3 {
-        start = step_inclusive(&next, start, 1000);
+        start = step(&next, start, 1000);
         sum += encrypted[start];
     }
 
