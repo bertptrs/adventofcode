@@ -23,6 +23,16 @@ fn step(steps: &[usize], mut start: usize, count: usize) -> usize {
     start
 }
 
+// While looping around to find a spot to move to, you must ignore the piece itself, but for
+// computing the answer, you shouldn't. This function does the latter.
+fn step_inclusive(steps: &[usize], mut start: usize, count: usize) -> usize {
+    for _ in 0..(count % steps.len()) {
+        start = steps[start];
+    }
+
+    start
+}
+
 #[allow(unused)]
 fn print(encrypted: &[i64], next: &[usize]) {
     let mut base = String::new();
@@ -75,8 +85,19 @@ fn shuffle(encrypted: &[i64], times: usize) -> Result<String> {
         .chain(0..(encrypted.len() - 1))
         .collect();
 
+    let len = encrypted.len() as i64;
+    let half_len = len / 2;
+
     for _ in 0..times {
         for (i, &value) in encrypted.iter().enumerate() {
+            let mut value = value % (len - 1);
+
+            if value < -half_len {
+                value += len - 1;
+            } else if value > half_len {
+                value -= len - 1;
+            }
+
             match value.cmp(&0) {
                 Ordering::Less => {
                     let before = step(&prev, i, (-value) as usize);
@@ -105,7 +126,7 @@ fn shuffle(encrypted: &[i64], times: usize) -> Result<String> {
     let mut sum = 0;
 
     for _ in 0..3 {
-        start = step(&next, start, 1000);
+        start = step_inclusive(&next, start, 1000);
         sum += encrypted[start];
     }
 
@@ -131,5 +152,10 @@ mod tests {
     #[test]
     fn sample_part1() {
         assert_eq!(part1(SAMPLE).unwrap(), "3");
+    }
+
+    #[test]
+    fn sample_part2() {
+        assert_eq!(part2(SAMPLE).unwrap(), "1623178306");
     }
 }
