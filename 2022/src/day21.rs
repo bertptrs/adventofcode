@@ -95,14 +95,80 @@ fn evaluate(monkeys: &Input, start: &[u8]) -> i64 {
     }
 }
 
+enum IncompleteSide {
+    Left,
+    Right,
+}
+
+fn evaluate2(
+    monkeys: &Input,
+    start: &[u8],
+) -> std::result::Result<i64, Vec<(i64, IncompleteSide, Operation)>> {
+    if start == b"humn" {
+        return Err(Vec::new());
+    }
+
+    match &monkeys[start] {
+        Monkey::Operation(first, second, op) => {
+            match (evaluate2(monkeys, first), evaluate2(monkeys, second)) {
+                (Ok(first), Ok(second)) => Ok(op.apply(first, second)),
+                (Ok(first), Err(mut incomplete)) => {
+                    incomplete.push((first, IncompleteSide::Right, *op));
+                    Err(incomplete)
+                }
+                (Err(mut incomplete), Ok(second)) => {
+                    incomplete.push((second, IncompleteSide::Left, *op));
+                    Err(incomplete)
+                }
+                (Err(_), Err(_)) => unreachable!("Should not happen on fair input"),
+            }
+        }
+        Monkey::Literal(val) => Ok(*val),
+    }
+}
+
 pub fn part1(input: &[u8]) -> Result<String> {
     let monkeys = parse_input(input, parse_monkeys)?;
 
     Ok(evaluate(&monkeys, b"root").to_string())
 }
 
-pub fn part2(_input: &[u8]) -> Result<String> {
-    anyhow::bail!("not implemented")
+pub fn part2(input: &[u8]) -> Result<String> {
+    let monkeys = parse_input(input, parse_monkeys)?;
+
+    let Monkey::Operation(first, second, _) = &monkeys[&b"root"[..]] else { anyhow::bail!("root is a literal somehow")};
+
+    let result = match (evaluate2(&monkeys, first), evaluate2(&monkeys, second)) {
+        (Ok(_), Ok(_)) => anyhow::bail!("both arms succeeded"),
+        (Ok(goal), Err(incomplete)) | (Err(incomplete), Ok(goal)) => incomplete
+            .into_iter()
+            .rev()
+            .fold(goal, |next, (complete, arm, op)| match (op, arm) {
+                // Multiplication and addition are commutative so the arm doesn't matter
+                (Operation::Mul, _) => {
+                    // This was a very useful sanity check
+                    debug_assert_eq!(next % complete, 0);
+                    next / complete
+                }
+
+                (Operation::Add, _) => next - complete,
+
+                // The other operations need some tweaking. x: unknown quantity. c: known quantity. n: current value
+                // x - c = n -> x = n + c
+                (Operation::Sub, IncompleteSide::Left) => next + complete,
+                // c - x = n -> c = n + x -> c - n = x
+                (Operation::Sub, IncompleteSide::Right) => complete - next,
+
+                // Similarly for division, if we miss the left arm we can undo the division and multiply instead
+                // x / c = n -> x = n * c
+                (Operation::Div, IncompleteSide::Left) => next * complete,
+                // c / x = n -> c = n * x -> c / n = x
+                (Operation::Div, IncompleteSide::Right) => complete / next,
+            }),
+        (Err(_), Err(_)) => anyhow::bail!("both arms failed"),
+    };
+
+    Ok(result.to_string())
 }
 
 #[cfg(test)]
@@ -114,5 +180,10 @@ mod tests {
     #[test]
     fn sample_part1() {
         assert_eq!(part1(SAMPLE).unwrap(), "152");
+    }
+
+    #[test]
+    fn sample_part2() {
+        assert_eq!(part2(SAMPLE).unwrap(), "301");
     }
 }
