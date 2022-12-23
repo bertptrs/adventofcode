@@ -90,11 +90,23 @@ fn print(elves: &AHashSet<Vec2>) -> Result<()> {
 pub fn part1(input: &[u8]) -> Result<String> {
     let mut elves = parse_input(input, parse_elves)?;
 
+    simulate(&mut elves, 10);
+
+    let (x_bounds, y_bounds) = determine_bounding_box(&elves)?;
+
+    let area = (x_bounds.end() - x_bounds.start() + 1) * (y_bounds.end() - y_bounds.start() + 1);
+
+    let free = area - elves.len() as i32;
+
+    Ok(free.to_string())
+}
+
+fn simulate(elves: &mut AHashSet<Vec2>, max: usize) -> Option<usize> {
     let mut todo = Vec::new();
     let mut to_return = Vec::new();
     let mut origin = AHashMap::new();
 
-    for it in 0..10 {
+    for it in 0..max {
         // Remove all todos from a previous iteration
         todo.clear();
 
@@ -148,6 +160,10 @@ pub fn part1(input: &[u8]) -> Result<String> {
             }
         }
 
+        if origin.is_empty() {
+            return Some(it + 1);
+        }
+
         // Remove entries we processed
         for elf in &todo {
             elves.remove(elf);
@@ -160,17 +176,15 @@ pub fn part1(input: &[u8]) -> Result<String> {
         elves.extend(origin.drain().map(|(dest, _)| dest));
     }
 
-    let (x_bounds, y_bounds) = determine_bounding_box(&elves)?;
-
-    let area = (x_bounds.end() - x_bounds.start() + 1) * (y_bounds.end() - y_bounds.start() + 1);
-
-    let free = area - elves.len() as i32;
-
-    Ok(free.to_string())
+    None
 }
 
-pub fn part2(_input: &[u8]) -> Result<String> {
-    anyhow::bail!("not implemented")
+pub fn part2(input: &[u8]) -> Result<String> {
+    let mut elves = parse_input(input, parse_elves)?;
+
+    let first_non_moved = simulate(&mut elves, usize::MAX).context("Elves didn't stop moving?")?;
+
+    Ok(first_non_moved.to_string())
 }
 
 #[cfg(test)]
@@ -182,5 +196,10 @@ mod tests {
     #[test]
     fn sample_part1() {
         assert_eq!(part1(SAMPLE).unwrap(), "110");
+    }
+
+    #[test]
+    fn sample_part2() {
+        assert_eq!(part2(SAMPLE).unwrap(), "20");
     }
 }
