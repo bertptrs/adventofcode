@@ -28,6 +28,8 @@ enum Direction {
     Right = 0,
 }
 
+type Map<'a> = Vec<&'a [u8]>;
+
 impl Direction {
     fn turn_left(self) -> Self {
         match self {
@@ -48,7 +50,7 @@ impl Direction {
     }
 }
 
-fn parse_map(input: &[u8]) -> IResult<&[u8], (Vec<&[u8]>, Vec<Step>)> {
+fn parse_map(input: &[u8]) -> IResult<&[u8], (Map, Vec<Step>)> {
     separated_pair(
         map(take_until("\n\n"), |map: &[u8]| {
             map.split(|&b| b == b'\n').collect()
