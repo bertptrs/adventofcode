@@ -55,6 +55,55 @@ impl Storm {
                 (self.height_period.get() - time % self.height_period + y) % self.height_period,
             ))
     }
+
+    fn dist(&self, from: (usize, usize), goal: (usize, usize), start: usize) -> Result<usize> {
+        let mut todo = VecDeque::new();
+        todo.push_back((start, from));
+
+        let mut visited = AHashSet::new();
+
+        while let Some((time, pos)) = todo.pop_front() {
+            let mut enqueue = |pos| {
+                let new_time = time + 1;
+
+                if self.can_stand(new_time, pos)
+                    && visited.insert((new_time % self.combined_period, pos))
+                {
+                    todo.push_back((new_time, pos));
+                }
+            };
+
+            // Waiting is perhaps an option
+            enqueue(pos);
+
+            // If not in the starting position or the right edge
+            if pos.0 > 1 && pos.1 < self.height - 1 {
+                enqueue((pos.0 - 1, pos.1));
+            }
+
+            if pos.1 > 0 && pos.0 < self.width - 2 {
+                enqueue((pos.0 + 1, pos.1));
+            }
+
+            if pos.1 > 1 {
+                enqueue((pos.0, pos.1 - 1));
+            }
+
+            if pos.0 > 0 && pos.1 < self.height - 2 {
+                enqueue((pos.0, pos.1 + 1));
+            }
+
+            if pos.1 >= 1 && (pos.0, pos.1 - 1) == goal {
+                return Ok(time + 1);
+            }
+
+            if (pos.0, pos.1 + 1) == goal {
+                return Ok(time + 1);
+            }
+        }
+
+        anyhow::bail!("Did not find a route to {goal:?}")
+    }
 }
 
 impl TryFrom<&'_ [u8]> for Storm {
@@ -111,51 +160,17 @@ pub fn part1(input: &[u8]) -> Result<String> {
     let storm = Storm::try_from(input)?;
     let goal = (storm.width - 2, storm.height - 1);
 
-    let mut todo = VecDeque::new();
-    todo.push_back((0, (1, 0)));
-
-    let mut visited = AHashSet::new();
-
-    while let Some((time, pos)) = todo.pop_front() {
-        let mut enqueue = |pos| {
-            let new_time = time + 1;
-
-            if storm.can_stand(new_time, pos)
-                && visited.insert((new_time % storm.combined_period, pos))
-            {
-                todo.push_back((new_time, pos));
-            }
-        };
-
-        // Waiting is perhaps an option
-        enqueue(pos);
-
-        if pos.0 > 1 {
-            enqueue((pos.0 - 1, pos.1));
-        }
-
-        if pos.1 > 0 && pos.0 < storm.width - 2 {
-            enqueue((pos.0 + 1, pos.1));
-        }
-
-        if pos.1 > 1 {
-            enqueue((pos.0, pos.1 - 1));
-        }
-
-        if pos.0 > 0 && pos.1 < storm.height - 2 {
-            enqueue((pos.0, pos.1 + 1));
-        }
-
-        if (pos.0, pos.1 + 1) == goal {
-            return Ok((time + 1).to_string());
-        }
-    }
-
-    anyhow::bail!("Did not find a route to {goal:?}")
+    storm.dist((1, 0), goal, 0).map(|d| d.to_string())
 }
 
-pub fn part2(_input: &[u8]) -> Result<String> {
-    anyhow::bail!("not implemented")
+pub fn part2(input: &[u8]) -> Result<String> {
+    let storm = Storm::try_from(input)?;
+    let goal = (storm.width - 2, storm.height - 1);
+
+    let there = storm.dist((1, 0), goal, 0)?;
+    let back_again = storm.dist(goal, (1, 0), there)?;
+
+    storm.dist((1, 0), goal, back_again).map(|s| s.to_string())
 }
 
 #[cfg(test)]
@@ -190,5 +205,10 @@ mod tests {
     #[test]
     fn sample_part1() {
         assert_eq!(part1(SAMPLE).unwrap(), "18");
+    }
+
+    #[test]
+    fn sample_part2() {
+        assert_eq!(part2(SAMPLE).unwrap(), "54");
     }
 }
