@@ -1,4 +1,3 @@
-use std::array;
 use std::cmp::Ordering;
 use std::collections::BinaryHeap;
 
@@ -126,8 +125,14 @@ impl BluePrint {
                     continue;
                 }
 
-                let resources_after =
-                    array::from_fn(|i| resources[i] + machines[i] * built_after - costs[i]);
+                // Ideally, would be written as a nice `array::from_fn`. It turns out that codegen
+                // for `array::from_fn` is very bad, and writing it out into this for loop reduces
+                // time taken by approximately 100%.
+                let mut resources_after = [0; 3];
+                for i in 0..3 {
+                    resources_after[i] = resources[i] + machines[i] * built_after - costs[i];
+                }
+
                 let time_after = time_left - built_after;
 
                 if element == Mineral::Geode as usize {
