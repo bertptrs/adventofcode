@@ -107,7 +107,7 @@ impl BluePrint {
         }) = todo.pop()
         {
             let ideal_from_now = ideal(time_left as u32);
-            if u32::from(best - got) > ideal_from_now {
+            if u32::from(best - got) >= ideal_from_now {
                 continue;
             }
             if todo.len() > 1_000_000 {
