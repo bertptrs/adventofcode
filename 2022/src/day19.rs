@@ -107,6 +107,7 @@ impl BluePrint {
         }) = todo.pop()
         {
             let ideal_from_now = ideal(time_left as u32);
+            // Need to check again because we might've gotten a better result in the meantime.
             if u32::from(best - got) >= ideal_from_now {
                 continue;
             }
@@ -116,19 +117,8 @@ impl BluePrint {
                     todo.len()
                 );
             }
-            'element: for element in 0..4 {
-                let mut min_to_build = 0;
-                for ((&cost, &avail), &machine) in
-                    self.costs[element].iter().zip(&resources).zip(&machines)
-                {
-                    if cost > avail {
-                        if machine == 0 {
-                            continue 'element;
-                        } else {
-                            min_to_build = min_to_build.max((cost - avail + machine - 1) / machine);
-                        }
-                    }
-                }
+            for (element, &costs) in self.costs.iter().enumerate() {
+                let Some(min_to_build) = self.until_buildable(costs, resources, machines) else { break };
 
                 // +1 because we need a turn to build
                 let built_after = min_to_build + 1;
@@ -136,13 +126,18 @@ impl BluePrint {
                     continue;
                 }
 
-                let resources_after = array::from_fn(|i| {
-                    resources[i] + machines[i] * built_after - self.costs[element][i]
-                });
+                let resources_after =
+                    array::from_fn(|i| resources[i] + machines[i] * built_after - costs[i]);
                 let time_after = time_left - built_after;
 
                 if element == Mineral::Geode as usize {
                     let new_got = got + time_after;
+                    best = best.max(new_got);
+
+                    if u32::from(best - new_got) >= ideal(time_after.into()) {
+                        continue;
+                    }
+
                     todo.push(State {
                         missed,
                         got: new_got,
@@ -153,7 +148,9 @@ impl BluePrint {
 
                     best = best.max(new_got);
                 } else {
-                    if machines[element] >= max_needed[element] {
+                    if machines[element] >= max_needed[element]
+                        || u32::from(best - got) >= ideal(time_after.into())
+                    {
                         continue;
                     }
 
@@ -172,6 +169,22 @@ impl BluePrint {
         }
 
         best
+    }
+
+    #[inline]
+    fn until_buildable(&self, costs: [u8; 3], resources: [u8; 3], machines: [u8; 3]) -> Option<u8> {
+        let mut min_to_build = 0;
+        for ((&cost, &avail), &machine) in costs.iter().zip(&resources).zip(&machines) {
+            if cost > avail {
+                if machine == 0 {
+                    return None;
+                } else {
+                    min_to_build = min_to_build.max((cost - avail + machine - 1) / machine);
+                }
+            }
+        }
+
+        Some(min_to_build)
     }
 
     fn max_needed(&self) -> [u8; 3] {
