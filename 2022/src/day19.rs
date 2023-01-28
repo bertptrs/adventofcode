@@ -1,3 +1,5 @@
+use std::cmp::Ordering;
+use std::collections::BinaryHeap;
 use std::ops::Add;
 use std::ops::Sub;
 
@@ -30,7 +32,6 @@ impl TryFrom<&'_ [u8]> for Mineral {
     type Error = String;
 
     fn try_from(value: &'_ [u8]) -> std::result::Result<Self, Self::Error> {
-        dbg!(String::from_utf8_lossy(value));
         match value {
             b"ore" => Ok(Self::Ore),
             b"clay" => Ok(Self::Clay),
@@ -76,8 +77,8 @@ struct BluePrint {
 }
 
 impl BluePrint {
-    pub fn max_geodes(&self) -> u8 {
-        self.max_geodes_recursive(24, 0, [1, 0, 0, 0], Resources::default())
+    pub fn max_geodes(&self, time: u32) -> u32 {
+        self.max_geodes_recursive(time, 0, [1, 0, 0, 0], Resources::default()) as u32
     }
 
     fn max_geodes_recursive(
@@ -88,7 +89,7 @@ impl BluePrint {
         machines: [u8; 4],
         resources: Resources,
     ) -> u8 {
-        if time_left <= 1 {
+        if time_left <= 1 || forbidden.count_ones() == 4 {
             return resources.0[3] + machines[3] * (time_left as u8);
         }
 
@@ -166,13 +167,21 @@ pub fn part1(input: &[u8]) -> Result<String> {
 
     Ok(blueprints
         .into_iter()
-        .map(|bp| dbg!(bp.max_geodes()) as u32 * bp.id)
+        .map(|bp| bp.max_geodes(24) as u32 * bp.id)
         .sum::<u32>()
         .to_string())
 }
 
-pub fn part2(_input: &[u8]) -> Result<String> {
-    anyhow::bail!("not implemented")
+pub fn part2(input: &[u8]) -> Result<String> {
+    let blueprints = parse_input(input, many1(parse_blueprint))?;
+
+    let result: u32 = blueprints
+        .iter()
+        .take(3)
+        .map(|bp| bp.max_geodes(32) as u32)
+        .product();
+
+    Ok(result.to_string())
 }
 
 #[cfg(test)]
