@@ -105,17 +105,13 @@ impl BluePrint {
             machines,
         }) = todo.pop()
         {
-            let ideal_from_now = ideal(time_left as u32);
+            let ideal_from_now = ideal(u32::from(time_left));
             // Need to check again because we might've gotten a better result in the meantime.
             if u32::from(best - got) >= ideal_from_now {
                 continue;
             }
-            if todo.len() > 1_000_000 {
-                panic!(
-                    "Safety: got a todo list of len {}, best: {best}",
-                    todo.len()
-                );
-            }
+            assert!(todo.len() <= 1_000_000, "Safety: got a todo list of len {}, best: {best}",
+                    todo.len());
             for (element, &costs) in self.costs.iter().enumerate() {
                 let Some(min_to_build) = self.until_buildable(costs, resources, machines) else { break };
 
@@ -161,7 +157,7 @@ impl BluePrint {
 
                     let mut new_machines = machines;
                     new_machines[element] += 1;
-                    let new_missed = ideal_from_now - ideal(time_after as u32);
+                    let new_missed = ideal_from_now - ideal(u32::from(time_after));
                     todo.push(State {
                         missed: new_missed,
                         got,
@@ -249,7 +245,7 @@ pub fn part1(input: &[u8]) -> Result<String> {
 
     Ok(blueprints
         .into_iter()
-        .map(|bp| bp.max_geodes(24) as u32 * bp.id)
+        .map(|bp| u32::from(bp.max_geodes(24)) * bp.id)
         .sum::<u32>()
         .to_string())
 }
@@ -260,7 +256,7 @@ pub fn part2(input: &[u8]) -> Result<String> {
     let result: u32 = blueprints
         .iter()
         .take(3)
-        .map(|bp| bp.max_geodes(32) as u32)
+        .map(|bp| u32::from(bp.max_geodes(32)))
         .product();
 
     Ok(result.to_string())

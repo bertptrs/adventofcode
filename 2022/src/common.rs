@@ -182,8 +182,7 @@ impl IndexSet {
 
         self.0
             .get(entry)
-            .map(|&entry| (entry & (1 << pos) != 0))
-            .unwrap_or(false)
+            .map_or(false, |&entry| (entry & (1 << pos) != 0))
     }
 }
 

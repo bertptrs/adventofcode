@@ -108,7 +108,7 @@ fn part1_generic<const Y: i32>(input: &[u8]) -> Result<String> {
 }
 
 pub fn part1(input: &[u8]) -> Result<String> {
-    part1_generic::<2000000>(input)
+    part1_generic::<2_000_000>(input)
 }
 
 fn part2_generic<const MAX: i32>(input: &[u8]) -> Result<String> {
@@ -153,11 +153,11 @@ fn part2_generic<const MAX: i32>(input: &[u8]) -> Result<String> {
 
     let Vec2([x, y]) = find_unseen::<MAX>(&beacons)?;
 
-    Ok((i64::from(x) * 4000000 + i64::from(y)).to_string())
+    Ok((i64::from(x) * 4_000_000 + i64::from(y)).to_string())
 }
 
 pub fn part2(input: &[u8]) -> Result<String> {
-    part2_generic::<4000000>(input)
+    part2_generic::<4_000_000>(input)
 }
 
 #[cfg(test)]

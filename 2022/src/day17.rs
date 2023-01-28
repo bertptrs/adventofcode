@@ -154,7 +154,7 @@ pub fn part2(input: &[u8]) -> Result<String> {
     let mut tortoise_time = 0;
     let mut last_gust = 0;
 
-    const TARGET: usize = 1000000000000;
+    const TARGET: usize = 1_000_000_000_000;
 
     for (it, (shape_id, &shape)) in shapes.by_ref().enumerate() {
         let mut x = 2usize;

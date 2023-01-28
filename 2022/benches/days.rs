@@ -11,7 +11,7 @@ use criterion::Criterion;
 const DAYS_IMPLEMENTED: u8 = 25;
 
 fn read_input(day: u8) -> std::io::Result<Vec<u8>> {
-    let input_path = format!("inputs/{:02}.txt", day);
+    let input_path = format!("inputs/{day:02}.txt");
 
     let mut buffer = Vec::new();
     File::open(input_path)?.read_to_end(&mut buffer)?;

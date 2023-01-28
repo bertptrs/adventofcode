@@ -61,7 +61,7 @@ impl From<ParsedNetwork<'_>> for SimpleNetwork {
                 .map(|(_, flow, connected)| {
                     let connected = connected.into_iter().map(|name| mapping[&name]).collect();
 
-                    SimpleValve { flow, connected }
+                    SimpleValve { connected, flow }
                 })
                 .collect(),
             start: mapping[&b"AA"[..]],
