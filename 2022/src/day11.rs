@@ -53,7 +53,7 @@ impl Monkey {
             // Miraculously get less worried
             new_val /= 3;
 
-            drains[(new_val % self.test_mod == 0) as usize].push(new_val);
+            drains[usize::from(new_val % self.test_mod == 0)].push(new_val);
         }
     }
 
@@ -65,7 +65,7 @@ impl Monkey {
             // Modular arithmetic is a good way to get less worried
             new_val = new_val % mod_base;
 
-            drains[(new_val % self.test_mod == 0) as usize].push(new_val);
+            drains[usize::from(new_val % self.test_mod == 0)].push(new_val);
         }
     }
 }

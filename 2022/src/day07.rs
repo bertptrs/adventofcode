@@ -84,14 +84,14 @@ fn parse_program(input: &[u8]) -> IResult<&[u8], (u32, Vec<u32>)> {
 pub fn part1(input: &[u8]) -> Result<String> {
     let (_, sizes) = parse_input(input, parse_program)?;
 
-    let searched_size: u32 = sizes.into_iter().filter(|&size| size <= 100000).sum();
+    let searched_size: u32 = sizes.into_iter().filter(|&size| size <= 100_000).sum();
 
     Ok(searched_size.to_string())
 }
 
 pub fn part2(input: &[u8]) -> Result<String> {
-    const TARGET: u32 = 30000000;
-    const TOTAL: u32 = 70000000;
+    const TARGET: u32 = 30_000_000;
+    const TOTAL: u32 = 70_000_000;
 
     let (used, sizes) = parse_input(input, parse_program)?;
 

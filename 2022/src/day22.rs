@@ -81,13 +81,12 @@ pub fn part1(input: &[u8]) -> Result<String> {
             Step::Forward(amount) => match dir {
                 Direction::Up => {
                     for _ in 0..amount {
-                        if y == 0 || map[y - 1].get(x).map(|&b| b == b' ').unwrap_or(true) {
+                        if y == 0 || map[y - 1].get(x).map_or(true, |&b| b == b' ') {
                             let new_y = map
                                 .iter()
                                 .rposition(|line| {
                                     line.get(x)
-                                        .map(|&b| b == b'.' || b == b'#')
-                                        .unwrap_or(false)
+                                        .map_or(false, |&b| b == b'.' || b == b'#')
                                 })
                                 .unwrap();
                             if map[new_y][x] == b'#' {
@@ -105,14 +104,13 @@ pub fn part1(input: &[u8]) -> Result<String> {
                 Direction::Down => {
                     for _ in 0..amount {
                         if y + 1 >= map.len()
-                            || map[y + 1].get(x).map(|&b| b == b' ').unwrap_or(true)
+                            || map[y + 1].get(x).map_or(true, |&b| b == b' ')
                         {
                             let new_y = map
                                 .iter()
                                 .position(|line| {
                                     line.get(x)
-                                        .map(|&b| b == b'.' || b == b'#')
-                                        .unwrap_or(false)
+                                        .map_or(false, |&b| b == b'.' || b == b'#')
                                 })
                                 .unwrap();
 

@@ -106,7 +106,7 @@ fn shuffle(encrypted: &[i64], times: usize) -> Result<String> {
 }
 
 pub fn part2(input: &[u8]) -> Result<String> {
-    const ENCRYPTION_KEY: i64 = 811589153;
+    const ENCRYPTION_KEY: i64 = 811_589_153;
 
     let mut encrypted = parse_input(input, parse_encrypted)?;
 
