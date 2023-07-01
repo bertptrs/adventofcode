@@ -1,6 +1,5 @@
 use std::cmp::Ordering;
 
-use anyhow::Context;
 use anyhow::Result;
 use nom::branch::alt;
 use nom::bytes::complete::tag;
@@ -8,14 +7,11 @@ use nom::character::complete::multispace1;
 use nom::character::complete::newline;
 use nom::combinator::iterator;
 use nom::combinator::map;
-use nom::multi::many0;
 use nom::multi::separated_list0;
 use nom::sequence::delimited;
 use nom::sequence::pair;
 use nom::sequence::terminated;
 use nom::IResult;
-
-use crate::common::parse_input;
 
 #[derive(Debug, PartialEq, Eq, Clone)]
 enum Signal {
@@ -91,33 +87,23 @@ pub fn part1(input: &[u8]) -> Result<String> {
     Ok(result.to_string())
 }
 
-fn parse_signals(input: &[u8]) -> IResult<&[u8], Vec<Signal>> {
-    many0(terminated(parse_signal, multispace1))(input)
-}
-
 pub fn part2(input: &[u8]) -> Result<String> {
-    let marker1 = Signal::from(vec![vec![2]]);
-    let marker2 = Signal::from(vec![vec![6]]);
+    let marker1 = Signal::Number(2);
+    let marker2 = Signal::Number(6);
 
-    let mut signals = parse_input(input, parse_signals)?;
+    let mut iterator = iterator(input, terminated(parse_signal, multispace1));
 
-    signals.push(marker1.clone());
-    signals.push(marker2.clone());
+    let mut pos1 = 1;
+    let mut pos2 = 2;
 
-    signals.sort_unstable();
-
-    let pos1 = signals
-        .iter()
-        .position(|v| v == &marker1)
-        .context("Cannot find marker 1")?
-        + 1;
-
-    let pos2 = pos1
-        + signals[pos1..]
-            .iter()
-            .position(|v| v == &marker2)
-            .context("Cannot find marker 2")?
-        + 1;
+    for signal in &mut iterator {
+        if signal < marker1 {
+            pos1 += 1;
+            pos2 += 1;
+        } else if signal < marker2 {
+            pos2 += 1;
+        }
+    }
 
     Ok((pos1 * pos2).to_string())
 }
