@@ -1,3 +1,4 @@
+use core::slice;
 use std::cmp::Ordering;
 
 use anyhow::Result;
@@ -27,11 +28,11 @@ impl Ord for Signal {
 
         match (self, other) {
             (Signal::Number(first), Signal::Number(second)) => first.cmp(second),
-            (Signal::Number(first), Signal::List(second)) => {
-                list_cmp(&[Signal::Number(*first)], second)
+            (first @ Signal::Number(_), Signal::List(second)) => {
+                list_cmp(slice::from_ref(first), second)
             }
-            (Signal::List(first), Signal::Number(second)) => {
-                list_cmp(first, &[Signal::Number(*second)])
+            (Signal::List(first), second @ Signal::Number(_)) => {
+                list_cmp(first, slice::from_ref(second))
             }
             (Signal::List(first), Signal::List(second)) => list_cmp(first, second),
         }
