@@ -1,3 +1,5 @@
+use std::mem;
+
 use anyhow::Context;
 use anyhow::Result;
 use nom::branch::alt;
@@ -12,6 +14,65 @@ use nom::sequence::terminated;
 use nom::IResult;
 
 use crate::common::parse_input;
+
+// This describes the transitions between the different squares.
+//
+// For every direction, write down which direction you end up going, in which square, and
+// whether you should flip the axis.
+//
+// The squares are laid out as follows:
+//
+// #01
+// #2#
+// 34#
+// 5##
+//
+// Entries are specified right, down, left, up.
+#[allow(dead_code)]
+const TRANSITIONS: [[(Direction, usize, bool); 4]; 6] = [
+    // Square 0
+    [
+        (Direction::Right, 1, false),
+        (Direction::Down, 2, false),
+        (Direction::Left, 3, true),
+        (Direction::Right, 5, false),
+    ],
+    // Square 1
+    [
+        (Direction::Left, 4, true),
+        (Direction::Down, 2, false),
+        (Direction::Left, 0, false),
+        (Direction::Up, 5, false),
+    ],
+    // Square 2
+    [
+        (Direction::Up, 1, false),
+        (Direction::Down, 4, false),
+        (Direction::Down, 3, false),
+        (Direction::Up, 0, false),
+    ],
+    // Square 3
+    [
+        (Direction::Right, 4, false),
+        (Direction::Down, 5, false),
+        (Direction::Right, 0, true),
+        (Direction::Right, 2, false),
+    ],
+    // Square 4
+    [
+        (Direction::Left, 1, true),
+        (Direction::Left, 5, false),
+        (Direction::Left, 3, false),
+        (Direction::Up, 2, false),
+    ],
+    // Square 5
+    [
+        (Direction::Up, 4, false),
+        (Direction::Down, 1, false),
+        (Direction::Down, 0, false),
+        (Direction::Up, 3, false),
+    ],
+];
 
 #[derive(Clone, Copy, Debug)]
 enum Step {
@@ -85,8 +146,7 @@ pub fn part1(input: &[u8]) -> Result<String> {
                             let new_y = map
                                 .iter()
                                 .rposition(|line| {
-                                    line.get(x)
-                                        .map_or(false, |&b| b == b'.' || b == b'#')
+                                    line.get(x).map_or(false, |&b| b == b'.' || b == b'#')
                                 })
                                 .unwrap();
                             if map[new_y][x] == b'#' {
@@ -103,14 +163,11 @@ pub fn part1(input: &[u8]) -> Result<String> {
                 }
                 Direction::Down => {
                     for _ in 0..amount {
-                        if y + 1 >= map.len()
-                            || map[y + 1].get(x).map_or(true, |&b| b == b' ')
-                        {
+                        if y + 1 >= map.len() || map[y + 1].get(x).map_or(true, |&b| b == b' ') {
                             let new_y = map
                                 .iter()
                                 .position(|line| {
-                                    line.get(x)
-                                        .map_or(false, |&b| b == b'.' || b == b'#')
+                                    line.get(x).map_or(false, |&b| b == b'.' || b == b'#')
                                 })
                                 .unwrap();
 
@@ -171,7 +228,52 @@ pub fn part1(input: &[u8]) -> Result<String> {
     Ok((1000 * (y + 1) + 4 * (x + 1) + dir as usize).to_string())
 }
 
-pub fn part2(_input: &[u8]) -> Result<String> {
+fn side_length_of(map: &[&[u8]]) -> usize {
+    let taken_tiles = map
+        .iter()
+        .flat_map(|r| r.iter())
+        .filter(|c| !c.is_ascii_whitespace())
+        .count();
+
+    // Future Bert: this needs to be an integer square root.
+    ((taken_tiles / 6) as f64).sqrt() as usize
+}
+
+fn break_squares<'a>(map: &[&'a [u8]], side_length: usize) -> [(Map<'a>, usize, usize); 6] {
+    let mut result: [(Map<'a>, usize, usize); 6] = Default::default();
+
+    let mut row_holder = [(); 4].map(|_| Map::new());
+    let mut index = 0;
+
+    for (y, block_row) in map.chunks_exact(side_length).enumerate() {
+        for row in block_row {
+            for (i, segment) in row.chunks_exact(side_length).enumerate() {
+                if segment[0] != b' ' {
+                    row_holder[i].push(segment);
+                }
+            }
+        }
+
+        for (x, potential_side) in row_holder.iter_mut().enumerate() {
+            if !potential_side.is_empty() {
+                mem::swap(potential_side, &mut result[index].0);
+                result[index].1 = x;
+                result[index].2 = y;
+                index += 1;
+            }
+        }
+    }
+
+    result
+}
+
+pub fn part2(input: &[u8]) -> Result<String> {
+    let (map, _steps) = parse_input(input, parse_map)?;
+
+    let side_length = side_length_of(&map);
+
+    let _squares = break_squares(&map, side_length);
+
     anyhow::bail!("not implemented")
 }
 
@@ -184,5 +286,39 @@ mod tests {
     #[test]
     fn sample_part1() {
         assert_eq!(part1(SAMPLE).unwrap(), "6032");
+    }
+
+    #[test]
+    fn test_side_length() {
+        let (map, _) = parse_input(SAMPLE, parse_map).unwrap();
+
+        assert_eq!(side_length_of(&map), 4);
+    }
+
+    #[test]
+    fn test_break_squares() {
+        let (map, _) = parse_input(SAMPLE, parse_map).unwrap();
+
+        let side_length = side_length_of(&map);
+        let squares = break_squares(&map, side_length);
+
+        assert_eq!(squares[0].1, 2);
+        assert_eq!(squares[0].2, 0);
+
+        assert_eq!(squares[5].1, 3);
+        assert_eq!(squares[5].2, 2);
+
+        for square in squares {
+            assert_eq!(square.0.len(), side_length);
+
+            for row in square.0 {
+                assert_eq!(row.len(), side_length);
+            }
+        }
+    }
+
+    #[test]
+    fn test_sanity_transitions() {
+        // TODO
     }
 }
