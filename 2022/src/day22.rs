@@ -34,13 +34,13 @@ const TRANSITIONS: [[(Direction, usize, bool); 4]; 6] = [
     [
         (Direction::Right, 1, false),
         (Direction::Down, 2, false),
-        (Direction::Left, 3, true),
+        (Direction::Right, 3, true),
         (Direction::Right, 5, false),
     ],
     // Square 1
     [
         (Direction::Left, 4, true),
-        (Direction::Down, 2, false),
+        (Direction::Left, 2, false),
         (Direction::Left, 0, false),
         (Direction::Up, 5, false),
     ],
@@ -81,7 +81,7 @@ enum Step {
     Right,
 }
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Debug)]
 enum Direction {
     Up = 3,
     Down = 1,
@@ -319,6 +319,22 @@ mod tests {
 
     #[test]
     fn test_sanity_transitions() {
-        // TODO
+        for (cur_face, &face) in TRANSITIONS.iter().enumerate() {
+            for (dir, (arrive_dir, arrive_face, invert)) in face.into_iter().enumerate() {
+                let inverse_dir = (arrive_dir as usize + 2) % 4;
+                let (back_dir, back_face, back_invert) = TRANSITIONS[arrive_face][inverse_dir];
+
+                assert_eq!(
+                    invert, back_invert,
+                    "Reciprocal invert failed: face {cur_face} dir {dir} to face {arrive_face} arrives as {arrive_dir:?}"
+                );
+
+                assert_eq!(back_face, cur_face, "Reciprocal transition failed: face {cur_face} dir {dir} arrives at {arrive_face} but returns at {back_face}");
+
+                let correct_back_dir = (dir + 2) % 4;
+
+                assert_eq!(back_dir as usize, correct_back_dir, "Reciprocal direction failed: face {cur_face} dir {dir} did not arrive the opposite direction from {arrive_face}");
+            }
+        }
     }
 }
