@@ -128,14 +128,18 @@ fn parse_map(input: &[u8]) -> IResult<&[u8], (Map, Vec<Step>)> {
     )(input)
 }
 
+fn find_starting_x(top_row: &[u8]) -> Result<usize> {
+    top_row
+        .iter()
+        .position(|&b| b == b'.')
+        .context("Could not find starting position")
+}
+
 pub fn part1(input: &[u8]) -> Result<String> {
     let (map, steps) = parse_input(input, parse_map)?;
     let mut dir = Direction::Right;
     let mut y = 0;
-    let mut x = map[y]
-        .iter()
-        .position(|&b| b == b'.')
-        .context("Could not find starting position")?;
+    let mut x = find_starting_x(&map[y])?;
 
     for step in steps {
         match step {
@@ -268,13 +272,29 @@ fn break_squares<'a>(map: &[&'a [u8]], side_length: usize) -> [(Map<'a>, usize, 
 }
 
 pub fn part2(input: &[u8]) -> Result<String> {
-    let (map, _steps) = parse_input(input, parse_map)?;
+    let (map, steps) = parse_input(input, parse_map)?;
 
     let side_length = side_length_of(&map);
 
-    let _squares = break_squares(&map, side_length);
+    let squares = break_squares(&map, side_length);
 
-    anyhow::bail!("not implemented")
+    let mut current_square = 0;
+    let mut y = 0;
+    let mut x = find_starting_x(&squares[current_square].0[y])?;
+    let mut dir = Direction::Right;
+
+    for step in steps {
+        match step {
+            Step::Left => dir = dir.turn_left(),
+            Step::Right => dir = dir.turn_right(),
+            Step::Forward(amount) => anyhow::bail!("not implemented"),
+        }
+    }
+
+    let real_x = x + squares[current_square].1 * side_length;
+    let real_y = y + squares[current_square].2 * side_length;
+
+    Ok((1000 * (real_y + 1) + 4 * (real_x + 1) + dir as usize).to_string())
 }
 
 #[cfg(test)]
