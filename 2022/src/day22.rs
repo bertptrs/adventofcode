@@ -139,7 +139,7 @@ pub fn part1(input: &[u8]) -> Result<String> {
     let (map, steps) = parse_input(input, parse_map)?;
     let mut dir = Direction::Right;
     let mut y = 0;
-    let mut x = find_starting_x(&map[y])?;
+    let mut x = find_starting_x(map[y])?;
 
     for step in steps {
         match step {
@@ -278,23 +278,123 @@ pub fn part2(input: &[u8]) -> Result<String> {
 
     let squares = break_squares(&map, side_length);
 
+    let convert_coords = |square: usize, x: usize, y: usize| {
+        let offset_x = squares[square].1 * side_length + x + 1;
+        let offset_y = squares[square].2 * side_length + y + 1;
+
+        (offset_x, offset_y)
+    };
+
     let mut current_square = 0;
     let mut y = 0;
-    let mut x = find_starting_x(&squares[current_square].0[y])?;
+    let mut x = find_starting_x(squares[current_square].0[y])?;
     let mut dir = Direction::Right;
 
     for step in steps {
         match step {
             Step::Left => dir = dir.turn_left(),
             Step::Right => dir = dir.turn_right(),
-            Step::Forward(amount) => anyhow::bail!("not implemented"),
+            Step::Forward(mut amount) => {
+                'outer: while amount > 0 {
+                    let map = &squares[current_square].0;
+
+                    // Need to allow unused range bound, since we're actually tracking how much we
+                    // still have to do. The loops are expected to end early, and we should remember
+                    // how much work we've actually done.
+                    #[allow(clippy::mut_range_bound)]
+                    let coord = match dir {
+                        Direction::Up => {
+                            for _ in 0..amount {
+                                if y == 0 {
+                                    break;
+                                } else if map[y - 1][x] == b'#' {
+                                    break 'outer;
+                                } else {
+                                    y -= 1;
+                                }
+                            }
+
+                            x
+                        }
+                        Direction::Down => {
+                            for _ in 0..amount {
+                                if y + 1 >= side_length {
+                                    break;
+                                } else if map[y + 1][x] == b'#' {
+                                    break 'outer;
+                                } else {
+                                    amount -= 1;
+                                    y += 1;
+                                }
+                            }
+
+                            x
+                        }
+                        Direction::Left => {
+                            for _ in 0..amount {
+                                if x == 0 {
+                                    break;
+                                } else if map[y][x - 1] == b'#' {
+                                    break 'outer;
+                                } else {
+                                    x -= 1;
+                                    amount -= 1;
+                                }
+                            }
+
+                            y
+                        }
+                        Direction::Right => {
+                            for _ in 0..amount {
+                                if x + 1 >= side_length {
+                                    break;
+                                } else if map[y][x + 1] == b'#' {
+                                    break 'outer;
+                                } else {
+                                    amount -= 1;
+                                    x += 1;
+                                }
+                            }
+
+                            y
+                        }
+                    };
+
+                    if amount > 0 {
+                        let (new_dir, new_square, invert) =
+                            TRANSITIONS[current_square][dir as usize];
+
+                        let flipped_coord = if invert {
+                            side_length - 1 - coord
+                        } else {
+                            coord
+                        };
+
+                        let (new_x, new_y) = match new_dir {
+                            Direction::Up => (flipped_coord, side_length - 1),
+                            Direction::Down => (flipped_coord, 0),
+                            Direction::Left => (side_length - 1, flipped_coord),
+                            Direction::Right => (0, flipped_coord),
+                        };
+
+                        if squares[new_square].0[new_y][new_x] == b'#' {
+                            break 'outer;
+                        }
+
+                        x = new_x;
+                        y = new_y;
+                        current_square = new_square;
+                        dir = new_dir;
+                        amount -= 1;
+                    }
+                }
+            }
         }
     }
 
-    let real_x = x + squares[current_square].1 * side_length;
-    let real_y = y + squares[current_square].2 * side_length;
+    let (real_x, real_y) = convert_coords(current_square, x, y);
 
-    Ok((1000 * (real_y + 1) + 4 * (real_x + 1) + dir as usize).to_string())
+    Ok((1000 * real_y + 4 * real_x + dir as usize).to_string())
 }
 
 #[cfg(test)]
