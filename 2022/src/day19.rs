@@ -110,10 +110,15 @@ impl BluePrint {
             if u32::from(best - got) >= ideal_from_now {
                 continue;
             }
-            assert!(todo.len() <= 1_000_000, "Safety: got a todo list of len {}, best: {best}",
-                    todo.len());
+            assert!(
+                todo.len() <= 1_000_000,
+                "Safety: got a todo list of len {}, best: {best}",
+                todo.len()
+            );
             for (element, &costs) in self.costs.iter().enumerate() {
-                let Some(min_to_build) = self.until_buildable(costs, resources, machines) else { break };
+                let Some(min_to_build) = self.until_buildable(costs, resources, machines) else {
+                    break;
+                };
 
                 // +1 because we need a turn to build
                 let built_after = min_to_build + 1;
