@@ -136,7 +136,9 @@ pub fn part1(input: &[u8]) -> Result<String> {
 pub fn part2(input: &[u8]) -> Result<String> {
     let monkeys = parse_input(input, parse_monkeys)?;
 
-    let Monkey::Operation(first, second, _) = &monkeys[&b"root"[..]] else { anyhow::bail!("root is a literal somehow")};
+    let Monkey::Operation(first, second, _) = &monkeys[&b"root"[..]] else {
+        anyhow::bail!("root is a literal somehow")
+    };
 
     let result = match (evaluate2(&monkeys, first), evaluate2(&monkeys, second)) {
         (Ok(_), Ok(_)) => anyhow::bail!("both arms succeeded"),
