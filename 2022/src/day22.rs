@@ -297,27 +297,23 @@ pub fn part2(input: &[u8]) -> Result<String> {
             Step::Forward(mut amount) => {
                 'outer: while amount > 0 {
                     let map = &squares[current_square].0;
-
-                    // Need to allow unused range bound, since we're actually tracking how much we
-                    // still have to do. The loops are expected to end early, and we should remember
-                    // how much work we've actually done.
-                    #[allow(clippy::mut_range_bound)]
                     let coord = match dir {
                         Direction::Up => {
-                            for _ in 0..amount {
+                            while amount > 0 {
                                 if y == 0 {
                                     break;
                                 } else if map[y - 1][x] == b'#' {
                                     break 'outer;
                                 } else {
                                     y -= 1;
+                                    amount -= 1;
                                 }
                             }
 
                             x
                         }
                         Direction::Down => {
-                            for _ in 0..amount {
+                            while amount > 0 {
                                 if y + 1 >= side_length {
                                     break;
                                 } else if map[y + 1][x] == b'#' {
@@ -331,7 +327,7 @@ pub fn part2(input: &[u8]) -> Result<String> {
                             x
                         }
                         Direction::Left => {
-                            for _ in 0..amount {
+                            while amount > 0 {
                                 if x == 0 {
                                     break;
                                 } else if map[y][x - 1] == b'#' {
@@ -345,7 +341,7 @@ pub fn part2(input: &[u8]) -> Result<String> {
                             y
                         }
                         Direction::Right => {
-                            for _ in 0..amount {
+                            while amount > 0 {
                                 if x + 1 >= side_length {
                                     break;
                                 } else if map[y][x + 1] == b'#' {
