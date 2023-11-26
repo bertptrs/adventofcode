@@ -64,3 +64,6 @@ target/
 perf.data
 perf.data.old
 flamegraph.svg
+
+# Ignore saved inputs
+inputs/
