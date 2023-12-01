@@ -1,7 +1,7 @@
 on:
   - push
 
-name: Advent of Code 2022
+name: Advent of Code 2023
 
 jobs:
   ci:
@@ -20,33 +20,33 @@ jobs:
     continue-on-error: ${{ matrix.experimental }}
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Install toolchain
-        uses: actions-rs/toolchain@v1
+        uses: dtolnay/rust-toolchain@v1
         with:
           profile: minimal
           toolchain: ${{ matrix.toolchain }}
           override: true
-          components: rustfmt, clippy
+          components: rustfmt
 
       - name: Set up caching
         uses: Swatinem/rust-cache@v2
         with:
           workspaces: >
-            2022 -> target
+            2023 -> target
 
       - name: Build binaries
-        working-directory: 2022
+        working-directory: 2023
         run: >
           cargo build --all-targets
 
       - name: Run tests
-        working-directory: 2022
+        working-directory: 2023
         run: >
           cargo test
 
-      - name: Run clippy
-        working-directory: 2022
+      - name: Check formatting
+        working-directory: 2023
         run: >
-          cargo clippy -- --deny warnings
+          cargo fmt --check
