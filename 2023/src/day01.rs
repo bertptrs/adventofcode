@@ -1,12 +1,5 @@
 use anyhow::Result;
 
-fn to_digit(c: u8) -> Option<u32> {
-    match c {
-        b'0'..=b'9' => Some(u32::from(c - b'0')),
-        _ => None,
-    }
-}
-
 pub fn part1(input: &[u8]) -> Result<String> {
     let mut it = input.iter();
     let mut sum = 0;
@@ -15,13 +8,16 @@ pub fn part1(input: &[u8]) -> Result<String> {
         let mut first = None;
         let mut last = 0;
 
-        for digit in it
-            .by_ref()
-            .take_while(|&&c| c != b'\n')
-            .filter_map(|&c| to_digit(c))
-        {
-            first.get_or_insert(digit);
-            last = digit;
+        for &c in &mut it {
+            match c {
+                d @ b'0'..=b'9' => {
+                    let digit = u32::from(d - b'0');
+                    first.get_or_insert(digit);
+                    last = digit;
+                }
+                b'\n' => break,
+                _ => continue,
+            }
         }
 
         if let Some(first) = first {
