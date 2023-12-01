@@ -5,27 +5,18 @@ pub fn part1(input: &[u8]) -> Result<String> {
     let mut it = input.iter();
     let mut sum = 0;
 
-    loop {
-        let mut first = None;
-        let mut last = 0;
+    while let Some(&first) = it.find(|s| s.is_ascii_digit()) {
+        let mut last = first;
 
         for &c in &mut it {
             match c {
-                d @ b'0'..=b'9' => {
-                    let digit = u32::from(d - b'0');
-                    first.get_or_insert(digit);
-                    last = digit;
-                }
+                d @ b'0'..=b'9' => last = d,
                 b'\n' => break,
                 _ => continue,
             }
         }
 
-        if let Some(first) = first {
-            sum += 10 * first + last;
-        } else {
-            break;
-        }
+        sum += u32::from(10 * (first - b'0') + last - b'0');
     }
 
     Ok(sum.to_string())
