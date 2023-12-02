@@ -9,7 +9,7 @@ use criterion::Criterion;
 use aoc_2023::get_implementation;
 
 /// Number of days we have an implementation to benchmark
-const DAYS_IMPLEMENTED: u8 = 1;
+const DAYS_IMPLEMENTED: u8 = 2;
 
 fn read_input(day: u8) -> std::io::Result<Vec<u8>> {
     let input_path = format!("inputs/{day:02}.txt");
