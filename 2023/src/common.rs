@@ -16,6 +16,14 @@ use nom::IResult;
 use nom::InputLength;
 use nom::Parser;
 
+pub fn convert_nom_error(e: nom::error::Error<&[u8]>) -> anyhow::Error {
+    anyhow::anyhow!(
+        "Parser error {:?} to parse at {}",
+        e.code,
+        String::from_utf8_lossy(e.input)
+    )
+}
+
 /// Parse input from some nom parser and return as an anyhow result
 ///
 /// This method exists as a convenience because nom's errors cannot otherwise be easily converted to
@@ -24,13 +32,7 @@ pub fn parse_input<'a, O>(
     input: &'a [u8],
     mut parser: impl Parser<&'a [u8], O, nom::error::Error<&'a [u8]>>,
 ) -> Result<O> {
-    let (unparsed, output) = parser.parse(input).finish().map_err(|e| {
-        anyhow::anyhow!(
-            "Parser error {:?} to parse at {}",
-            e.code,
-            String::from_utf8_lossy(e.input)
-        )
-    })?;
+    let (unparsed, output) = parser.parse(input).finish().map_err(convert_nom_error)?;
 
     if !unparsed.is_empty() {
         Err(anyhow::anyhow!(
