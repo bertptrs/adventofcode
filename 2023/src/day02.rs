@@ -5,14 +5,12 @@ use nom::combinator::iterator;
 use nom::combinator::opt;
 use nom::combinator::value;
 use nom::multi::fold_many1;
-use nom::multi::many1;
 use nom::sequence::preceded;
 use nom::sequence::separated_pair;
 use nom::sequence::terminated;
 use nom::IResult;
 
 use crate::common::convert_nom_error;
-use crate::common::parse_input;
 
 #[derive(Clone, Copy)]
 #[repr(usize)]
