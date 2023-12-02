@@ -53,19 +53,10 @@ fn parse_game(i: &[u8]) -> IResult<&[u8], (u8, [u8; 3])> {
     )(i)
 }
 
-pub fn part1(input: &[u8]) -> anyhow::Result<String> {
+fn parts_common(input: &[u8], map: impl Fn((u8, [u8; 3])) -> u32) -> anyhow::Result<String> {
     let mut game_it = iterator(input, parse_game);
 
-    let total: u32 = game_it
-        .into_iter()
-        .filter_map(|(id, colors)| {
-            if colors[0] <= 12 && colors[1] <= 13 && colors[2] <= 14 {
-                Some(u32::from(id))
-            } else {
-                None
-            }
-        })
-        .sum();
+    let total: u32 = game_it.into_iter().map(map).sum();
 
     game_it.finish().map_err(|e| match e {
         nom::Err::Incomplete(_) => anyhow::anyhow!("unreachable"),
@@ -75,6 +66,35 @@ pub fn part1(input: &[u8]) -> anyhow::Result<String> {
     Ok(total.to_string())
 }
 
-pub fn part2(_input: &[u8]) -> anyhow::Result<String> {
-    anyhow::bail!("Not implemented")
+pub fn part1(input: &[u8]) -> anyhow::Result<String> {
+    parts_common(input, |(id, colors)| {
+        if colors[0] <= 12 && colors[1] <= 13 && colors[2] <= 14 {
+            u32::from(id)
+        } else {
+            0
+        }
+    })
+}
+
+pub fn part2(input: &[u8]) -> anyhow::Result<String> {
+    parts_common(input, |(_, colors)| {
+        u32::from(colors[0]) * u32::from(colors[1]) * u32::from(colors[2])
+    })
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    const SAMPLE: &[u8] = include_bytes!("samples/02.txt");
+
+    #[test]
+    fn sample_part1() {
+        assert_eq!(part1(SAMPLE).unwrap(), "8");
+    }
+
+    #[test]
+    fn sample_part2() {
+        assert_eq!(part2(SAMPLE).unwrap(), "2286");
+    }
 }
