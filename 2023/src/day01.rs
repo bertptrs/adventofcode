@@ -39,17 +39,15 @@ pub fn part2(input: &[u8]) -> Result<String> {
     let mut sum = 0;
 
     for line in input.split(|&c| c == b'\n') {
-        let mut first = None;
-        let mut last = 0;
+        let mut it = parser.find_overlapping_iter(line);
+        if let Some(first) = it.next() {
+            let first = convert_id(first.pattern().as_u32())?;
+            let last = if let Some(last) = it.last() {
+                convert_id(last.pattern().as_u32())?
+            } else {
+                first
+            };
 
-        // Cannot use find_iter because it doesn't find overlapping matches.
-        for needle in parser.find_overlapping_iter(line) {
-            let digit = convert_id(needle.pattern().as_u32())?;
-            first.get_or_insert(digit);
-            last = digit;
-        }
-
-        if let Some(first) = first {
             sum += 10 * first + last;
         }
     }
