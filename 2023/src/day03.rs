@@ -50,12 +50,7 @@ impl<'a> Index<usize> for Grid<'a> {
 
 fn is_surrounded(grid: &Grid<'_>, y: usize, start: usize, last: usize) -> bool {
     fn is_symbol(c: u8) -> bool {
-        match c {
-            b'0'..=b'9' => false,
-            b'.' => false,
-            b'\n' => false,
-            _ => true,
-        }
+        !matches!(c, b'0'..=b'9' | b'.' | b'\n')
     }
     let x_min = start.saturating_sub(1);
     let x_max = Ord::min(grid.width(), last + 2);
