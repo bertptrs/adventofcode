@@ -1,3 +1,5 @@
+use std::mem;
+
 use anyhow::Context;
 use nom::bytes::complete::tag;
 use nom::character::complete::newline;
@@ -124,13 +126,66 @@ pub fn part1(input: &[u8]) -> anyhow::Result<String> {
 pub fn part2(input: &[u8]) -> anyhow::Result<String> {
     let almanac = parse_input(input, parse_almanac)?;
 
-    let min = almanac
+    let mut ranges: Vec<(u64, u64)> = almanac
         .seeds
         .chunks_exact(2)
-        .flat_map(|c| c[0]..c[0] + c[1])
-        .map(|node| follow_all_mappings(node, &almanac.mappings))
+        .map(|c| (c[0], c[1]))
+        .collect();
+    let mut target = Vec::new();
+
+    for mappings in &almanac.mappings {
+        for (mut start, mut len) in ranges.drain(..) {
+            debug_assert_ne!(len, 0);
+            let mut point = mappings.partition_point(|mapping| mapping.source_start <= start);
+
+            if point > 0 && start < mappings[point - 1].source_start + mappings[point - 1].len {
+                let mapping = &mappings[point - 1];
+                let overlapping_len = mapping.len - (start - mapping.source_start);
+                let use_len = Ord::min(len, overlapping_len);
+
+                debug_assert!(use_len > 0);
+
+                target.push((start - mapping.source_start + mapping.dest_start, use_len));
+                start += use_len;
+                len -= use_len;
+            }
+
+            // Loop invariant: start is not in a range and the next range is mappings[point]
+            while len > 0 && point < mappings.len() {
+                let mapping = &mappings[point];
+                let before_len = Ord::min(len, mapping.source_start - start);
+
+                if before_len > 0 {
+                    len -= before_len;
+                    target.push((start, before_len));
+                    start += before_len;
+                }
+
+                if len > 0 {
+                    let inside_len = Ord::min(len, mapping.len);
+
+                    debug_assert!(inside_len > 0);
+
+                    target.push((mapping.dest_start, inside_len));
+                    start += inside_len;
+                    len -= inside_len;
+
+                    point += 1;
+                }
+            }
+
+            if len > 0 {
+                target.push((start, len));
+            }
+        }
+        mem::swap(&mut ranges, &mut target);
+    }
+
+    let min = ranges
+        .iter()
+        .map(|&(start, _)| start)
         .min()
-        .context("Unreachable, no seeds but parser ensures seeds")?;
+        .context("Somehow lost all ranges")?;
 
     Ok(min.to_string())
 }
