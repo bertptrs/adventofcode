@@ -1,6 +1,5 @@
 use anyhow::Context;
 use nom::bytes::complete::tag;
-use nom::bytes::complete::take_until;
 use nom::character::complete::newline;
 use nom::combinator::map;
 use nom::multi::many1;
@@ -102,27 +101,38 @@ fn follow_mapping(node: u64, mappings: &[Mapping]) -> u64 {
     }
 }
 
+fn follow_all_mappings(mut node: u64, mappings: &[Vec<Mapping>]) -> u64 {
+    for mappings in mappings {
+        node = follow_mapping(node, mappings)
+    }
+    node
+}
+
 pub fn part1(input: &[u8]) -> anyhow::Result<String> {
     let almanac = parse_input(input, parse_almanac)?;
 
     let min = almanac
         .seeds
         .iter()
-        .map(|node| {
-            let mut node = *node;
-            for mappings in &almanac.mappings {
-                node = follow_mapping(node, mappings)
-            }
-            node
-        })
+        .map(|node| follow_all_mappings(*node, &almanac.mappings))
         .min()
         .context("Unreachable, no seeds but parser ensures seeds")?;
 
     Ok(min.to_string())
 }
 
-pub fn part2(_input: &[u8]) -> anyhow::Result<String> {
-    anyhow::bail!("Not implemented")
+pub fn part2(input: &[u8]) -> anyhow::Result<String> {
+    let almanac = parse_input(input, parse_almanac)?;
+
+    let min = almanac
+        .seeds
+        .chunks_exact(2)
+        .flat_map(|c| c[0]..c[0] + c[1])
+        .map(|node| follow_all_mappings(node, &almanac.mappings))
+        .min()
+        .context("Unreachable, no seeds but parser ensures seeds")?;
+
+    Ok(min.to_string())
 }
 
 #[cfg(test)]
@@ -134,5 +144,10 @@ mod tests {
     #[test]
     fn sample_part1() {
         assert_eq!(part1(SAMPLE).unwrap(), "35");
+    }
+
+    #[test]
+    fn sample_part2() {
+        assert_eq!(part2(SAMPLE).unwrap(), "46");
     }
 }
