@@ -47,9 +47,21 @@ fn parse_long_race(i: &[u8]) -> IResult<&[u8], (u64, u64)> {
 }
 
 fn ways(time: u64, distance: u64) -> u64 {
-    let make_it = (1..=time / 2)
-        .filter(|&v| v * (time - v) > distance)
-        .count() as u64;
+    let half = time / 2;
+    let mut min = 1;
+    let mut max = half;
+
+    while min < max {
+        let mid = min + (max - min) / 2;
+
+        if mid * (time - mid) < distance {
+            min = mid + 1;
+        } else {
+            max = mid;
+        }
+    }
+
+    let make_it = half - min + 1;
 
     if time % 2 == 0 {
         2 * make_it - 1
