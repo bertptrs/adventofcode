@@ -54,7 +54,7 @@ fn ways(time: u64, distance: u64) -> u64 {
     while min < max {
         let mid = min + (max - min) / 2;
 
-        if mid * (time - mid) < distance {
+        if mid * (time - mid) <= distance {
             min = mid + 1;
         } else {
             max = mid;
@@ -93,6 +93,13 @@ mod tests {
     use super::*;
 
     const SAMPLE: &[u8] = include_bytes!("samples/06.txt");
+
+    #[test]
+    fn individual_samples() {
+        assert_eq!(ways(7, 9), 4);
+        assert_eq!(ways(15, 40), 8);
+        assert_eq!(ways(30, 200), 9);
+    }
 
     #[test]
     fn sample_part1() {
