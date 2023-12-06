@@ -1,6 +1,8 @@
 use nom::bytes::complete::tag;
+use nom::character::complete::digit1;
 use nom::character::complete::newline;
 use nom::character::complete::space1;
+use nom::multi::fold_many1;
 use nom::multi::many1;
 use nom::sequence::delimited;
 use nom::sequence::pair;
@@ -10,12 +12,38 @@ use nom::IResult;
 use crate::common::parse_input;
 
 fn parse_race(i: &[u8]) -> IResult<&[u8], (Vec<u64>, Vec<u64>)> {
-    use nom::character::complete::u64;
+    let line = |header| {
+        delimited(
+            tag(header),
+            many1(preceded(space1, nom::character::complete::u64)),
+            newline,
+        )
+    };
 
-    pair(
-        delimited(tag("Time:"), many1(preceded(space1, u64)), newline),
-        delimited(tag("Distance:"), many1(preceded(space1, u64)), newline),
-    )(i)
+    pair(line("Time:"), line("Distance:"))(i)
+}
+
+fn parse_long_race(i: &[u8]) -> IResult<&[u8], (u64, u64)> {
+    let line = |header| {
+        delimited(
+            tag(header),
+            fold_many1(
+                preceded(space1, digit1),
+                || 0,
+                |mut cur, sequence| {
+                    for &c in sequence {
+                        cur *= 10;
+                        cur += u64::from(c - b'0');
+                    }
+
+                    cur
+                },
+            ),
+            newline,
+        )
+    };
+
+    pair(line("Time:"), line("Distance:"))(i)
 }
 
 fn ways(time: u64, distance: u64) -> u64 {
@@ -42,8 +70,10 @@ pub fn part1(input: &[u8]) -> anyhow::Result<String> {
     Ok(total.to_string())
 }
 
-pub fn part2(_input: &[u8]) -> anyhow::Result<String> {
-    anyhow::bail!("Not implemented")
+pub fn part2(input: &[u8]) -> anyhow::Result<String> {
+    let (time, distance) = parse_input(input, parse_long_race)?;
+
+    Ok(ways(time, distance).to_string())
 }
 
 #[cfg(test)]
@@ -55,5 +85,10 @@ mod tests {
     #[test]
     fn sample_part1() {
         assert_eq!(part1(SAMPLE).unwrap(), "288");
+    }
+
+    #[test]
+    fn sample_part2() {
+        assert_eq!(part2(SAMPLE).unwrap(), "71503");
     }
 }
