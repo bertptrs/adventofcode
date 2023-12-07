@@ -1,3 +1,5 @@
+use std::mem;
+
 use nom::bytes::complete::tag;
 use nom::bytes::complete::take;
 use nom::character::complete::newline;
@@ -9,7 +11,7 @@ use nom::Parser;
 
 use crate::common::parse_input;
 
-#[derive(PartialEq, Eq, PartialOrd, Ord)]
+#[derive(PartialEq, Eq, PartialOrd, Ord, Debug)]
 enum Kind {
     HighCard,
     Pair,
@@ -20,32 +22,14 @@ enum Kind {
     FiveOfAKind,
 }
 
-fn kind_parser1(cards: &[u8; 5]) -> Kind {
+#[inline]
+fn kind_parser(cards: &[u8; 5], part2: bool) -> Kind {
     let mut counts = [0u8; 15];
     for &card in cards {
         counts[card as usize] += 1;
     }
 
-    counts.sort_unstable();
-    match (counts[14], counts[13]) {
-        (5, _) => Kind::FiveOfAKind,
-        (4, _) => Kind::FourOfAKind,
-        (3, 2) => Kind::FullHouse,
-        (3, _) => Kind::ThreeOfAKind,
-        (2, 2) => Kind::TwoPair,
-        (2, _) => Kind::Pair,
-        _ => Kind::HighCard,
-    }
-}
-
-fn kind_parser2(cards: &[u8; 5]) -> Kind {
-    let mut counts = [0u8; 15];
-    for &card in cards {
-        counts[card as usize] += 1;
-    }
-
-    let jokers = counts[11];
-    counts[11] = 0;
+    let jokers = if part2 { mem::take(&mut counts[1]) } else { 0 };
 
     counts.sort_unstable();
     match (counts[14] + jokers, counts[13]) {
@@ -65,21 +49,27 @@ struct Hand {
     kind: Kind,
 }
 
-fn hands_parser<'a>(
-    kind_parser: impl Fn(&[u8; 5]) -> Kind,
-) -> impl Parser<&'a [u8], Vec<Hand>, nom::error::Error<&'a [u8]>> {
-    fn map_card(c: u8) -> anyhow::Result<u8> {
-        Ok(match c {
-            d @ b'2'..=b'9' => d - b'0',
-            b'T' => 10,
-            b'J' => 11,
-            b'Q' => 12,
-            b'K' => 13,
-            b'A' => 14,
-            other => anyhow::bail!("Invalid card {other}"),
-        })
-    }
+#[inline]
+fn map_card(c: u8, part2: bool) -> anyhow::Result<u8> {
+    Ok(match c {
+        d @ b'2'..=b'9' => d - b'0',
+        b'T' => 10,
+        b'J' => {
+            if part2 {
+                1
+            } else {
+                11
+            }
+        }
+        b'Q' => 12,
+        b'K' => 13,
+        b'A' => 14,
+        other => anyhow::bail!("Invalid card {other}"),
+    })
+}
 
+#[inline]
+fn hands_parser<'a>(part2: bool) -> impl Parser<&'a [u8], Vec<Hand>, nom::error::Error<&'a [u8]>> {
     many1(map_res(
         pair(
             terminated(take(5usize), tag(" ")),
@@ -88,9 +78,9 @@ fn hands_parser<'a>(
         move |(hand, bid)| -> anyhow::Result<Hand> {
             let mut cards = [0; 5];
             for (t, &s) in cards.iter_mut().zip(hand) {
-                *t = map_card(s)?
+                *t = map_card(s, part2)?
             }
-            let kind = kind_parser(&cards);
+            let kind = kind_parser(&cards, part2);
 
             Ok(Hand { cards, bid, kind })
         },
@@ -115,14 +105,14 @@ fn parts_common(hands: &mut [Hand]) -> anyhow::Result<String> {
 }
 
 pub fn part1(input: &[u8]) -> anyhow::Result<String> {
-    let mut hands = parse_input(input, hands_parser(kind_parser1))?;
+    let mut hands = parse_input(input, hands_parser(false))?;
 
     parts_common(&mut hands)
 }
 
 // Too high: 248859461
 pub fn part2(input: &[u8]) -> anyhow::Result<String> {
-    let mut hands = parse_input(input, hands_parser(kind_parser2))?;
+    let mut hands = parse_input(input, hands_parser(true))?;
 
     parts_common(&mut hands)
 }
