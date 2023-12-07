@@ -52,7 +52,7 @@ pub fn part1(input: &[u8]) -> anyhow::Result<String> {
             let winners = (card.have & card.winning).count_ones();
 
             if winners > 0 {
-                1 << winners - 1
+                1 << (winners - 1)
             } else {
                 0
             }
