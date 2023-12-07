@@ -29,10 +29,35 @@ fn kind_parser(cards: &[u8; 5], part2: bool) -> Kind {
         counts[card as usize] += 1;
     }
 
-    let jokers = if part2 { mem::take(&mut counts[1]) } else { 0 };
+    let jokers = if part2 {
+        mem::take(&mut counts[1]) as usize
+    } else {
+        0
+    };
 
-    counts.sort_unstable();
-    match (counts[14] + jokers, counts[13]) {
+    let mut counts_counts = [0u8; 6];
+    for count in counts {
+        counts_counts[count as usize] += 1;
+    }
+
+    let mut first = 0;
+    let mut second = 0;
+
+    for (count, &occurrences) in counts_counts.iter().enumerate() {
+        match occurrences {
+            0 => continue,
+            1 => {
+                second = first;
+                first = count;
+            }
+            _ => {
+                first = count;
+                second = count;
+            }
+        }
+    }
+
+    match (first + jokers, second) {
         (5, _) => Kind::FiveOfAKind,
         (4, _) => Kind::FourOfAKind,
         (3, 2) => Kind::FullHouse,
