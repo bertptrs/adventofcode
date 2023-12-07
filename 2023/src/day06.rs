@@ -55,7 +55,7 @@ fn ways(time: u64, distance: u64) -> u64 {
         0
     } else {
         // Note: can leave out quite a bit of the quadratic formula because things cancel out nicely
-        let solution = ((b - d.sqrt()) / 2.0 + 1.0).floor() as u64;
+        let solution = ((b - d.sqrt()) / 2.0 + 1.0) as u64;
         let half = time / 2;
         let make_it = half - solution + 1;
 
