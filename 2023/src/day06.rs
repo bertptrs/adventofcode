@@ -47,26 +47,23 @@ fn parse_long_race(i: &[u8]) -> IResult<&[u8], (u64, u64)> {
 }
 
 fn ways(time: u64, distance: u64) -> u64 {
-    let half = time / 2;
-    let mut min = 1;
-    let mut max = half;
-
-    while min < max {
-        let mid = min + (max - min) / 2;
-
-        if mid * (time - mid) <= distance {
-            min = mid + 1;
-        } else {
-            max = mid;
-        }
-    }
-
-    let make_it = half - min + 1;
-
-    if time % 2 == 0 {
-        2 * make_it - 1
+    let a = -1.0;
+    let b = time as f64;
+    let c = -(distance as f64);
+    let d = b * b - 4.0 * a * c;
+    if d < 0.0 {
+        0
     } else {
-        2 * make_it
+        // Note: can leave out quite a bit of the quadratic formula because things cancel out nicely
+        let solution = ((b - d.sqrt()) / 2.0 + 1.0).floor() as u64;
+        let half = time / 2;
+        let make_it = half - solution + 1;
+
+        if time % 2 == 0 {
+            2 * make_it - 1
+        } else {
+            2 * make_it
+        }
     }
 }
 
