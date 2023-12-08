@@ -1,0 +1,10 @@
+LR
+
+DDA = (DDB, XXX)
+DDB = (XXX, DDZ)
+DDZ = (DDB, XXX)
+EEA = (EEB, XXX)
+EEB = (EEC, EEC)
+EEC = (EEZ, EEZ)
+EEZ = (EEB, EEB)
+XXX = (XXX, XXX)
