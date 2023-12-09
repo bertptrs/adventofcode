@@ -15,12 +15,11 @@ fn parse_reports(i: &[u8]) -> IResult<&[u8], Vec<Vec<i32>>> {
     ))(i)
 }
 
-fn compute_next(report: &[i32]) -> i32 {
+fn compute_next<'a>(report: impl IntoIterator<Item = &'a i32>) -> i32 {
     let mut deltas = Vec::new();
 
-    for w in report.windows(2) {
-        let mut delta = w[1] - w[0];
-
+    for &entry in report {
+        let mut delta = entry;
         for prev_delta in &mut deltas {
             let prev = mem::replace(prev_delta, delta);
             delta = delta - prev;
@@ -31,14 +30,15 @@ fn compute_next(report: &[i32]) -> i32 {
         }
     }
 
-    let next_step = deltas.drain(..).rev().fold(0, |c, d| c + d);
-
-    report.last().unwrap() + next_step
+    deltas.drain(..).rev().fold(0, |c, d| c + d)
 }
 
 pub fn part1(input: &[u8]) -> anyhow::Result<String> {
     let reports = parse_input(input, parse_reports)?;
-    let result: i32 = reports.iter().map(|report| compute_next(&report)).sum();
+    let result: i32 = reports
+        .iter()
+        .map(|report| compute_next(report.iter()))
+        .sum();
     Ok(result.to_string())
 }
 
@@ -46,10 +46,7 @@ pub fn part2(input: &[u8]) -> anyhow::Result<String> {
     let mut reports = parse_input(input, parse_reports)?;
     let result: i32 = reports
         .iter_mut()
-        .map(|report| {
-            report.reverse();
-            compute_next(&report)
-        })
+        .map(|report| compute_next(report.iter().rev()))
         .sum();
     Ok(result.to_string())
 }
