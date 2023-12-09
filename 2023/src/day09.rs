@@ -1,26 +1,36 @@
 use std::mem;
+use std::ops::Range;
 
-use nom::bytes::complete::tag;
-use nom::multi::many1;
-use nom::multi::separated_list1;
-use nom::sequence::terminated;
 use nom::IResult;
 
 use crate::common::parse_input;
 
-fn parse_reports(i: &[u8]) -> IResult<&[u8], Vec<Vec<i32>>> {
-    many1(terminated(
-        separated_list1(tag(" "), nom::character::complete::i32),
-        tag("\n"),
-    ))(i)
+fn parse_reports(mut i: &[u8]) -> IResult<&[u8], (Vec<Range<usize>>, Vec<i32>)> {
+    let mut begin = 0;
+    let mut numbers = Vec::new();
+    let mut ranges = Vec::new();
+    while !i.is_empty() {
+        let (rem, num) = nom::character::complete::i32(i)?;
+        numbers.push(num);
+
+        if rem[0] == b'\n' {
+            let end = numbers.len();
+            ranges.push(begin..end);
+            begin = end;
+        }
+
+        i = &rem[1..];
+    }
+
+    Ok((i, (ranges, numbers)))
 }
 
-fn compute_next<'a>(report: impl IntoIterator<Item = &'a i32>) -> i32 {
-    let mut deltas = Vec::new();
+fn compute_next<'a>(report: impl IntoIterator<Item = &'a i32>, deltas: &mut Vec<i32>) -> i32 {
+    deltas.clear();
 
     for &entry in report {
         let mut delta = entry;
-        for prev_delta in &mut deltas {
+        for prev_delta in &mut *deltas {
             let prev = mem::replace(prev_delta, delta);
             delta = delta - prev;
         }
@@ -30,23 +40,25 @@ fn compute_next<'a>(report: impl IntoIterator<Item = &'a i32>) -> i32 {
         }
     }
 
-    deltas.drain(..).rev().fold(0, |c, d| c + d)
+    deltas.iter().rev().fold(0, |c, d| c + d)
 }
 
 pub fn part1(input: &[u8]) -> anyhow::Result<String> {
-    let reports = parse_input(input, parse_reports)?;
-    let result: i32 = reports
-        .iter()
-        .map(|report| compute_next(report.iter()))
+    let mut deltas = Vec::new();
+    let (ranges, numbers) = parse_input(input, parse_reports)?;
+    let result: i32 = ranges
+        .into_iter()
+        .map(|range| compute_next(&numbers[range], &mut deltas))
         .sum();
     Ok(result.to_string())
 }
 
 pub fn part2(input: &[u8]) -> anyhow::Result<String> {
-    let mut reports = parse_input(input, parse_reports)?;
-    let result: i32 = reports
-        .iter_mut()
-        .map(|report| compute_next(report.iter().rev()))
+    let mut deltas = Vec::new();
+    let (ranges, numbers) = parse_input(input, parse_reports)?;
+    let result: i32 = ranges
+        .into_iter()
+        .map(|range| compute_next(numbers[range].iter().rev(), &mut deltas))
         .sum();
     Ok(result.to_string())
 }
@@ -59,9 +71,9 @@ mod tests {
 
     #[test]
     fn samples_separate() {
-        assert_eq!(18, compute_next(&[0, 3, 6, 9, 12, 15]));
-        assert_eq!(28, compute_next(&[1, 3, 6, 10, 15, 21]));
-        assert_eq!(68, compute_next(&[10, 13, 16, 21, 30, 45]));
+        assert_eq!(18, compute_next(&[0, 3, 6, 9, 12, 15], &mut Vec::new()));
+        assert_eq!(28, compute_next(&[1, 3, 6, 10, 15, 21], &mut Vec::new()));
+        assert_eq!(68, compute_next(&[10, 13, 16, 21, 30, 45], &mut Vec::new()));
     }
 
     #[test]
