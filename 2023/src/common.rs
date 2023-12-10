@@ -7,6 +7,7 @@ use std::ops::Index;
 use std::ops::IndexMut;
 use std::ops::Sub;
 
+use anyhow::Context;
 use anyhow::Result;
 use nom::combinator::map;
 use nom::error::ErrorKind;
@@ -53,6 +54,7 @@ pub fn parse_input<'a, O>(
 ///
 /// This implementation is based on [`nom::multi::fold_many1`] with minor differences. If
 /// successful, this should probably be upstreamed.
+#[allow(unused)]
 pub fn reduce_many1<I, O, E, F>(
     mut f: F,
     mut g: impl FnMut(O, O) -> O,
@@ -104,6 +106,7 @@ where
 }
 
 /// Add an index to repeated successful invocations of the embedded parser.
+#[allow(unused)]
 pub fn enumerate<I, O, E>(f: impl Parser<I, O, E>) -> impl FnMut(I) -> IResult<I, (usize, O), E> {
     let mut index = 0usize;
 
@@ -115,6 +118,7 @@ pub fn enumerate<I, O, E>(f: impl Parser<I, O, E>) -> impl FnMut(I) -> IResult<I
 }
 
 /// Return the minimum and maximum of two unordered variables
+#[allow(unused)]
 pub fn minmax<T>(a: T, b: T) -> (T, T)
 where
     T: PartialOrd,
@@ -127,6 +131,7 @@ where
 }
 
 /// Some magic to get two mutable references into the same slice
+#[allow(unused)]
 pub fn get_both<T>(slice: &mut [T], first: usize, second: usize) -> (&mut T, &mut T) {
     match first.cmp(&second) {
         Ordering::Greater => {
@@ -141,9 +146,11 @@ pub fn get_both<T>(slice: &mut [T], first: usize, second: usize) -> (&mut T, &mu
     }
 }
 
+#[allow(unused)]
 #[derive(Debug, Default)]
 pub struct IndexSet(Vec<u32>);
 
+#[allow(unused)]
 impl IndexSet {
     pub fn with_capacity(capacity: usize) -> Self {
         Self(Vec::with_capacity(
@@ -186,9 +193,11 @@ impl IndexSet {
     }
 }
 
+#[allow(unused)]
 #[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
 pub struct Vec2(pub [i32; 2]);
 
+#[allow(unused)]
 impl Vec2 {
     pub fn l1(self) -> i32 {
         self.0.into_iter().map(i32::abs).sum()
@@ -232,5 +241,50 @@ impl IndexMut<usize> for Vec2 {
     #[inline]
     fn index_mut(&mut self, index: usize) -> &mut Self::Output {
         &mut self.0[index]
+    }
+}
+
+pub struct Grid<'a> {
+    width: usize,
+    data: &'a [u8],
+}
+
+impl<'a> Grid<'a> {
+    pub fn new(data: &'a [u8]) -> anyhow::Result<Self> {
+        let width = 1 + data
+            .iter()
+            .position(|&c| c == b'\n')
+            .context("Failed to find end of line in grid")?;
+
+        anyhow::ensure!(
+            data.len() % width == 0,
+            "Grid should divide equally into rows"
+        );
+
+        Ok(Self { width, data })
+    }
+
+    pub fn height(&self) -> usize {
+        self.data.len() / self.width
+    }
+
+    pub fn width(&self) -> usize {
+        self.width - 1
+    }
+
+    pub fn rows(&self) -> impl Iterator<Item = &'a [u8]> {
+        let width = self.width();
+        self.data
+            .chunks_exact(self.width)
+            .map(move |row| &row[..width])
+    }
+}
+
+impl<'a> Index<usize> for Grid<'a> {
+    type Output = [u8];
+
+    fn index(&self, y: usize) -> &Self::Output {
+        let offset = y * self.width;
+        &self.data[offset..(offset + self.width())]
     }
 }
