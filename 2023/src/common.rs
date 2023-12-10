@@ -146,11 +146,9 @@ pub fn get_both<T>(slice: &mut [T], first: usize, second: usize) -> (&mut T, &mu
     }
 }
 
-#[allow(unused)]
 #[derive(Debug, Default)]
 pub struct IndexSet(Vec<u32>);
 
-#[allow(unused)]
 impl IndexSet {
     pub fn with_capacity(capacity: usize) -> Self {
         Self(Vec::with_capacity(
@@ -277,6 +275,12 @@ impl<'a> Grid<'a> {
         self.data
             .chunks_exact(self.width)
             .map(move |row| &row[..width])
+    }
+
+    pub fn find(&self, c: u8) -> Option<(usize, usize)> {
+        let pos = self.data.iter().position(|&d| d == c)?;
+
+        Some((pos % self.width, pos / self.width))
     }
 }
 
