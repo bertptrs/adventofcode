@@ -1,52 +1,6 @@
 use std::collections::HashMap;
-use std::ops::Index;
 
-use anyhow::Context;
-
-struct Grid<'a> {
-    width: usize,
-    data: &'a [u8],
-}
-
-impl<'a> Grid<'a> {
-    pub fn new(data: &'a [u8]) -> anyhow::Result<Self> {
-        let width = 1 + data
-            .iter()
-            .position(|&c| c == b'\n')
-            .context("Failed to find end of line in grid")?;
-
-        anyhow::ensure!(
-            data.len() % width == 0,
-            "Grid should divide equally into rows"
-        );
-
-        Ok(Self { width, data })
-    }
-
-    pub fn height(&self) -> usize {
-        self.data.len() / self.width
-    }
-
-    pub fn width(&self) -> usize {
-        self.width - 1
-    }
-
-    pub fn rows(&self) -> impl Iterator<Item = &'a [u8]> {
-        let width = self.width();
-        self.data
-            .chunks_exact(self.width)
-            .map(move |row| &row[..width])
-    }
-}
-
-impl<'a> Index<usize> for Grid<'a> {
-    type Output = [u8];
-
-    fn index(&self, y: usize) -> &Self::Output {
-        let offset = y * self.width;
-        &self.data[offset..(offset + self.width())]
-    }
-}
+use crate::common::Grid;
 
 fn is_surrounded(grid: &Grid<'_>, y: usize, start: usize, last: usize) -> bool {
     fn is_symbol(c: u8) -> bool {
