@@ -22,13 +22,14 @@ fn get_connections(c: u8) -> u8 {
     }
 }
 
-pub fn part1(input: &[u8]) -> anyhow::Result<String> {
-    let map = Grid::new(input)?;
+fn find_cycle(map: &Grid<'_>) -> anyhow::Result<(usize, bool, IndexSet)> {
     let (start_x, start_y) = map.find(b'S').context("Couldn't find starting point")?;
     let mut visited = IndexSet::with_capacity(map.width() * map.height());
     let mut todo = VecDeque::new();
 
     visited.insert(start_y * map.width() + start_x);
+
+    let mut start_up = false;
 
     if start_x > 0 && (get_connections(map[start_y][start_x - 1]) & RIGHT) != 0 {
         todo.push_back((1, (start_x - 1, start_y)));
@@ -43,6 +44,7 @@ pub fn part1(input: &[u8]) -> anyhow::Result<String> {
     if start_y > 0 && (get_connections(map[start_y - 1][start_x]) & DOWN) != 0 {
         todo.push_back((1, (start_x, start_y - 1)));
         visited.insert((start_y - 1) * map.width() + start_x);
+        start_up = true;
     }
 
     if start_y + 1 < map.height() && (get_connections(map[start_y + 1][start_x]) & DOWN) != 0 {
@@ -80,21 +82,63 @@ pub fn part1(input: &[u8]) -> anyhow::Result<String> {
         }
     }
 
-    Ok(max_dist.to_string())
+    Ok((max_dist, start_up, visited))
 }
 
-pub fn part2(_input: &[u8]) -> anyhow::Result<String> {
-    anyhow::bail!("Not implemented")
+pub fn part1(input: &[u8]) -> anyhow::Result<String> {
+    let map = Grid::new(input)?;
+
+    find_cycle(&map).map(|(max_dist, _, _)| max_dist.to_string())
+}
+
+pub fn part2(input: &[u8]) -> anyhow::Result<String> {
+    let map = Grid::new(input)?;
+    let (_, s_up, visited) = find_cycle(&map)?;
+
+    let mut inside = 0;
+
+    for (y, row) in map.rows().enumerate() {
+        let y_offset = y * map.width();
+        let mut pipes = 0;
+
+        for (x, &c) in row.iter().enumerate() {
+            if visited.contains(y_offset + x) {
+                let is_up = match c {
+                    b'|' | b'J' | b'L' => true,
+                    b'S' => s_up,
+                    _ => false,
+                };
+
+                if is_up {
+                    pipes += 1;
+                }
+            } else {
+                inside += pipes % 2;
+            }
+        }
+    }
+
+    Ok(inside.to_string())
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
 
-    const SAMPLE: &[u8] = include_bytes!("samples/10.txt");
+    const SAMPLE: &[u8] = include_bytes!("samples/10.1.txt");
+    const SAMPLE2: &[u8] = include_bytes!("samples/10.2.txt");
+    const SAMPLE3: &[u8] = include_bytes!("samples/10.3.txt");
+    const SAMPLE4: &[u8] = include_bytes!("samples/10.4.txt");
 
     #[test]
     fn sample_part1() {
         assert_eq!("8", part1(SAMPLE).unwrap());
+    }
+
+    #[test]
+    fn sample_part2() {
+        assert_eq!("4", part2(SAMPLE2).unwrap());
+        assert_eq!("8", part2(SAMPLE3).unwrap());
+        assert_eq!("10", part2(SAMPLE4).unwrap());
     }
 }
