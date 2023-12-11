@@ -6,12 +6,12 @@ fn find_doubles(occupied: IndexSet, len: usize) -> Vec<usize> {
     (0..len).filter(|&v| !occupied.contains(v)).collect()
 }
 
-fn transform(pos: usize, doubles: &[usize]) -> usize {
+fn transform<const S: usize>(pos: usize, doubles: &[usize]) -> usize {
     let before = doubles.partition_point(|&v| v < pos);
-    pos + before
+    pos + before * (S - 1)
 }
 
-pub fn part1(input: &[u8]) -> anyhow::Result<String> {
+fn part_common<const S: usize>(input: &[u8]) -> anyhow::Result<String> {
     let map = Grid::new(input)?;
     let mut stars = Vec::new();
     let mut cols_occupied = IndexSet::with_capacity(map.width());
@@ -30,8 +30,8 @@ pub fn part1(input: &[u8]) -> anyhow::Result<String> {
     let rows_doubled = find_doubles(rows_occupied, map.height());
 
     for star in &mut stars {
-        star.0 = transform(star.0, &cols_doubled);
-        star.1 = transform(star.1, &rows_doubled);
+        star.0 = transform::<S>(star.0, &cols_doubled);
+        star.1 = transform::<S>(star.1, &rows_doubled);
     }
 
     let total: usize = stars
@@ -47,8 +47,12 @@ pub fn part1(input: &[u8]) -> anyhow::Result<String> {
     Ok(total.to_string())
 }
 
-pub fn part2(_input: &[u8]) -> anyhow::Result<String> {
-    anyhow::bail!("Not implemented")
+pub fn part1(input: &[u8]) -> anyhow::Result<String> {
+    part_common::<2>(input)
+}
+
+pub fn part2(input: &[u8]) -> anyhow::Result<String> {
+    part_common::<1_000_000>(input)
 }
 
 #[cfg(test)]
@@ -62,7 +66,9 @@ mod tests {
         assert_eq!("374", part1(SAMPLE).unwrap());
     }
 
-    // #[test]
-    // fn sample_part2() {
-    // }
+    #[test]
+    fn sample_scaled() {
+        assert_eq!("1030", part_common::<10>(SAMPLE).unwrap());
+        assert_eq!("8410", part_common::<100>(SAMPLE).unwrap());
+    }
 }
