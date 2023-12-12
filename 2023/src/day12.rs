@@ -1,3 +1,5 @@
+use std::mem;
+
 use nom::bytes::complete::tag;
 use nom::bytes::complete::take_until;
 use nom::multi::many1;
@@ -13,36 +15,42 @@ fn number_ways(line: &[u8], groups: &[u8]) -> u64 {
         return 0;
     };
 
-    let mut dp = vec![vec![vec![0; max_group as usize + 1]; groups.len() + 1]; line.len() + 1];
-    dp[0][0][0] = 1;
+    let mut next = vec![vec![0; max_group as usize + 1]; groups.len() + 1];
+    let mut cur = next.clone();
+    cur[0][0] = 1;
 
-    for (line_pos, &c) in line.iter().enumerate() {
+    for &c in line {
+        for entry in &mut next {
+            entry.fill(0);
+        }
+
         for group_pos in 0..=groups.len() {
             let group = *groups.get(group_pos).unwrap_or(&0);
             for cur_group in 0..=max_group {
-                let ways = dp[line_pos][group_pos][cur_group as usize];
+                let ways = cur[group_pos][cur_group as usize];
                 if ways == 0 {
                     continue;
                 }
 
                 // Either defective or maybe defective
                 if c != b'.' && cur_group < group {
-                    dp[line_pos + 1][group_pos][cur_group as usize + 1] += ways;
+                    next[group_pos][cur_group as usize + 1] += ways;
                 }
 
                 if c != b'#' {
                     if cur_group == 0 {
-                        dp[line_pos + 1][group_pos][0] += ways;
+                        next[group_pos][0] += ways;
                     } else if group == cur_group {
-                        dp[line_pos + 1][group_pos + 1][0] += ways;
+                        next[group_pos + 1][0] += ways;
                     }
                 }
             }
         }
+
+        mem::swap(&mut cur, &mut next);
     }
 
-    dp[line.len()][groups.len()][0]
-        + dp[line.len()][groups.len() - 1][groups[groups.len() - 1] as usize]
+    cur[groups.len()][0] + cur[groups.len() - 1][groups[groups.len() - 1] as usize]
 }
 
 fn parse_lines(i: &[u8]) -> IResult<&[u8], Vec<(&[u8], Vec<u8>)>> {
