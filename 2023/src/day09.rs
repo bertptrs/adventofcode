@@ -32,7 +32,7 @@ fn compute_next<'a>(report: impl IntoIterator<Item = &'a i32>, deltas: &mut Vec<
         let mut delta = entry;
         for prev_delta in &mut *deltas {
             let prev = mem::replace(prev_delta, delta);
-            delta = delta - prev;
+            delta -= prev;
         }
 
         if delta != 0 {
@@ -40,7 +40,7 @@ fn compute_next<'a>(report: impl IntoIterator<Item = &'a i32>, deltas: &mut Vec<
         }
     }
 
-    deltas.iter().rev().fold(0, |c, d| c + d)
+    deltas.iter().rev().sum::<i32>()
 }
 
 pub fn part1(input: &[u8]) -> anyhow::Result<String> {
