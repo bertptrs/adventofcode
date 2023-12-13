@@ -69,7 +69,7 @@ pub fn part1(input: &[u8]) -> anyhow::Result<String> {
 
     let total: u64 = lines
         .iter()
-        .map(|(line, groups)| number_ways(*line, groups))
+        .map(|(line, groups)| number_ways(line, groups))
         .sum();
 
     Ok(total.to_string())
