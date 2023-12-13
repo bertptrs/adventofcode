@@ -1,6 +1,8 @@
 //! Common helper utilities to all days
 
 use std::cmp::Ordering;
+use std::fmt;
+use std::fmt::Display;
 use std::ops::Add;
 use std::ops::Div;
 use std::ops::Index;
@@ -290,5 +292,11 @@ impl<'a> Index<usize> for Grid<'a> {
     fn index(&self, y: usize) -> &Self::Output {
         let offset = y * self.width;
         &self.data[offset..(offset + self.width())]
+    }
+}
+
+impl Display for Grid<'_> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", String::from_utf8_lossy(self.data))
     }
 }
