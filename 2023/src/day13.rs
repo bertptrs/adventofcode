@@ -15,7 +15,7 @@ impl Symmetry {
     }
 }
 
-fn find_symmetry(grid: Grid<'_>, differences: usize) -> Option<Symmetry> {
+fn find_symmetry(grid: Grid<&[u8]>, differences: usize) -> Option<Symmetry> {
     // Attempt to find a vertical line of reflection first
     for c in 1..grid.width() {
         if grid
@@ -48,7 +48,7 @@ fn find_symmetry(grid: Grid<'_>, differences: usize) -> Option<Symmetry> {
     None
 }
 
-fn parse_grids(input: &[u8]) -> anyhow::Result<Vec<Grid<'_>>> {
+fn parse_grids(input: &[u8]) -> anyhow::Result<Vec<Grid<&[u8]>>> {
     let mut result = Vec::new();
     let mut start = 0;
     let mut last_newline = 0;

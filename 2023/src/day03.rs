@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use crate::common::Grid;
 
-fn is_surrounded(grid: &Grid<'_>, y: usize, start: usize, last: usize) -> bool {
+fn is_surrounded(grid: &Grid<&[u8]>, y: usize, start: usize, last: usize) -> bool {
     fn is_symbol(c: u8) -> bool {
         !matches!(c, b'0'..=b'9' | b'.' | b'\n')
     }
@@ -53,7 +53,7 @@ pub fn part1(input: &[u8]) -> anyhow::Result<String> {
     Ok(sum.to_string())
 }
 
-fn find_gear(grid: &Grid<'_>, y: usize, start: usize, end: usize) -> Option<(usize, usize)> {
+fn find_gear(grid: &Grid<&[u8]>, y: usize, start: usize, end: usize) -> Option<(usize, usize)> {
     let x_min = start.saturating_sub(1);
     let x_max = Ord::min(grid.width(), end + 2);
 

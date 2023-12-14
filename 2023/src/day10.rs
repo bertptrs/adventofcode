@@ -22,7 +22,7 @@ fn get_connections(c: u8) -> u8 {
     }
 }
 
-fn find_cycle(map: &Grid<'_>) -> anyhow::Result<(usize, bool, IndexSet)> {
+fn find_cycle(map: &Grid<&[u8]>) -> anyhow::Result<(usize, bool, IndexSet)> {
     let (start_x, start_y) = map.find(b'S').context("Couldn't find starting point")?;
     let mut visited = IndexSet::with_capacity(map.width() * map.height());
     let mut todo = VecDeque::new();
