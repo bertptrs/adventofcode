@@ -1,5 +1,4 @@
 use crate::common::Grid;
-use crate::common::OwnedGrid;
 
 pub fn part1(input: &[u8]) -> anyhow::Result<String> {
     let grid = Grid::new(input)?;
@@ -23,7 +22,7 @@ pub fn part1(input: &[u8]) -> anyhow::Result<String> {
     Ok(load.to_string())
 }
 
-fn advance(grid: &mut OwnedGrid, stack_heights: &mut [usize]) {
+fn advance(grid: &mut Grid<Vec<u8>>, stack_heights: &mut [usize]) {
     // Tilt north
     stack_heights.fill(0);
     for y in 0..grid.height() {
@@ -100,7 +99,7 @@ fn advance(grid: &mut OwnedGrid, stack_heights: &mut [usize]) {
 
 fn find_cycle(
     it: impl Iterator<Item = usize>,
-    hare: &mut OwnedGrid,
+    hare: &mut Grid<Vec<u8>>,
     stack_heights: &mut [usize],
 ) -> Option<usize> {
     let mut tortoise = hare.clone();
@@ -113,7 +112,7 @@ fn find_cycle(
             return Some(cycle - last_sync);
         } else if cycle.count_ones() == 1 {
             // New power of two, sync up the tortoise and the hare
-            tortoise.clone_from(&hare);
+            tortoise.clone_from(hare);
             last_sync = cycle;
         }
     }
@@ -122,7 +121,7 @@ fn find_cycle(
 
 pub fn part2(input: &[u8]) -> anyhow::Result<String> {
     const GOAL: usize = 1000000000;
-    let mut hare = OwnedGrid::new(input.to_owned())?;
+    let mut hare = Grid::new(input.to_owned())?;
     let mut stack_heights = vec![0; hare.width()];
 
     let mut it = 1..=GOAL;
