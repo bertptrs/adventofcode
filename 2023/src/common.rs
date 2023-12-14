@@ -300,3 +300,98 @@ impl Display for Grid<'_> {
         write!(f, "{}", String::from_utf8_lossy(self.data))
     }
 }
+
+// TODO: merge OwnedGrid and Grid impls so I don't go insane
+pub struct OwnedGrid {
+    width: usize,
+    data: Vec<u8>,
+}
+
+impl OwnedGrid {
+    pub fn new(data: Vec<u8>) -> anyhow::Result<Self> {
+        let width = 1 + data
+            .iter()
+            .position(|&c| c == b'\n')
+            .context("Failed to find end of line in grid")?;
+
+        anyhow::ensure!(
+            data.len() % width == 0,
+            "Grid should divide equally into rows"
+        );
+
+        Ok(Self { width, data })
+    }
+
+    pub fn height(&self) -> usize {
+        self.data.len() / self.width
+    }
+
+    pub fn width(&self) -> usize {
+        self.width - 1
+    }
+
+    pub fn rows(&self) -> impl Iterator<Item = &[u8]> {
+        let width = self.width();
+        self.data
+            .chunks_exact(self.width)
+            .map(move |row| &row[..width])
+    }
+
+    pub fn rows_mut(&mut self) -> impl Iterator<Item = &mut [u8]> {
+        let width = self.width();
+        self.data
+            .chunks_exact_mut(self.width)
+            .map(move |row| &mut row[..width])
+    }
+
+    pub fn find(&self, c: u8) -> Option<(usize, usize)> {
+        let pos = self.data.iter().position(|&d| d == c)?;
+
+        Some((pos % self.width, pos / self.width))
+    }
+}
+
+impl Index<usize> for OwnedGrid {
+    type Output = [u8];
+
+    fn index(&self, y: usize) -> &Self::Output {
+        let offset = y * self.width;
+        &self.data[offset..(offset + self.width())]
+    }
+}
+
+impl IndexMut<usize> for OwnedGrid {
+    fn index_mut(&mut self, y: usize) -> &mut Self::Output {
+        let offset = y * self.width;
+        let width = self.width;
+        &mut self.data[offset..(offset + width)]
+    }
+}
+
+impl Display for OwnedGrid {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", String::from_utf8_lossy(&self.data))
+    }
+}
+
+impl PartialEq<OwnedGrid> for OwnedGrid {
+    fn eq(&self, other: &OwnedGrid) -> bool {
+        // No need to compare width as width is a function of data
+        self.data == other.data
+    }
+}
+
+// Custom Clone impl so we don't allocate in `clone_from`
+impl Clone for OwnedGrid {
+    fn clone(&self) -> Self {
+        Self {
+            width: self.width.clone(),
+            data: self.data.clone(),
+        }
+    }
+
+    fn clone_from(&mut self, source: &Self) {
+        self.width = source.width;
+        self.data.clone_from(&source.data);
+    }
+}
