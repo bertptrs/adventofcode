@@ -60,26 +60,28 @@ fn parse_commands(i: &[u8]) -> IResult<&[u8], Vec<Command>> {
 
 pub fn part2(input: &[u8]) -> anyhow::Result<String> {
     let commands = parse_input(trim(input), parse_commands)?;
-    let mut boxes = [(); 256].map(|_| LinkedHashMap::new());
+    let mut state = LinkedHashMap::new();
 
-    for command in &commands {
+    for command in commands {
         match command {
             Command::Add(identifier, focal_len) => {
-                *boxes[hash(identifier) as usize]
-                    .entry(*identifier)
-                    .or_default() = *focal_len;
+                *state.entry(identifier).or_default() = focal_len;
             }
             Command::Remove(identifier) => {
-                boxes[hash(identifier) as usize].remove(identifier);
+                state.remove(identifier);
             }
         }
     }
 
+    let mut box_slot = [1; 256];
     let mut total = 0;
-    for (i, b) in boxes.iter().enumerate() {
-        for (slot, &focal_len) in b.values().enumerate() {
-            total += (i as u32 + 1) * (slot as u32 + 1) * focal_len;
-        }
+
+    for (&identifier, &focal_len) in &state {
+        let index = hash(identifier);
+        let box_no = u32::from(index) + 1;
+        let slot_no = &mut box_slot[index as usize];
+        total += box_no * *slot_no * focal_len;
+        *slot_no += 1;
     }
 
     Ok(total.to_string())
