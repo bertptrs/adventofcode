@@ -73,15 +73,15 @@ pub fn part2(input: &[u8]) -> anyhow::Result<String> {
         }
     }
 
-    let mut box_slot = [1; 256];
+    let mut box_slot = [0; 256];
     let mut total = 0;
 
     for (&identifier, &focal_len) in &state {
         let index = hash(identifier);
         let box_no = u32::from(index) + 1;
         let slot_no = &mut box_slot[index as usize];
-        total += box_no * *slot_no * focal_len;
         *slot_no += 1;
+        total += box_no * *slot_no * focal_len;
     }
 
     Ok(total.to_string())
