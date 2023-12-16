@@ -289,6 +289,21 @@ impl<T: AsRef<[u8]>> Grid<T> {
     }
 }
 
+impl Grid<Vec<u8>> {
+    pub fn zeroed(width: usize, height: usize) -> Self {
+        let mut data = vec![0; (width + 1) * height];
+
+        for line_end in data[width..].iter_mut().step_by(width + 1) {
+            *line_end = b'\n';
+        }
+
+        Self {
+            width: width + 1,
+            data,
+        }
+    }
+}
+
 impl<T: AsMut<[u8]> + AsRef<[u8]>> Grid<T> {
     pub fn rows_mut(&mut self) -> impl Iterator<Item = &mut [u8]> {
         let width = self.width();
