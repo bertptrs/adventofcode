@@ -14,15 +14,12 @@ impl Direction {
     }
 }
 
-pub fn part1(input: &[u8]) -> anyhow::Result<String> {
-    let map = Grid::new(input)?;
-    let mut state = Grid::zeroed(map.width(), map.height());
-    state[0][0] = Direction::Right.bit();
-
-    let mut todo = Vec::new();
-    todo.push((Direction::Right, 0, 0));
-
-    let mut energized = 1;
+fn compute_energized(
+    map: &Grid<&[u8]>,
+    state: &mut Grid<Vec<u8>>,
+    todo: &mut Vec<(Direction, usize, usize)>,
+) -> u32 {
+    let mut energized = todo.len() as u32;
 
     while let Some((dir, x, y)) = todo.pop() {
         let mut enqueue = |dir: Direction, x: usize, y| {
@@ -90,11 +87,51 @@ pub fn part1(input: &[u8]) -> anyhow::Result<String> {
         }
     }
 
-    Ok(energized.to_string())
+    energized
 }
 
-pub fn part2(_input: &[u8]) -> anyhow::Result<String> {
-    anyhow::bail!("Not implemented")
+pub fn part1(input: &[u8]) -> anyhow::Result<String> {
+    let map = Grid::new(input)?;
+    let mut state = Grid::zeroed(map.width(), map.height());
+    state[0][0] = Direction::Right.bit();
+
+    let mut todo = Vec::new();
+    todo.push((Direction::Right, 0, 0));
+
+    Ok(compute_energized(&map, &mut state, &mut todo).to_string())
+}
+
+fn reset_state(state: &mut Grid<Vec<u8>>) {
+    for row in state.rows_mut() {
+        row.fill(0);
+    }
+}
+
+pub fn part2(input: &[u8]) -> anyhow::Result<String> {
+    let map = Grid::new(input)?;
+    let mut state = Grid::zeroed(map.width(), map.height());
+    let mut todo = Vec::new();
+
+    let mut helper = |dir: Direction, x, y| {
+        todo.push((dir, x, y));
+        reset_state(&mut state);
+        state[y][x] = dir.bit();
+
+        compute_energized(&map, &mut state, &mut todo)
+    };
+
+    let mut best = 0;
+    for x in 0..map.width() {
+        best = Ord::max(best, helper(Direction::Down, x, 0));
+        best = Ord::max(best, helper(Direction::Up, x, map.height() - 1));
+    }
+
+    for y in 0..map.height() {
+        best = Ord::max(best, helper(Direction::Down, 0, y));
+        best = Ord::max(best, helper(Direction::Up, map.width() - 1, y));
+    }
+
+    Ok(best.to_string())
 }
 
 #[cfg(test)]
@@ -108,8 +145,8 @@ mod tests {
         assert_eq!("46", part1(SAMPLE).unwrap());
     }
 
-    // #[test]
-    // fn sample_part2() {
-    //     assert_eq!("64", part2(SAMPLE).unwrap());
-    // }
+    #[test]
+    fn sample_part2() {
+        assert_eq!("51", part2(SAMPLE).unwrap());
+    }
 }
