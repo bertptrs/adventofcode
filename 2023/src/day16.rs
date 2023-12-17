@@ -1,18 +1,5 @@
+use crate::common::Direction;
 use crate::common::Grid;
-
-#[derive(Clone, Copy)]
-enum Direction {
-    Up = 0,
-    Left = 1,
-    Down = 2,
-    Right = 3,
-}
-
-impl Direction {
-    fn bit(self) -> u8 {
-        1 << self as u8
-    }
-}
 
 fn compute_energized(
     map: &Grid<&[u8]>,
@@ -22,7 +9,7 @@ fn compute_energized(
     let mut energized = todo.len() as u32;
 
     while let Some((dir, x, y)) = todo.pop() {
-        let mut enqueue = |dir: Direction, x: usize, y| {
+        let mut enqueue = |dir: Direction, x: usize, y: usize| {
             let state = &mut state[y][x];
             if state == &0 {
                 energized += 1;
@@ -112,7 +99,7 @@ pub fn part2(input: &[u8]) -> anyhow::Result<String> {
     let mut state = Grid::zeroed(map.width(), map.height());
     let mut todo = Vec::new();
 
-    let mut helper = |dir: Direction, x, y| {
+    let mut helper = |dir: Direction, x: usize, y: usize| {
         todo.push((dir, x, y));
         reset_state(&mut state);
         state[y][x] = dir.bit();

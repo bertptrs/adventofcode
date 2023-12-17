@@ -323,6 +323,18 @@ impl<T: AsRef<[u8]>> Index<usize> for Grid<T> {
     }
 }
 
+impl<T: AsRef<[u8]>> Index<(usize, usize)> for Grid<T> {
+    type Output = u8;
+
+    fn index(&self, (y, x): (usize, usize)) -> &Self::Output {
+        debug_assert!(y < self.height());
+        debug_assert!(x < self.width());
+
+        let offset = self.width * y + x;
+        &self.data.as_ref()[offset]
+    }
+}
+
 impl<T: AsRef<[u8]>> Display for Grid<T> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{}", String::from_utf8_lossy(self.data.as_ref()))
@@ -349,5 +361,23 @@ impl<T: AsMut<[u8]> + AsRef<[u8]>> IndexMut<usize> for Grid<T> {
         let offset = y * self.width;
         let width = self.width;
         &mut self.data.as_mut()[offset..(offset + width)]
+    }
+}
+
+#[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+pub enum Direction {
+    Up = 0,
+    Left = 1,
+    Down = 2,
+    Right = 3,
+}
+
+impl Direction {
+    pub fn bit(self) -> u8 {
+        1 << self as u8
+    }
+
+    pub fn is_vertical(self) -> bool {
+        matches!(self, Direction::Down | Direction::Up)
     }
 }
