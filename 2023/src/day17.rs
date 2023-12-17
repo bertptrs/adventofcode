@@ -34,7 +34,9 @@ impl PartialOrd for State {
     }
 }
 
-pub fn part1(input: &[u8]) -> anyhow::Result<String> {
+pub fn parts_common(input: &[u8], min: usize, max: usize) -> anyhow::Result<String> {
+    let to_skip = min - 1;
+    let to_take = max - min + 1;
     let map = Grid::new(input)?;
     let mut visited = HashMap::new();
     let width = map.width();
@@ -123,26 +125,52 @@ pub fn part1(input: &[u8]) -> anyhow::Result<String> {
 
         match dir {
             Direction::Up => {
-                for y in (0..y).rev().take(3) {
-                    new_loss += u32::from(map[(y, x)] - b'0');
+                for (y, new_loss) in (0..y)
+                    .rev()
+                    .map(|y| {
+                        new_loss += u32::from(map[(y, x)] - b'0');
+                        (y, new_loss)
+                    })
+                    .skip(to_skip)
+                    .take(to_take)
+                {
                     enqueue(x, y, new_loss);
                 }
             }
             Direction::Left => {
-                for x in (0..x).rev().take(3) {
-                    new_loss += u32::from(map[(y, x)] - b'0');
+                for (x, new_loss) in (0..x)
+                    .rev()
+                    .map(|x| {
+                        new_loss += u32::from(map[(y, x)] - b'0');
+                        (x, new_loss)
+                    })
+                    .skip(to_skip)
+                    .take(to_take)
+                {
                     enqueue(x, y, new_loss);
                 }
             }
             Direction::Down => {
-                for y in ((y + 1)..map.height()).take(3) {
-                    new_loss += u32::from(map[(y, x)] - b'0');
+                for (y, new_loss) in ((y + 1)..map.height())
+                    .map(|y| {
+                        new_loss += u32::from(map[(y, x)] - b'0');
+                        (y, new_loss)
+                    })
+                    .skip(to_skip)
+                    .take(to_take)
+                {
                     enqueue(x, y, new_loss);
                 }
             }
             Direction::Right => {
-                for x in ((x + 1)..map.width()).take(3) {
-                    new_loss += u32::from(map[(y, x)] - b'0');
+                for (x, new_loss) in ((x + 1)..map.width())
+                    .map(|x| {
+                        new_loss += u32::from(map[(y, x)] - b'0');
+                        (x, new_loss)
+                    })
+                    .skip(to_skip)
+                    .take(to_take)
+                {
                     enqueue(x, y, new_loss);
                 }
             }
@@ -151,8 +179,12 @@ pub fn part1(input: &[u8]) -> anyhow::Result<String> {
     anyhow::bail!("Did not find a solution")
 }
 
-pub fn part2(_input: &[u8]) -> anyhow::Result<String> {
-    anyhow::bail!("Not implemented")
+pub fn part1(input: &[u8]) -> anyhow::Result<String> {
+    parts_common(input, 1, 3)
+}
+
+pub fn part2(input: &[u8]) -> anyhow::Result<String> {
+    parts_common(input, 4, 10)
 }
 
 #[cfg(test)]
@@ -164,5 +196,10 @@ mod tests {
     #[test]
     fn sample_part1() {
         assert_eq!("102", part1(SAMPLE).unwrap());
+    }
+
+    #[test]
+    fn sample_part2() {
+        assert_eq!("94", part2(SAMPLE).unwrap());
     }
 }
