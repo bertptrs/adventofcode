@@ -1,8 +1,11 @@
+use anyhow::Context;
 use nom::bytes::complete::tag;
 use nom::bytes::complete::take;
+use nom::bytes::complete::take_until;
 use nom::combinator::map;
 use nom::combinator::map_res;
 use nom::multi::many1;
+use nom::sequence::delimited;
 use nom::sequence::pair;
 use nom::sequence::terminated;
 use nom::IResult;
@@ -88,8 +91,42 @@ pub fn part1(input: &[u8]) -> anyhow::Result<String> {
     solve(&digs)
 }
 
-pub fn part2(_input: &[u8]) -> anyhow::Result<String> {
-    anyhow::bail!("Not implemented")
+fn parse_colors(i: &[u8]) -> IResult<&[u8], Vec<Dig>> {
+    fn parse_color(i: &[u8]) -> anyhow::Result<u64> {
+        // stdlib offers hex parsing but requires going through string, incurring utf-8 validation.
+        // better do it ourselves.
+        let mut num = 0;
+
+        for &c in &i[1..] {
+            num *= 16;
+            num += (c as char).to_digit(16).context("Invalid hex")?;
+        }
+
+        Ok(num.into())
+    }
+    many1(delimited(
+        take_until("#"),
+        map_res(take(7usize), |color: &[u8]| -> anyhow::Result<Dig> {
+            let num = parse_color(color)?;
+            let amount = num >> 4;
+
+            let dir = match num & 0xF {
+                0 => Direction::Right,
+                1 => Direction::Down,
+                2 => Direction::Left,
+                3 => Direction::Up,
+                other => anyhow::bail!("Unknown direction: {other}"),
+            };
+
+            Ok(Dig { dir, amount })
+        }),
+        tag(")\n"),
+    ))(i)
+}
+
+pub fn part2(input: &[u8]) -> anyhow::Result<String> {
+    let digs = parse_input(input, parse_colors)?;
+    solve(&digs)
 }
 
 #[cfg(test)]
@@ -101,5 +138,10 @@ mod tests {
     #[test]
     fn sample_part1() {
         assert_eq!("62", part1(SAMPLE).unwrap());
+    }
+
+    #[test]
+    fn sample_part2() {
+        assert_eq!("952408144115", part2(SAMPLE).unwrap());
     }
 }
