@@ -1,10 +1,8 @@
 use nom::bytes::complete::tag;
 use nom::bytes::complete::take;
-use nom::bytes::complete::take_while1;
 use nom::combinator::map;
 use nom::combinator::map_res;
 use nom::multi::many1;
-use nom::sequence::delimited;
 use nom::sequence::pair;
 use nom::sequence::terminated;
 use nom::IResult;
@@ -17,8 +15,8 @@ struct Dig {
     amount: u64,
 }
 
-fn parse_instructions(i: &[u8]) -> IResult<&[u8], Vec<(Dig, u64)>> {
-    many1(pair(
+fn parse_instructions(i: &[u8]) -> IResult<&[u8], Vec<Dig>> {
+    many1(terminated(
         map(
             pair(
                 terminated(
@@ -37,24 +35,18 @@ fn parse_instructions(i: &[u8]) -> IResult<&[u8], Vec<(Dig, u64)>> {
             ),
             |(dir, amount)| Dig { dir, amount },
         ),
-        delimited(
-            tag("(#"),
-            map_res(take_while1(nom::character::is_hex_digit), |s| {
-                u64::from_str_radix(std::str::from_utf8(s).expect("Checked hex digits"), 16)
-            }),
-            tag(")\n"),
-        ),
+        take(10usize),
     ))(i)
 }
 
-fn compute_points(instructions: &[(Dig, u64)]) -> Vec<(i64, i64)> {
+fn compute_points(instructions: &[Dig]) -> Vec<(i64, i64)> {
     let mut result = Vec::with_capacity(instructions.len() + 1);
     result.push((0, 0));
 
     let mut x = 0;
     let mut y = 0;
 
-    for &(Dig { dir, amount }, _) in instructions {
+    for &Dig { dir, amount } in instructions {
         match dir {
             Direction::Up => y -= amount as i64,
             Direction::Left => x -= amount as i64,
@@ -78,20 +70,22 @@ fn shoelace(points: &[(i64, i64)]) -> i64 {
         / 2
 }
 
-pub fn part1(input: &[u8]) -> anyhow::Result<String> {
-    let instructions = parse_input(input, parse_instructions)?;
-    let points = compute_points(&instructions);
+fn solve(digs: &[Dig]) -> anyhow::Result<String> {
+    let points = compute_points(digs);
 
     let area = shoelace(&points);
     // Assumption: we don't cross over ourselves
-    let perimeter = instructions
-        .iter()
-        .map(|(dig, _)| dig.amount as i64)
-        .sum::<i64>();
+    let perimeter = digs.iter().map(|dig| dig.amount as i64).sum::<i64>();
 
     let total = area + perimeter / 2 + 1;
 
     Ok(total.to_string())
+}
+
+pub fn part1(input: &[u8]) -> anyhow::Result<String> {
+    let digs = parse_input(input, parse_instructions)?;
+
+    solve(&digs)
 }
 
 pub fn part2(_input: &[u8]) -> anyhow::Result<String> {

@@ -33,7 +33,7 @@ fn number_ways(line: &[u8], groups: &[u8]) -> u64 {
 
                 // Either defective or maybe defective
                 if c != b'.' && cur_group < usize::from(group) {
-                    next[group_pos * group_stride + cur_group as usize + 1] += ways;
+                    next[group_pos * group_stride + cur_group + 1] += ways;
                 }
 
                 if c != b'#' {
