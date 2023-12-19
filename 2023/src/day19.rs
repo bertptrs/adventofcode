@@ -1,4 +1,5 @@
 use std::ops::Index;
+use std::ops::Range;
 
 use nom::branch::alt;
 use nom::bytes::complete::tag;
@@ -178,14 +179,86 @@ pub fn part1(input: &[u8]) -> anyhow::Result<String> {
 
     let passing = items
         .iter()
-        .filter_map(|c| c.passes(&rules).then(|| c.rating_sum()))
+        .filter(|c| c.passes(&rules))
+        .map(|c| c.rating_sum())
         .sum::<u32>();
 
     Ok(passing.to_string())
 }
 
-pub fn part2(_input: &[u8]) -> anyhow::Result<String> {
-    anyhow::bail!("Not implemented")
+type ValidRange = Range<u16>;
+
+#[derive(Clone)]
+struct State {
+    numbers: [ValidRange; 4],
+    pos: u16,
+}
+
+pub fn part2(input: &[u8]) -> anyhow::Result<String> {
+    let (rules, _) = parse_input(input, parse_text)?;
+    let mut passing = 0u64;
+
+    let mut todo = Vec::new();
+    todo.push(State {
+        numbers: [(); 4].map(|_| 1..4001),
+        pos: convert_name(b"in"),
+    });
+
+    while let Some(State { mut numbers, pos }) = todo.pop() {
+        let mut enqueue = |numbers: [ValidRange; 4], end| match end {
+            RuleEnd::Reject => (),
+            RuleEnd::Accept => {
+                passing += numbers.iter().map(|r| r.len() as u64).product::<u64>();
+            }
+            RuleEnd::Next(pos) => todo.push(State { numbers, pos }),
+        };
+
+        let rule = &rules[pos as usize];
+
+        'outer: for &(condition, end) in &rule.checks {
+            let mut new_numbers = numbers.clone();
+
+            let (old_range, new_range) = match condition {
+                Condition::Less(b'x', _) | Condition::Greater(b'x', _) => {
+                    (&mut numbers[0], &mut new_numbers[0])
+                }
+                Condition::Less(b'm', _) | Condition::Greater(b'm', _) => {
+                    (&mut numbers[1], &mut new_numbers[1])
+                }
+                Condition::Less(b'a', _) | Condition::Greater(b'a', _) => {
+                    (&mut numbers[2], &mut new_numbers[2])
+                }
+                Condition::Less(b's', _) | Condition::Greater(b's', _) => {
+                    (&mut numbers[3], &mut new_numbers[3])
+                }
+                Condition::Less(other, _) | Condition::Greater(other, _) => {
+                    anyhow::bail!("Invalid variable {}", other as char)
+                }
+            };
+
+            match condition {
+                Condition::Greater(_, value) => {
+                    old_range.end = value + 1;
+                    new_range.start = value + 1;
+                }
+                Condition::Less(_, value) => {
+                    old_range.start = value;
+                    new_range.end = value;
+                }
+            }
+
+            if !Range::is_empty(new_range) {
+                enqueue(new_numbers, end);
+            }
+
+            if Range::is_empty(old_range) {
+                continue 'outer;
+            }
+        }
+        enqueue(numbers, rule.end);
+    }
+
+    Ok(passing.to_string())
 }
 
 #[cfg(test)]
@@ -197,5 +270,10 @@ mod tests {
     #[test]
     fn sample_part1() {
         assert_eq!("19114", part1(SAMPLE).unwrap());
+    }
+
+    #[test]
+    fn sample_part2() {
+        assert_eq!("167409079868000", part2(SAMPLE).unwrap());
     }
 }
