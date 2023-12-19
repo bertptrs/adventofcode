@@ -188,7 +188,6 @@ pub fn part1(input: &[u8]) -> anyhow::Result<String> {
 
 type ValidRange = Range<u16>;
 
-#[derive(Clone)]
 struct State {
     numbers: [ValidRange; 4],
     pos: u16,
