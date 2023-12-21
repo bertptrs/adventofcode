@@ -99,7 +99,6 @@ fn compute_infinimap<const L: usize>(
     Ok(final_counts)
 }
 
-// 616665063284297 too high
 pub fn part2(input: &[u8]) -> anyhow::Result<String> {
     // This is wrong for things that aren't the input but it works for me, so…
     let dests = [65, 65 + 131, 65 + 2 * 131];
