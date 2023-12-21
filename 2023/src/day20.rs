@@ -141,8 +141,52 @@ pub fn part1(input: &[u8]) -> anyhow::Result<String> {
     Ok((low_pulses * high_pulses).to_string())
 }
 
-pub fn part2(_input: &[u8]) -> anyhow::Result<String> {
-    anyhow::bail!("Not implemented")
+pub fn part2(input: &[u8]) -> anyhow::Result<String> {
+    let mut cables = parse_input(input, parse_cables)?;
+
+    let mut todo = VecDeque::new();
+    let mut last_pulse: HashMap<u32, bool> = HashMap::new();
+
+    for press in 1u64.. {
+        todo.push_back((false, convert_name(b"broadcaster")));
+
+        while let Some((pulse, pos)) = todo.pop_front() {
+            let Some(cable) = cables.get_mut(&pos) else {
+                // Sometimes cables aren't real, and that's okay
+                continue;
+            };
+
+            if !pulse && pos == convert_name(b"rx") {
+                return Ok(press.to_string());
+            }
+
+            let next_pulse = match &mut cable.node {
+                Node::FlipFlop(state) => {
+                    if pulse {
+                        // Ignore, nothing to be done since it's a high pulse
+                        continue;
+                    } else {
+                        *state = !*state;
+                        *state
+                    }
+                }
+                Node::Conjunction(inwards) => {
+                    // Need to deal with the check outside the match otherwise lifetime issues :(
+                    !inwards
+                        .iter()
+                        .all(|source| *last_pulse.get(source).unwrap_or(&false))
+                }
+                Node::Broadcaster => pulse,
+            };
+
+            last_pulse.insert(pos, next_pulse);
+            for &other in &cable.dest {
+                todo.push_back((next_pulse, other));
+            }
+        }
+    }
+
+    anyhow::bail!("Somehow counted to infinity")
 }
 
 #[cfg(test)]
