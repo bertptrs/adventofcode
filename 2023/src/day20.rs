@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 use std::collections::VecDeque;
 
+use anyhow::Context;
 use nom::branch::alt;
 use nom::bytes::complete::tag;
 use nom::bytes::complete::take_until;
@@ -11,6 +12,7 @@ use nom::multi::fold_many1;
 use nom::multi::separated_list1;
 use nom::sequence::delimited;
 use nom::IResult;
+use num_integer::Integer;
 
 use crate::common::parse_input;
 
@@ -141,11 +143,37 @@ pub fn part1(input: &[u8]) -> anyhow::Result<String> {
     Ok((low_pulses * high_pulses).to_string())
 }
 
+/// This solution is entirely based on the structure of the graph. The only node pointing into the
+/// rx node is a conjunction, which itself has a few conjunctions into then that work like binary
+/// counters.
+///
+/// In the end, I compute the period of each of those binary counters, and then the solution is the
+/// lowest common multiple of all of those.
 pub fn part2(input: &[u8]) -> anyhow::Result<String> {
     let mut cables = parse_input(input, parse_cables)?;
 
     let mut todo = VecDeque::new();
     let mut last_pulse: HashMap<u32, bool> = HashMap::new();
+
+    let into_rx = cables
+        .iter()
+        .find_map(|(id, entry)| {
+            if entry.dest.contains(&convert_name(b"rx")) {
+                Some(*id)
+            } else {
+                None
+            }
+        })
+        .context("Cannot find node pointing into rx")?;
+
+    let Node::Conjunction(into) = &cables[&into_rx].node else {
+        anyhow::bail!("Node pointing into rx is not a conjunction");
+    };
+
+    // In theory this data structure should be a set, in practice it contains 4 elements and a Vec
+    // is nice and easy.
+    let mut awaiting = into.clone();
+    let mut lcm = 1;
 
     for press in 1u64.. {
         todo.push_back((false, convert_name(b"broadcaster")));
@@ -155,10 +183,6 @@ pub fn part2(input: &[u8]) -> anyhow::Result<String> {
                 // Sometimes cables aren't real, and that's okay
                 continue;
             };
-
-            if !pulse && pos == convert_name(b"rx") {
-                return Ok(press.to_string());
-            }
 
             let next_pulse = match &mut cable.node {
                 Node::FlipFlop(state) => {
@@ -182,6 +206,14 @@ pub fn part2(input: &[u8]) -> anyhow::Result<String> {
             last_pulse.insert(pos, next_pulse);
             for &other in &cable.dest {
                 todo.push_back((next_pulse, other));
+                if next_pulse && other == into_rx && awaiting.contains(&pos) {
+                    lcm = press.lcm(&lcm);
+                    awaiting.retain(|f| f != &pos);
+
+                    if awaiting.is_empty() {
+                        return Ok(lcm.to_string());
+                    }
+                }
             }
         }
     }
