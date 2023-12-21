@@ -52,7 +52,10 @@ pub fn part1(input: &[u8]) -> anyhow::Result<String> {
     part1_parametrized(input, 64)
 }
 
-fn compute_infinimap(input: &[u8], steps: i64) -> anyhow::Result<i64> {
+fn compute_infinimap<const L: usize>(
+    input: &[u8],
+    steps_groups: [i64; L],
+) -> anyhow::Result<[i64; L]> {
     let map = Grid::new(input)?;
     let width = map.width() as i64;
     let height = map.height() as i64;
@@ -64,11 +67,17 @@ fn compute_infinimap(input: &[u8], steps: i64) -> anyhow::Result<i64> {
     let mut todo = VecDeque::new();
     todo.push_back((0, (start.0 as i64, start.1 as i64)));
 
-    let mut count = (steps + 1) % 2;
+    let mut final_counts = [0; L];
+    let mut counts = [1, 0];
+    let mut i = 0;
 
     while let Some((dist, (x, y))) = todo.pop_front() {
-        if dist == steps {
-            break;
+        if dist == steps_groups[i] {
+            final_counts[i] = counts[(steps_groups[i] % 2) as usize];
+            i += 1;
+            if i >= steps_groups.len() {
+                break;
+            }
         }
         let mut enqueue = |x, y| {
             let map_x = (((x % width) + width) % width) as usize;
@@ -77,9 +86,7 @@ fn compute_infinimap(input: &[u8], steps: i64) -> anyhow::Result<i64> {
 
             if map[(map_y, map_x)] != b'#' && visited.insert((x, y)) {
                 todo.push_back((dist + 1, (x, y)));
-                if (dist + 1) % 2 == steps % 2 {
-                    count += 1;
-                }
+                counts[((dist + 1) % 2) as usize] += 1;
             }
         };
 
@@ -89,7 +96,7 @@ fn compute_infinimap(input: &[u8], steps: i64) -> anyhow::Result<i64> {
         enqueue(x, y + 1);
     }
 
-    Ok(count)
+    Ok(final_counts)
 }
 
 // 616665063284297 too high
@@ -97,10 +104,7 @@ pub fn part2(input: &[u8]) -> anyhow::Result<String> {
     // This is wrong for things that aren't the input but it works for me, so…
     let dests = [65, 65 + 131, 65 + 2 * 131];
 
-    let mut counts = [0; 3];
-    for (steps, count) in dests.into_iter().zip(&mut counts) {
-        *count = compute_infinimap(input, steps)?;
-    }
+    let counts = compute_infinimap(input, dests)?;
 
     // Stolen set of equations, this fits a quadratic equation to a three points at x = 0, 1, 2
     let a = 0;
@@ -148,13 +152,19 @@ mod tests {
 
     #[test]
     fn sample_infinimap() {
-        assert_eq!(16, compute_infinimap(SAMPLE, 6).unwrap());
-        assert_eq!(50, compute_infinimap(SAMPLE, 10).unwrap());
-        assert_eq!(1594, compute_infinimap(SAMPLE, 50).unwrap());
-        assert_eq!(6536, compute_infinimap(SAMPLE, 100).unwrap());
-        // Commented out because they take forever but they should work.
-        // assert_eq!(167004, compute_infinimap(SAMPLE, 500).unwrap());
-        // assert_eq!(668697, compute_infinimap(SAMPLE, 1000).unwrap());
-        // assert_eq!(16733044, compute_infinimap(SAMPLE, 5000).unwrap());
+        let inputs = [
+            6, 10, 50, 100,
+            // 500
+            // 1000
+            // 5000
+        ];
+        let expected = [
+            16, 50, 1594, 6536,
+            // 167004,
+            // 668697,
+            // 16733044,
+        ];
+
+        assert_eq!(expected, compute_infinimap(SAMPLE, inputs).unwrap());
     }
 }
