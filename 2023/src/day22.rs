@@ -47,7 +47,7 @@ fn parse_bricks(i: &[u8]) -> IResult<&[u8], Vec<Brick>> {
     many1(Brick::parse)(i)
 }
 
-pub fn part1(input: &[u8]) -> anyhow::Result<String> {
+fn compute_support(input: &[u8]) -> anyhow::Result<(Vec<Vec<usize>>, Vec<u8>)> {
     let mut bricks = parse_input(input, parse_bricks)?;
     bricks.sort_unstable_by_key(Brick::lowest);
 
@@ -101,6 +101,12 @@ pub fn part1(input: &[u8]) -> anyhow::Result<String> {
         }
     }
 
+    Ok((supporting, supported))
+}
+
+pub fn part1(input: &[u8]) -> anyhow::Result<String> {
+    let (supporting, supported) = compute_support(input)?;
+
     let removable = supporting
         .iter()
         .filter(|b| b.iter().all(|&other| supported[other] >= 2))
@@ -109,8 +115,37 @@ pub fn part1(input: &[u8]) -> anyhow::Result<String> {
     Ok(removable.to_string())
 }
 
-pub fn part2(_input: &[u8]) -> anyhow::Result<String> {
-    anyhow::bail!("Not implemented")
+fn compute_collapse(start: usize, supporting: &[Vec<usize>], supported: &[u8]) -> u32 {
+    // Need to make a copy to keep track of removed supports
+    let mut supported = supported.to_owned();
+    let mut todo = Vec::new();
+    todo.push(start);
+    let mut collapsed = 0;
+
+    while let Some(node) = todo.pop() {
+        for &other in &supporting[node] {
+            supported[other] -= 1;
+            if supported[other] == 0 {
+                todo.push(other);
+                collapsed += 1;
+            }
+        }
+    }
+
+    collapsed
+}
+
+pub fn part2(input: &[u8]) -> anyhow::Result<String> {
+    let (supporting, supported) = compute_support(input)?;
+
+    let collapsed = supporting
+        .iter()
+        .enumerate()
+        .filter(|(_, support)| support.iter().any(|&other| supported[other] == 1))
+        .map(|(start, _)| compute_collapse(start, &supporting, &supported))
+        .sum::<u32>();
+
+    Ok(collapsed.to_string())
 }
 
 #[cfg(test)]
@@ -122,5 +157,10 @@ mod tests {
     #[test]
     fn sample_part1() {
         assert_eq!("5", part1(SAMPLE).unwrap());
+    }
+
+    #[test]
+    fn sample_part2() {
+        assert_eq!("7", part2(SAMPLE).unwrap());
     }
 }
