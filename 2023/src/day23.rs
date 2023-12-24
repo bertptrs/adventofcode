@@ -12,6 +12,13 @@ enum Slope {
 }
 
 impl Slope {
+    fn invert(self) -> Self {
+        match self {
+            Slope::Level => Self::Level,
+            Slope::Up => Self::Down,
+            Slope::Down => Self::Up,
+        }
+    }
     fn combine(self, other: Self) -> Self {
         match (self, other) {
             (Slope::Level, next) | (next, Slope::Level) => next,
@@ -25,7 +32,7 @@ impl Slope {
     }
 }
 
-fn simplify_graph(input: &[u8]) -> anyhow::Result<Vec<Vec<(usize, u32)>>> {
+fn simplify_graph(input: &[u8]) -> anyhow::Result<Vec<Vec<(Slope, usize, u32)>>> {
     let map = Grid::new(input)?;
     let width = map.width();
     let height = map.height();
@@ -76,12 +83,8 @@ fn simplify_graph(input: &[u8]) -> anyhow::Result<Vec<Vec<(usize, u32)>>> {
                         return;
                     }
 
-                    if matches!(slope, Slope::Down | Slope::Level) {
-                        graph[id].push((other, dist + 1));
-                    }
-                    if matches!(slope, Slope::Up | Slope::Level) {
-                        graph[other].push((id, dist + 1));
-                    }
+                    graph[id].push((slope, other, dist + 1));
+                    graph[other].push((slope.invert(), id, dist + 1));
                 } else if visited.insert(x + y * width) {
                     let tile_slope = if map[(y, x)] == up {
                         Slope::Up
@@ -96,12 +99,8 @@ fn simplify_graph(input: &[u8]) -> anyhow::Result<Vec<Vec<(usize, u32)>>> {
                         let new_id = graph.len();
                         nodes.insert((x, y), new_id);
                         graph.push(Vec::new());
-                        if matches!(slope, Slope::Down | Slope::Level) {
-                            graph[id].push((new_id, dist + 1));
-                        }
-                        if matches!(slope, Slope::Up | Slope::Level) {
-                            graph[new_id].push((id, dist + 1));
-                        }
+                        graph[id].push((slope, new_id, dist + 1));
+                        graph[new_id].push((slope.invert(), id, dist + 1));
 
                         todo_junctions.push((new_id, x, y));
                     } else {
@@ -122,7 +121,7 @@ fn simplify_graph(input: &[u8]) -> anyhow::Result<Vec<Vec<(usize, u32)>>> {
 fn longest_path(
     pos: usize,
     travelled: u32,
-    graph: &[Vec<(usize, u32)>],
+    graph: &[Vec<(Slope, usize, u32)>],
     visited: &mut HashSet<usize>,
 ) -> u32 {
     if pos == 1 {
@@ -131,8 +130,8 @@ fn longest_path(
 
     let mut best = 0;
 
-    for &(other, dist) in &graph[pos] {
-        if visited.insert(other) {
+    for &(slope, other, dist) in &graph[pos] {
+        if !matches!(slope, Slope::Up) && visited.insert(other) {
             best = Ord::max(best, longest_path(other, travelled + dist, graph, visited));
             visited.remove(&other);
         }
@@ -147,8 +146,35 @@ pub fn part1(input: &[u8]) -> anyhow::Result<String> {
     Ok(longest_path(0, 0, &graph, &mut HashSet::new()).to_string())
 }
 
-pub fn part2(_input: &[u8]) -> anyhow::Result<String> {
-    anyhow::bail!("Not implemented")
+fn longer_longest_path(
+    pos: usize,
+    travelled: u32,
+    graph: &[Vec<(Slope, usize, u32)>],
+    visited: &mut HashSet<usize>,
+) -> u32 {
+    if pos == 1 {
+        return travelled;
+    }
+
+    let mut best = 0;
+
+    for &(_, other, dist) in &graph[pos] {
+        if visited.insert(other) {
+            best = Ord::max(
+                best,
+                longer_longest_path(other, travelled + dist, graph, visited),
+            );
+            visited.remove(&other);
+        }
+    }
+
+    best
+}
+
+pub fn part2(input: &[u8]) -> anyhow::Result<String> {
+    let graph = simplify_graph(input)?;
+
+    Ok(longer_longest_path(0, 0, &graph, &mut HashSet::new()).to_string())
 }
 
 #[cfg(test)]
@@ -160,5 +186,10 @@ mod tests {
     #[test]
     fn sample_part1() {
         assert_eq!("94", part1(SAMPLE).unwrap());
+    }
+
+    #[test]
+    fn sample_part2() {
+        assert_eq!("154", part2(SAMPLE).unwrap());
     }
 }
