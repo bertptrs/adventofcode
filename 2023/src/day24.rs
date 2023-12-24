@@ -10,10 +10,6 @@ use crate::common::parse_input;
 
 const EPSILON: f64 = 1e-6;
 
-fn is_in_range(n: f64) -> bool {
-    n >= 200000000000000.0 && n <= 400000000000000.0
-}
-
 struct Hail {
     position: [i64; 3],
     speed: [i64; 3],
@@ -30,7 +26,7 @@ impl Hail {
         (slope, offset)
     }
 
-    fn intersect(&self, other: &Self) -> bool {
+    fn intersect(&self, other: &Self, min: f64, max: f64) -> bool {
         let (a1, b1) = self.to_yab();
         let (a2, b2) = other.to_yab();
 
@@ -52,7 +48,7 @@ impl Hail {
         }
 
         // use the formula for X
-        is_in_range(x) && is_in_range(y)
+        x >= min && x <= max && y >= min && y <= max
     }
 
     fn parse(i: &[u8]) -> IResult<&[u8], Self> {
@@ -78,7 +74,7 @@ fn parse_hail(i: &[u8]) -> IResult<&[u8], Vec<Hail>> {
     many1(Hail::parse)(i)
 }
 
-pub fn part1(input: &[u8]) -> anyhow::Result<String> {
+fn part1_parametrized(input: &[u8], min: f64, max: f64) -> anyhow::Result<String> {
     let hail = parse_input(input, parse_hail)?;
 
     let intersections = hail
@@ -88,11 +84,15 @@ pub fn part1(input: &[u8]) -> anyhow::Result<String> {
             hail[i + 1..]
                 .iter()
                 .map(move |b| (a, b))
-                .filter(|(a, b)| a.intersect(b))
+                .filter(|(a, b)| a.intersect(b, min, max))
         })
         .count();
 
     Ok(intersections.to_string())
+}
+
+pub fn part1(input: &[u8]) -> anyhow::Result<String> {
+    part1_parametrized(input, 200000000000000.0, 400000000000000.0)
 }
 
 pub fn part2(_input: &[u8]) -> anyhow::Result<String> {
@@ -105,8 +105,8 @@ mod tests {
 
     const SAMPLE: &[u8] = include_bytes!("samples/24.txt");
 
-    // #[test]
-    // fn sample_part1() {
-    //     assert_eq!("2", part1(SAMPLE).unwrap());
-    // }
+    #[test]
+    fn sample_part1() {
+        assert_eq!("2", part1_parametrized(SAMPLE, 7.0, 27.0).unwrap());
+    }
 }
