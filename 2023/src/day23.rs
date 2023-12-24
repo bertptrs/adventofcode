@@ -1,5 +1,4 @@
 use std::collections::HashMap;
-use std::collections::HashSet;
 
 use crate::common::Grid;
 use crate::common::IndexSet;
@@ -121,7 +120,7 @@ fn longest_path(
     pos: usize,
     travelled: u32,
     graph: &[Vec<(Slope, usize, u32)>],
-    visited: &mut HashSet<usize>,
+    visited: u64,
 ) -> u32 {
     if pos == 1 {
         return travelled;
@@ -130,9 +129,12 @@ fn longest_path(
     let mut best = 0;
 
     for &(slope, other, dist) in &graph[pos] {
-        if !matches!(slope, Slope::Up) && visited.insert(other) {
-            best = Ord::max(best, longest_path(other, travelled + dist, graph, visited));
-            visited.remove(&other);
+        let index = 1u64 << other;
+        if !matches!(slope, Slope::Up) && (visited & index) == 0 {
+            best = Ord::max(
+                best,
+                longest_path(other, travelled + dist, graph, visited | index),
+            );
         }
     }
 
@@ -142,14 +144,14 @@ fn longest_path(
 pub fn part1(input: &[u8]) -> anyhow::Result<String> {
     let graph = simplify_graph(input)?;
 
-    Ok(longest_path(0, 0, &graph, &mut HashSet::new()).to_string())
+    Ok(longest_path(0, 0, &graph, 0).to_string())
 }
 
 fn longer_longest_path(
     pos: usize,
     travelled: u32,
     graph: &[Vec<(Slope, usize, u32)>],
-    visited: &mut HashSet<usize>,
+    visited: u64,
 ) -> u32 {
     if pos == 1 {
         return travelled;
@@ -158,12 +160,12 @@ fn longer_longest_path(
     let mut best = 0;
 
     for &(_, other, dist) in &graph[pos] {
-        if visited.insert(other) {
+        let index = 1u64 << other;
+        if (visited & index) == 0 {
             best = Ord::max(
                 best,
-                longer_longest_path(other, travelled + dist, graph, visited),
+                longer_longest_path(other, travelled + dist, graph, visited | index),
             );
-            visited.remove(&other);
         }
     }
 
@@ -173,7 +175,7 @@ fn longer_longest_path(
 pub fn part2(input: &[u8]) -> anyhow::Result<String> {
     let graph = simplify_graph(input)?;
 
-    Ok(longer_longest_path(0, 0, &graph, &mut HashSet::new()).to_string())
+    Ok(longer_longest_path(0, 0, &graph, 0).to_string())
 }
 
 #[cfg(test)]
