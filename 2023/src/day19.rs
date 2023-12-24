@@ -159,7 +159,9 @@ fn parse_rule(i: &[u8]) -> IResult<&[u8], (u16, Rule)> {
     Ok((&i[2..], (name, Rule { checks, end })))
 }
 
-fn parse_text(i: &[u8]) -> IResult<&[u8], (Box<[Rule]>, Vec<Item>)> {
+type RulesAndItems = (Box<[Rule]>, Vec<Item>);
+
+fn parse_text(i: &[u8]) -> IResult<&[u8], RulesAndItems> {
     separated_pair(
         fold_many1(
             parse_rule,

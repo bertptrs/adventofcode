@@ -5,7 +5,9 @@ use nom::IResult;
 
 use crate::common::parse_input;
 
-fn parse_reports(mut i: &[u8]) -> IResult<&[u8], (Vec<Range<usize>>, Vec<i32>)> {
+type Input = (Vec<Range<usize>>, Vec<i32>);
+
+fn parse_reports(mut i: &[u8]) -> IResult<&[u8], Input> {
     let mut begin = 0;
     let mut numbers = Vec::new();
     let mut ranges = Vec::new();

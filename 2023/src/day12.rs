@@ -53,7 +53,9 @@ fn number_ways(line: &[u8], groups: &[u8]) -> u64 {
         + cur[(groups.len() - 1) * group_stride + groups[groups.len() - 1] as usize]
 }
 
-fn parse_lines(i: &[u8]) -> IResult<&[u8], Vec<(&[u8], Vec<u8>)>> {
+type LineAndGroups<'a> = Vec<(&'a [u8], Vec<u8>)>;
+
+fn parse_lines(i: &[u8]) -> IResult<&[u8], LineAndGroups> {
     many1(terminated(
         separated_pair(
             take_until(" "),
