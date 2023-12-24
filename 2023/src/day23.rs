@@ -77,7 +77,6 @@ fn simplify_graph(input: &[u8]) -> anyhow::Result<Vec<Vec<(Slope, usize, u32)>>>
         while let Some((dist, slope, x, y)) = todo_positions.pop() {
             let mut enqueue = |x: usize, y: usize, up, down| {
                 if map[(y, x)] == b'#' {
-                    return;
                 } else if let Some(&other) = nodes.get(&(x, y)) {
                     if other == id {
                         return;
