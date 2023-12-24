@@ -327,8 +327,16 @@ impl<T: AsRef<[u8]>> Index<(usize, usize)> for Grid<T> {
     type Output = u8;
 
     fn index(&self, (y, x): (usize, usize)) -> &Self::Output {
-        debug_assert!(y < self.height());
-        debug_assert!(x < self.width());
+        debug_assert!(
+            y < self.height(),
+            "Y {y} should be lower than {}",
+            self.height()
+        );
+        debug_assert!(
+            x < self.width(),
+            "X {x} should be lower than {}",
+            self.width()
+        );
 
         let offset = self.width * y + x;
         &self.data.as_ref()[offset]
