@@ -1,12 +1,18 @@
 use nom::bytes::complete::tag;
+use nom::character::complete::space1;
 use nom::combinator::map;
 use nom::multi::many1;
 use nom::sequence::terminated;
 use nom::sequence::tuple;
 use nom::IResult;
-use num_integer::Integer;
 
 use crate::common::parse_input;
+
+const EPSILON: f64 = 1e-6;
+
+fn is_in_range(n: f64) -> bool {
+    n >= 200000000000000.0 && n <= 400000000000000.0
+}
 
 struct Hail {
     position: [i64; 3],
@@ -14,29 +20,54 @@ struct Hail {
 }
 
 impl Hail {
-    fn intersect(&self, other: &Self) -> bool {
-        // Assumption: speed in no coordinate is 0. This happens to be true.
-        let multiplier = self.speed[0].lcm(&self.speed[1]);
+    // Convert to y = ax + b form
+    fn to_yab(&self) -> (f64, f64) {
+        debug_assert_ne!(0, self.speed[0]);
 
-        let mult_x = multiplier / self.speed[0];
-        let mult_y = multiplier / self.speed[1];
+        let slope = self.speed[1] as f64 / self.speed[0] as f64;
+        let offset = self.position[1] as f64 - self.position[0] as f64 * slope;
+
+        (slope, offset)
+    }
+
+    fn intersect(&self, other: &Self) -> bool {
+        let (a1, b1) = self.to_yab();
+        let (a2, b2) = other.to_yab();
+
+        if (a1 - a2).abs() < EPSILON {
+            return false;
+        }
+
+        let a = a1 - a2;
+        let b = b2 - b1;
+
+        let x = b / a;
+        let y = a1 * x + b1;
+
+        let t1 = (x - self.position[0] as f64) / self.speed[0] as f64;
+        let t2 = (x - other.position[0] as f64) / other.speed[0] as f64;
+
+        if t1 < 0.0 || t2 < 0.0 {
+            return false;
+        }
 
         // use the formula for X
-        false
+        is_in_range(x) && is_in_range(y)
     }
 
     fn parse(i: &[u8]) -> IResult<&[u8], Self> {
         use nom::character::complete::i64;
-        let parse_coordinates = |i| {
+        let sep = |i| tuple((tag(","), space1))(i);
+        let parse_coordinates = move |i| {
             map(
-                tuple((terminated(i64, tag(", ")), terminated(i64, tag(", ")), i64)),
+                tuple((terminated(i64, sep), terminated(i64, sep), i64)),
                 |(x, y, z)| [x, y, z],
             )(i)
         };
 
         map(
             tuple((
-                terminated(parse_coordinates, tag(" @ ")),
+                terminated(parse_coordinates, tuple((tag(" @"), space1))),
                 terminated(parse_coordinates, tag("\n")),
             )),
             |(position, speed)| Self { position, speed },
@@ -74,9 +105,8 @@ mod tests {
 
     const SAMPLE: &[u8] = include_bytes!("samples/24.txt");
 
-    #[test]
-    #[ignore = "not completely implemented"]
-    fn sample_part1() {
-        assert_eq!("2", part1(SAMPLE).unwrap());
-    }
+    // #[test]
+    // fn sample_part1() {
+    //     assert_eq!("2", part1(SAMPLE).unwrap());
+    // }
 }
