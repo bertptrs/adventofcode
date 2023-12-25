@@ -1,3 +1,4 @@
+use linfa_linalg::qr::QRInto;
 use nom::bytes::complete::tag;
 use nom::character::complete::space1;
 use nom::combinator::map;
@@ -95,8 +96,81 @@ pub fn part1(input: &[u8]) -> anyhow::Result<String> {
     part1_parametrized(input, 200000000000000.0, 400000000000000.0)
 }
 
-pub fn part2(_input: &[u8]) -> anyhow::Result<String> {
-    anyhow::bail!("Not implemented")
+pub fn part2(input: &[u8]) -> anyhow::Result<String> {
+    let hail = parse_input(input, parse_hail)?;
+
+    let p0 = hail[0].position.map(|v| v as f64);
+    let p1 = hail[1].position.map(|v| v as f64);
+    let p2 = hail[2].position.map(|v| v as f64);
+    let v0 = hail[0].speed.map(|v| v as f64);
+    let v1 = hail[1].speed.map(|v| v as f64);
+    let v2 = hail[2].speed.map(|v| v as f64);
+
+    let b = ndarray::array![
+        [(p0[1] * v0[0] - p1[1] * v1[0]) - (p0[0] * v0[1] - p1[0] * v1[1])],
+        [(p0[1] * v0[0] - p2[1] * v2[0]) - (p0[0] * v0[1] - p2[0] * v2[1])],
+        [(p0[2] * v0[0] - p1[2] * v1[0]) - (p0[0] * v0[2] - p1[0] * v1[2])],
+        [(p0[2] * v0[0] - p2[2] * v2[0]) - (p0[0] * v0[2] - p2[0] * v2[2])],
+        [(p0[2] * v0[1] - p1[2] * v1[1]) - (p0[1] * v0[2] - p1[1] * v1[2])],
+        [(p0[2] * v0[1] - p2[2] * v2[1]) - (p0[1] * v0[2] - p2[1] * v2[2])],
+    ];
+
+    let a = ndarray::array![
+        [
+            v1[1] - v0[1],
+            v0[0] - v1[0],
+            0.0,
+            p0[1] - p1[1],
+            p1[0] - p0[0],
+            0.0
+        ],
+        [
+            v2[1] - v0[1],
+            v0[0] - v2[0],
+            0.0,
+            p0[1] - p2[1],
+            p2[0] - p0[0],
+            0.0
+        ],
+        [
+            v1[2] - v0[2],
+            0.0,
+            v0[0] - v1[0],
+            p0[2] - p1[2],
+            0.0,
+            p1[0] - p0[0]
+        ],
+        [
+            v2[2] - v0[2],
+            0.0,
+            v0[0] - v2[0],
+            p0[2] - p2[2],
+            0.0,
+            p2[0] - p0[0]
+        ],
+        [
+            0.0,
+            v1[2] - v0[2],
+            v0[1] - v1[1],
+            0.0,
+            p0[2] - p1[2],
+            p1[1] - p0[1]
+        ],
+        [
+            0.0,
+            v2[2] - v0[2],
+            v0[1] - v2[1],
+            0.0,
+            p0[2] - p2[2],
+            p2[1] - p0[1]
+        ],
+    ];
+
+    let rock = a.qr_into()?.solve_into(b)?;
+
+    Ok((rock[[0, 0]] + rock[[1, 0]] + rock[[2, 0]])
+        .round()
+        .to_string())
 }
 
 #[cfg(test)]
@@ -108,5 +182,10 @@ mod tests {
     #[test]
     fn sample_part1() {
         assert_eq!("2", part1_parametrized(SAMPLE, 7.0, 27.0).unwrap());
+    }
+
+    #[test]
+    fn sample_part2() {
+        assert_eq!("47", part2(SAMPLE).unwrap());
     }
 }
