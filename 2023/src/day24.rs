@@ -41,15 +41,14 @@ impl Hail {
         let x = b / a;
         let y = a1 * x + b1;
 
-        let t1 = (x - self.position[0] as f64) / self.speed[0] as f64;
-        let t2 = (x - other.position[0] as f64) / other.speed[0] as f64;
-
-        if t1 < 0.0 || t2 < 0.0 {
+        if x < min || x > max || y < min || y > max {
             return false;
         }
 
-        // use the formula for X
-        x >= min && x <= max && y >= min && y <= max
+        let t1 = (x - self.position[0] as f64) / self.speed[0] as f64;
+        let t2 = (x - other.position[0] as f64) / other.speed[0] as f64;
+
+        t1 >= 0.0 && t2 >= 0.0
     }
 
     fn parse(i: &[u8]) -> IResult<&[u8], Self> {
