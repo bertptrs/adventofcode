@@ -1,12 +1,12 @@
 import importlib
 from abc import ABC, abstractmethod
-from typing import Any, Tuple, cast
+from typing import Any, cast
 
 
 class Runner(ABC):
     @classmethod
     @abstractmethod
-    def run_both(cls, data: str) -> Tuple[Any, Any]:
+    def run_both(cls, data: str) -> tuple[Any, Any]:
         pass
 
     @classmethod
@@ -22,7 +22,7 @@ class Runner(ABC):
 
 class SeparateRunner(Runner):
     @classmethod
-    def run_both(cls, data: str) -> Tuple[Any, Any]:
+    def run_both(cls, data: str) -> tuple[Any, Any]:
         return (cls.part1(data), cls.part2(data))
 
 
