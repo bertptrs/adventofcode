@@ -15,7 +15,9 @@ from aoc import days
     default="-",
     help="Problem input file",
 )
-@click.option("-t", "--time", "timing", is_flag=True, help="Print elapsed time afterwards")
+@click.option(
+    "-t", "--time", "timing", is_flag=True, help="Print elapsed time afterwards"
+)
 @click.argument("day", required=True)
 def main(day: int, timing: bool, data: str) -> None:
     runner_class = days.get_runner(day)
