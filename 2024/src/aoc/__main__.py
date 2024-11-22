@@ -3,7 +3,7 @@ import time
 
 import click
 
-from . import days
+from aoc import days
 
 
 @click.command()

@@ -12,8 +12,12 @@ dependencies = [
 [dependency-groups]
 dev = [
     "mypy>=1.13.0",
+    "pytest>=8.3.3",
     "ruff>=0.7.3",
 ]
+
+[tool.uv]
+package = true
 
 [tool.ruff.lint]
 select = ["F", "E", "I"]
