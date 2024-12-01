@@ -67,3 +67,6 @@ flamegraph.svg
 
 # Ignore saved inputs
 inputs/
+
+# Terraform dir 
+.terraform
