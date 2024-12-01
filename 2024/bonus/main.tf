@@ -10,3 +10,7 @@ module "day01" {
 output "day01_1" {
   value = module.day01.part1
 }
+
+output "day01_2" {
+  value = module.day01.part2
+}
