@@ -1,5 +1,6 @@
 import datetime
 import time
+from typing import IO
 
 import click
 
@@ -19,8 +20,9 @@ from aoc import days
     "-t", "--time", "timing", is_flag=True, help="Print elapsed time afterwards"
 )
 @click.argument("day", required=True)
-def main(day: int, timing: bool, data: str) -> None:
+def main(day: int, timing: bool, data: IO[str]) -> None:
     runner_class = days.get_runner(day)
+    data = data.read()
 
     start = time.perf_counter_ns()
 
