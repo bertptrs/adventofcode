@@ -1,0 +1,43 @@
+on:
+  - push
+
+name: Advent of Code 2024
+
+jobs:
+  ci:
+    strategy:
+      matrix:
+        python-version:
+          - "3.12"
+          - "3.13"
+
+    name: Continuous Integration
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+        with:
+          enable-cache: true
+          cache-dependency-glob: "2024/uv.lock"
+
+      - name: Check formatting
+        working-directory: "2024"
+        run: >
+          uv run ruff format --check
+
+      - name: Run lints
+        working-directory: "2024"
+        run: >
+          uv run ruff check
+
+      - name: Run tests
+        working-directory: "2024"
+        run: >
+          uv run pytest tests
