@@ -14,7 +14,9 @@ locals {
 
   diffs = [for i in range(length(local.left_sorted)): abs(local.left_sorted[i] - local.right_sorted[i])]
 
-  matching = [for left in local.left: sum([for right in local.right: left == right ? left : 0])]
+  counts = {for num in local.right: num => num...}
+
+  matching = [for left in local.left: left * length(lookup(local.counts, left, []))]
 }
 
 output "part1" {
