@@ -22,11 +22,11 @@ from aoc import days
 @click.argument("day", required=True)
 def main(day: int, timing: bool, data: IO[str]) -> None:
     runner_class = days.get_runner(day)
-    data = data.read()
+    contents = data.read()
 
     start = time.perf_counter_ns()
 
-    part1, part2 = runner_class.run_both(data)
+    part1, part2 = runner_class.run_both(contents)
 
     if timing:
         elapsed = time.perf_counter_ns() - start

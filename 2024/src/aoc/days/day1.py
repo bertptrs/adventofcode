@@ -10,8 +10,7 @@ from . import CombinedRunner
 class DayRunner(CombinedRunner):
     @classmethod
     def run_both(cls, data: str) -> tuple[Any, Any]:
-        data = StringIO(data)
-        nums = numpy.loadtxt(data, dtype=numpy.int32)
+        nums = numpy.loadtxt(StringIO(data), dtype=numpy.int32)
 
         left = nums[..., 0]
         right = nums[..., 1]
@@ -21,7 +20,7 @@ class DayRunner(CombinedRunner):
 
         diff = numpy.abs(left - right).sum()
 
-        counts = defaultdict(int)
+        counts: defaultdict[int, int] = defaultdict(int)
         for val in right:
             counts[val] += 1
 
