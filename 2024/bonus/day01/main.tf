@@ -13,8 +13,14 @@ locals {
   right_sorted = sort(local.right)
 
   diffs = [for i in range(length(local.left_sorted)): abs(local.left_sorted[i] - local.right_sorted[i])]
+
+  matching = [for left in local.left: sum([for right in local.right: left == right ? left : 0])]
 }
 
 output "part1" {
   value = sum(local.diffs)
+}
+
+output "part2" {
+    value = sum(local.matching)
 }
