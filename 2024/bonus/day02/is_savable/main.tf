@@ -8,7 +8,7 @@ module "is_valid" {
 
   report = concat(
     count.index > 0 ? slice(var.report, 0, count.index) : [],
-    count.index < length(var.report) - 1 ? slice(var.report, count.index + 1, length(var.report)) : []
+    try(slice(var.report, count.index + 1, length(var.report)), [])
   )
 }
 
