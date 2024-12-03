@@ -16,7 +16,7 @@ locals {
 
   counts = { for num in local.right : num => num... }
 
-  matching = [for left in local.left : left * length(lookup(local.counts, left, []))]
+  matching = [for left in local.left : left * try(length(local.counts[left]), 0)]
 }
 
 output "part1" {
