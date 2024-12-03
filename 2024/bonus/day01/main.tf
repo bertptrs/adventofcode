@@ -3,20 +3,20 @@ variable "input" {
 }
 
 locals {
-  cleaned_input = replace(var.input, "/ +/", " ")   
-  lines = split("\n", trim(local.cleaned_input, "\n"))
-  lines_split = [for line in local.lines: split(" ", line)]
-  left = [for line in local.lines_split: parseint(line[0], 10)]
-  right = [for line in local.lines_split: parseint(line[1], 10)]
+  cleaned_input = replace(var.input, "/ +/", " ")
+  lines         = split("\n", trim(local.cleaned_input, "\n"))
+  lines_split   = [for line in local.lines : split(" ", line)]
+  left          = [for line in local.lines_split : parseint(line[0], 10)]
+  right         = [for line in local.lines_split : parseint(line[1], 10)]
 
-  left_sorted = sort(local.left)
+  left_sorted  = sort(local.left)
   right_sorted = sort(local.right)
 
-  diffs = [for i in range(length(local.left_sorted)): abs(local.left_sorted[i] - local.right_sorted[i])]
+  diffs = [for i in range(length(local.left_sorted)) : abs(local.left_sorted[i] - local.right_sorted[i])]
 
-  counts = {for num in local.right: num => num...}
+  counts = { for num in local.right : num => num... }
 
-  matching = [for left in local.left: left * length(lookup(local.counts, left, []))]
+  matching = [for left in local.left : left * length(lookup(local.counts, left, []))]
 }
 
 output "part1" {
@@ -24,5 +24,5 @@ output "part1" {
 }
 
 output "part2" {
-    value = sum(local.matching)
+  value = sum(local.matching)
 }
