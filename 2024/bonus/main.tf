@@ -36,3 +36,7 @@ module "day03" {
 output "day03_1" {
   value = module.day03.part1
 }
+
+output "day03_2" {
+  value = module.day03.part2
+}
