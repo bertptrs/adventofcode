@@ -19,9 +19,9 @@ variable "dy" {
 }
 
 locals {
-  match = [for i in range(4) : var.x + i * var.dx >= 0 && try(substr(var.grid[var.y + i * var.dy], var.x + i * var.dx, 1), "F") == substr("XMAS", i, 1)]
+  word = join("", [for i in range(4) : var.x + i * var.dx >= 0 ? try(substr(var.grid[var.y + i * var.dy], var.x + i * var.dx, 1), "F") : "F"])
 }
 
 output "found" {
-  value = alltrue(local.match) ? 1 : 0
+  value = contains(["SAMX", "XMAS"], local.word) ? 1 : 0
 }
