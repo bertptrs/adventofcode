@@ -6,6 +6,9 @@ locals {
   grid   = split("\n", chomp(var.input))
   height = length(local.grid)
   width  = length(local.grid[0])
+
+  lr = length(regexall("XMAS", var.input))
+  rl = length(regexall("SAMX", var.input))
 }
 
 module "check_point" {
@@ -20,7 +23,7 @@ module "check_point" {
 }
 
 output "part1" {
-  value = sum(module.check_point[*].xmas)
+  value = sum(module.check_point[*].xmas) + local.lr + local.rl
 }
 
 output "part2" {
