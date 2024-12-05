@@ -1,5 +1,5 @@
-from collections import defaultdict
 import functools
+from collections import defaultdict
 
 from . import CombinedRunner
 
@@ -21,7 +21,7 @@ def is_correct(update: list[int], must_after: dict[int, set[int]]) -> bool:
             return False
 
         forbidden |= must_after.get(entry, set())
-        
+
     return True
 
 
