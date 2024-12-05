@@ -19,9 +19,6 @@ locals {
   y = floor(var.index / var.width)
 
   directions = {
-    "UL" = [-1, -1]
-    "U"  = [0, -1]
-    "UR" = [1, -1]
     "DL" = [-1, 1]
     "D"  = [0, 1]
     "DR" = [1, 1]

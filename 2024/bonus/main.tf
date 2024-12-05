@@ -41,8 +41,18 @@ output "day03_2" {
   value = module.day03.part2
 }
 
-# Don't run this, it runs out of memory
+# Don't run this, it runs forever (6 minutes) and requires a lot of memory (~5.5GB) to execute to
+# boot. Trust me, it works.
+
 # module "day04" {
 #   source = "./day04"
 #   input  = file("../inputs/04.txt")
+# }
+
+# output "day04_1" {
+#   value = module.day04.part1
+# }
+
+# output "day04_2" {
+#   value = module.day04.part2
 # }
