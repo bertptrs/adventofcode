@@ -74,3 +74,42 @@ run "day3_2" {
     error_message = "Part2 output is wrong"
   }
 }
+
+run "day4_small" {
+  command = plan
+
+  module {
+    source = "./day04"
+  }
+
+  variables {
+    input = file("../tests/samples/04.1.txt")
+  }
+
+  assert {
+    condition     = output.part1 == 4
+    error_message = "Part1 output is wrong"
+  }
+}
+
+run "day4" {
+  command = plan
+
+  module {
+    source = "./day04"
+  }
+
+  variables {
+    input = file("../tests/samples/04.2.txt")
+  }
+
+  assert {
+    condition     = output.part1 == 18
+    error_message = "Part1 output is wrong"
+  }
+
+  assert {
+    condition     = output.part2 == 9
+    error_message = "Part2 output is wrong"
+  }
+}

@@ -40,3 +40,9 @@ output "day03_1" {
 output "day03_2" {
   value = module.day03.part2
 }
+
+# Don't run this, it runs out of memory
+# module "day04" {
+#   source = "./day04"
+#   input  = file("../inputs/04.txt")
+# }
