@@ -56,3 +56,12 @@ output "day03_2" {
 # output "day04_2" {
 #   value = module.day04.part2
 # }
+
+module "day05" {
+  source = "./day05"
+  input  = file("../inputs/05.txt")
+}
+
+output "day05_1" {
+  value = module.day05.part1
+}
