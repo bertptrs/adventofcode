@@ -3,22 +3,17 @@ variable "input" {
 }
 
 locals {
-  muls = regexall("mul\\((\\d+),(\\d+)\\)", var.input)
-  ops  = regexall("(don't\\(\\)|do\\(\\)|mul\\((\\d+),(\\d+)\\))", var.input)
-}
+  filtered  = replace(var.input, "/(?s)don't\\(\\).*?do\\(\\)/", "")
+  filtered2 = replace(local.filtered, "/(?s)don't\\(\\).*/", "")
 
-module "should_execute" {
-  count  = length(local.ops)
-  source = "./should_execute"
-
-  index = count.index
-  ops   = local.ops
+  muls          = regexall("mul\\((\\d+),(\\d+)\\)", var.input)
+  filtered_muls = regexall("mul\\((\\d+),(\\d+)\\)", local.filtered2)
 }
 
 output "part1" {
-  value = sum([for mul in local.muls : parseint(mul[1], 10) * parseint(mul[0], 10)])
+  value = sum([for mul in local.muls : tonumber(mul[1]) * tonumber(mul[0])])
 }
 
 output "part2" {
-  value = sum(module.should_execute[*].value)
+  value = sum([for mul in local.filtered_muls : tonumber(mul[1]) * tonumber(mul[0])])
 }
