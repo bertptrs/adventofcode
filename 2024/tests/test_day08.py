@@ -1,17 +1,11 @@
-import os
-
 from aoc.days.day8 import DayRunner
 
-
-def get_data() -> str:
-    sample = os.path.dirname(__file__) + "/samples/08.txt"
-    with open(sample, mode="rt", encoding="utf-8") as f:
-        return f.read()
+from . import get_data
 
 
 def test_sample_part1() -> None:
-    assert DayRunner.part1(get_data()) == 14
+    assert DayRunner.part1(get_data(8)) == 14
 
 
 def test_sample_part2() -> None:
-    assert DayRunner.part2(get_data()) == 34
+    assert DayRunner.part2(get_data(8)) == 34

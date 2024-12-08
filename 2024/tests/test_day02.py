@@ -1,12 +1,6 @@
-import os
-
 from aoc.days.day2 import DayRunner, is_savable
 
-
-def get_data() -> str:
-    sample = os.path.dirname(__file__) + "/samples/02.txt"
-    with open(sample, mode="rt", encoding="utf-8") as f:
-        return f.read()
+from . import get_data
 
 
 def test_individual_samples() -> None:
@@ -19,8 +13,8 @@ def test_individual_samples() -> None:
 
 
 def test_sample_part1() -> None:
-    assert DayRunner.part1(get_data()) == 2
+    assert DayRunner.part1(get_data(2)) == 2
 
 
 def test_sample_part2() -> None:
-    assert DayRunner.part2(get_data()) == 4
+    assert DayRunner.part2(get_data(2)) == 4
