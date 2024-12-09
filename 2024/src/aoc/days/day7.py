@@ -11,35 +11,39 @@ def parse_input(input: str) -> tuple[int, list[int]]:
     return result
 
 
-def is_possible(target: int, nums: list[int], cur: int) -> bool:
-    if cur == target and not nums:
-        return True
-
-    if cur > target or not nums:
+def is_possible(target: int, nums: list[int]) -> bool:
+    if target == 0:
+        return not nums
+    if not nums or target < 0:
         return False
 
-    head = nums[0]
-    remainder = nums[1:]
+    tail = nums[-1]
+    remainder = nums[:-1]
 
-    return is_possible(target, remainder, cur + head) or is_possible(
-        target, remainder, cur * head
+    return is_possible(target - tail, remainder) or (
+        target % tail == 0 and is_possible(target // tail, remainder)
     )
 
 
-def is_possible2(target: int, nums: list[int], cur: int) -> bool:
-    if cur == target and not nums:
-        return True
-
-    if cur > target or not nums:
+def is_possible2(target: int, nums: list[int]) -> bool:
+    if target == 0:
+        return not nums
+    if not nums or target < 0:
         return False
 
-    head = nums[0]
-    remainder = nums[1:]
+    tail = nums[-1]
+    remainder = nums[:-1]
+
+    target_str = str(target)
+    tail_str = str(tail)
 
     return (
-        is_possible2(target, remainder, cur + head)
-        or is_possible2(target, remainder, cur * head)
-        or is_possible2(target, remainder, int(f"{cur}{head}"))
+        is_possible2(target - tail, remainder)
+        or (target % tail == 0 and is_possible2(target // tail, remainder))
+        or (
+            target_str.endswith(tail_str)
+            and is_possible2(int(target_str[: -len(str(tail_str))]), remainder)
+        )
     )
 
 
@@ -48,14 +52,10 @@ class DayRunner(SeparateRunner):
     def part1(cls, input: str) -> int:
         lines = parse_input(input)
 
-        return sum(
-            target for target, nums in lines if is_possible(target, nums[1:], nums[0])
-        )
+        return sum(target for target, nums in lines if is_possible(target, nums))
 
     @classmethod
     def part2(cls, input: str) -> int:
         lines = parse_input(input)
 
-        return sum(
-            target for target, nums in lines if is_possible2(target, nums[1:], nums[0])
-        )
+        return sum(target for target, nums in lines if is_possible2(target, nums))
