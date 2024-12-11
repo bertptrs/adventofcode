@@ -4,12 +4,15 @@ variable "input" {
 
 locals {
   nums = [for s in split(" ", chomp(var.input)) : tonumber(s)]
+
+  grouped = { for num in local.nums : num => 1... }
+  total   = { for k, v in local.grouped : k => sum(v) }
 }
 
 module "step1" {
   source = "./step"
 
-  prev = local.nums
+  prev = local.total
 }
 
 module "step2" {
@@ -157,5 +160,5 @@ module "step25" {
 }
 
 output "part1" {
-  value = length(flatten(module.step25.next))
+  value = sum(values(module.step25.next))
 }
