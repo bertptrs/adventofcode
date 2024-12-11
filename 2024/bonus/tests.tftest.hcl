@@ -130,3 +130,21 @@ run "day5_1" {
     error_message = "Part1 output is wrong"
   }
 }
+
+run "day11" {
+  command = plan
+
+  module {
+    source = "./day11"
+  }
+
+  variables {
+    input = "125 17"
+  }
+
+  assert {
+    condition     = output.part1 == 55312
+    error_message = "Part1 output is wrong"
+  }
+
+}
