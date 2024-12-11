@@ -146,5 +146,4 @@ run "day11" {
     condition     = output.part1 == 55312
     error_message = "Part1 output is wrong"
   }
-
 }

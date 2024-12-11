@@ -18,17 +18,6 @@ locals {
   grouped = { for kv in local.by_value : kv.num => kv.count... }
 }
 
-# module "transform" {
-#   source = "../transform"
-
-#   count = length(var.prev)
-#   num   = var.prev[count.index]
-# }
-
-# output "next" {
-#   value = flatten(module.transform[*].result)
-# }
-
 output "next" {
   value = { for num, groups in local.grouped : num => sum(groups) }
 }
