@@ -1,6 +1,7 @@
 import itertools
 import math
 import re
+import sys
 
 import numpy
 
@@ -69,5 +70,11 @@ class DayRunner(SeparateRunner):
             positions %= mod_base
 
             if len(numpy.unique(positions, axis=0)) == target:
-                # TODO: print the Christmas tree, Eric prepared it for us so nicely
+                grid = [[" "] * width for _ in range(height)]
+
+                for x, y in positions:
+                    grid[y][x] = "#"
+
+                tree = "\n".join(map((lambda x: "".join(x)), grid))
+                print(tree, file=sys.stderr)
                 return i
