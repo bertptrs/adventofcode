@@ -15,6 +15,20 @@ def parse_input(data: str) -> tuple[numpy.array, str]:
     return grid_split, steps
 
 
+def convert_dir(c: str) -> tuple[int, int]:
+    match c:
+        case "^":
+            return 0, -1
+        case ">":
+            return 1, 0
+        case "<":
+            return -1, 0
+        case "v":
+            return 0, 1
+        case other:
+            raise ValueError(f"Invalid movement: {other}")
+
+
 class DayRunner(SeparateRunner):
     @classmethod
     def part1(cls, input: str) -> None:
@@ -24,17 +38,7 @@ class DayRunner(SeparateRunner):
         x, y = x[0], y[0]
 
         for c in steps:
-            match c:
-                case "^":
-                    dx, dy = 0, -1
-                case ">":
-                    dx, dy = 1, 0
-                case "<":
-                    dx, dy = -1, 0
-                case "v":
-                    dx, dy = 0, 1
-                case other:
-                    raise ValueError(f"Invalid movement: {other}")
+            dx, dy = convert_dir(c)
 
             match grid[y + dy, x + dx]:
                 case "#":
@@ -81,17 +85,7 @@ class DayRunner(SeparateRunner):
         x, y = x[0], y[0]
 
         for c in steps:
-            match c:
-                case "^":
-                    dx, dy = 0, -1
-                case ">":
-                    dx, dy = 1, 0
-                case "<":
-                    dx, dy = -1, 0
-                case "v":
-                    dx, dy = 0, 1
-                case other:
-                    raise ValueError(f"Invalid movement: {other}")
+            dx, dy = convert_dir(c)
 
             match grid[y + dy, x + dx]:
                 case "#":
