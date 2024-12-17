@@ -14,3 +14,14 @@ from . import get_data
 )
 def test_sample_part1(data: str, result: int) -> None:
     assert DayRunner.part1(data) == result
+
+
+@pytest.mark.parametrize(
+    "data,result",
+    [
+        (get_data(16, 1), 45),
+        (get_data(16, 2), 64),
+    ],
+)
+def test_sample_part2(data: str, result: int) -> None:
+    assert DayRunner.part2(data) == result
