@@ -32,7 +32,7 @@ class DayRunner(CombinedRunner):
                 heapq.heappush(todo, (dist, x, y, dx, dy))
             elif best[x, y, dx, dy][0] == dist:
                 best[x, y, dx, dy][1].append((cx, cy, cdx, cdy))
-            
+
         shortest_dist = None
         finishes = set()
 
