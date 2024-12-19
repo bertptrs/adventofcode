@@ -147,3 +147,20 @@ run "day11" {
     error_message = "Part1 output is wrong"
   }
 }
+
+run "day19" {
+  command = plan
+
+  module {
+    source = "./day19"
+  }
+
+  variables {
+    input = file("../tests/samples/19.txt")
+  }
+
+  assert {
+    condition     = output.part1 == 6
+    error_message = "Part1 output is wrong"
+  }
+}
