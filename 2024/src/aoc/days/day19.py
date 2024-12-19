@@ -9,18 +9,6 @@ def parse_input(data: str) -> tuple[tuple[str, ...], list[str]]:
     return tuple(patterns.split(", ")), designs.split("\n")
 
 
-@functools.cache
-def is_possible(design: str, patterns: tuple[str, ...]) -> bool:
-    if not design:
-        return 1
-
-    return sum(
-        is_possible(design[len(pat) :], patterns)
-        for pat in patterns
-        if design.startswith(pat)
-    )
-
-
 class DayRunner(CombinedRunner):
     @classmethod
     def run_both(cls, input: str) -> int:
@@ -29,8 +17,19 @@ class DayRunner(CombinedRunner):
         possible = 0
         ways = 0
 
+        @functools.cache
+        def is_possible(design: str) -> bool:
+            if not design:
+                return 1
+
+            return sum(
+                is_possible(design[len(pat) :])
+                for pat in patterns
+                if design.startswith(pat)
+            )
+
         for design in designs:
-            if (solve := is_possible(design, patterns)) > 0:
+            if (solve := is_possible(design)) > 0:
                 possible += 1
                 ways += solve
 
