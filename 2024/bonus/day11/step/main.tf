@@ -3,26 +3,28 @@ variable "prev" {
 }
 
 locals {
-  not_a_module = {
-    for num, _ in var.prev : num => (
+  by_value = flatten([
+    for num, count in var.prev : (
       tonumber(num) == 0
-      ? [1]
+      ? [{ number = 1, amount = count }]
       : (
         length(tostring(num)) % 2 == 0
         ? [
-          tonumber(substr(tostring(num), 0, length(tostring(num)) / 2)),
-          tonumber(substr(tostring(num), length(tostring(num)) / 2, length(tostring(num)) / 2)),
+          {
+            number = tonumber(substr(tostring(num), 0, length(tostring(num)) / 2)),
+            amount = count
+          },
+          {
+            number = tonumber(substr(tostring(num), length(tostring(num)) / 2, length(tostring(num)) / 2)),
+            amount = count,
+          },
         ]
-        : [num * 2024]
+        : [{ number = 2024 * num, amount = count }]
       )
     )
-  }
-  by_value = flatten([
-    for key, value in local.not_a_module :
-    [for result in value : { num = result, count = var.prev[key] }]
   ])
 
-  grouped = { for kv in local.by_value : kv.num => kv.count... }
+  grouped = { for kv in local.by_value : kv.number => kv.amount... }
 }
 
 output "next" {
