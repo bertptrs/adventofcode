@@ -41,14 +41,11 @@ class DayRunner(SeparateRunner):
         per_signal = defaultdict(int)
 
         for row_scores, row_deltas in zip(field, delta):
-            seen = set()
+            unique, positions = numpy.unique(
+                sliding_window_view(row_deltas, 4), return_index=True, axis=0
+            )
 
-            for window, price in zip(
-                sliding_window_view(row_deltas, 4), row_scores[4:]
-            ):
-                key = tuple(window)
-                if key not in seen:
-                    seen.add(key)
-                    per_signal[key] += price
+            for key, index in zip(unique, positions):
+                per_signal[tuple(key)] += row_scores[index + 4]
 
         return max(per_signal.values())
