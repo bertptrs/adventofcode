@@ -84,6 +84,8 @@ class DayRunner(SeparateRunner):
 
             return least_wrong
 
+        assert max_bit >= 3
+
         # First one is a half adder, that's a simple pattern
         invalid = find_invalid("z00", ["XOR", "x00", "y00"])
         # Second one is missing a reference to the before-previous adder, so it's a
@@ -91,8 +93,21 @@ class DayRunner(SeparateRunner):
         invalid |= find_invalid(
             "z01", ["XOR", ["AND", "x00", "y00"], ["XOR", "x01", "y01"]]
         )
+        # Needed a second lookback to determine that `ktp` is valid
+        invalid |= find_invalid(
+            "z02",
+            [
+                "XOR",
+                ["XOR", "x02", "y02"],
+                [
+                    "OR",
+                    ["AND", "x01", "y01"],
+                    ["AND", ["XOR", "x01", "y01"], ["AND", "x00", "y00"]],
+                ],
+            ],
+        )
 
-        for n in range(2, max_bit):
+        for n in range(3, max_bit):
             xcurr = f"x{n:02}"
             ycurr = f"y{n:02}"
             zcurr = f"z{n:02}"
@@ -104,7 +119,11 @@ class DayRunner(SeparateRunner):
                 [
                     "XOR",
                     ["XOR", xcurr, ycurr],
-                    ["OR", ["AND", xprev, yprev], ["AND", ["XOR", xprev, yprev], None]],
+                    [
+                        "OR",
+                        ["AND", xprev, yprev],
+                        ["AND", ["XOR", xprev, yprev], ["OR", None, None]],
+                    ],
                 ],
             )
 
