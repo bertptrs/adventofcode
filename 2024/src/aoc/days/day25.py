@@ -20,11 +20,10 @@ class DayRunner(CombinedRunner):
             else:
                 keys.append(heights)
 
-        fitting = 0
+        locks = numpy.stack(locks, axis=0)
 
-        for key in keys:
-            for lock in locks:
-                if numpy.all((key + lock) <= 7):
-                    fitting += 1
+        fitting = sum(
+            numpy.count_nonzero(numpy.all((key + locks) <= 7, axis=1)) for key in keys
+        )
 
         return fitting, None
