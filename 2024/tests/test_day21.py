@@ -49,3 +49,7 @@ def test_encode_shortest_dirpad_twice(code: str, answer: str) -> None:
 
 def test_sample_part1() -> None:
     assert DayRunner.part1(get_data(21)) == 126384
+
+
+def test_sample_part2() -> None:
+    assert DayRunner.part2(get_data(21), robots=2) == 126384

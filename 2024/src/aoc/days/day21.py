@@ -1,4 +1,5 @@
 import functools
+from collections import Counter, defaultdict
 
 from . import SeparateRunner
 
@@ -114,6 +115,18 @@ def decode(code: str, pad: dict[str, tuple[int, int]]) -> str:
     return result
 
 
+def count_steps(path: str, count: int) -> dict[str, int]:
+    cur = "A"
+    counts = defaultdict(int)
+
+    for c in path:
+        step = shortest_dirpad(cur, c)
+        cur = c
+        counts[step] += count
+
+    return counts
+
+
 class DayRunner(SeparateRunner):
     @classmethod
     def part1(cls, input: str) -> int:
@@ -128,5 +141,19 @@ class DayRunner(SeparateRunner):
         return result
 
     @classmethod
-    def part2(cls, input: str) -> int:
-        pass
+    def part2(cls, input: str, robots=25) -> int:
+        result = 0
+        for code in input.strip().split("\n"):
+            numpad = encode_shortest_numpad(code)
+            keypresses = Counter([numpad])
+
+            for _ in range(robots + 1):
+                new_presses = Counter()
+                for subroute, count in keypresses.items():
+                    new_presses.update(count_steps(subroute, count))
+
+                keypresses = new_presses
+
+            result += int(code[:-1]) * keypresses.total()
+
+        return result
