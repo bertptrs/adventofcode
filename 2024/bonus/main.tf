@@ -87,3 +87,12 @@ module "day19" {
 output "day19_1" {
   value = module.day19.part1
 }
+
+module "day25" {
+  source = "./day25"
+  input  = file("../inputs/25.txt")
+}
+
+output "day25_1" {
+  value = module.day25.part1
+}
