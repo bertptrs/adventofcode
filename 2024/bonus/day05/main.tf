@@ -8,16 +8,18 @@ locals {
   disallow_rules = { for rule in local.rules : rule[1] => rule[0]... }
 
   updates = [for update_line in split("\n", local.parts[1]) : [for v in split(",", update_line) : tonumber(v)]]
-}
 
-module "is_valid" {
-  source = "./is_correct"
-  count  = length(local.updates)
-
-  update         = local.updates[count.index]
-  disallow_rules = local.disallow_rules
+  scores = [
+    for update in local.updates :
+    alltrue([
+      for i in range(1, length(update)) :
+      !contains(
+        flatten([for j in range(i) : lookup(local.disallow_rules, update[j], [])]),
+        update[i]
+      )
+  ]) ? update[floor(length(update) / 2)] : 0]
 }
 
 output "part1" {
-  value = sum(module.is_valid[*].valid)
+  value = sum(local.scores[*])
 }
