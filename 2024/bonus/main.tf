@@ -92,6 +92,15 @@ output "day13_2" {
   value = module.day13.part2
 }
 
+module "day14" {
+  source = "./day14"
+  input  = file("../inputs/14.txt")
+}
+
+output "day14_1" {
+  value = module.day14.part1
+}
+
 module "day19" {
   source = "./day19"
   input  = file("../inputs/19.txt")
