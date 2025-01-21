@@ -3,7 +3,7 @@ variable "input" {
 }
 
 locals {
-  reports = [for line in split("\n", trim(var.input, "\n")) : [for num in split(" ", line) : parseint(num, 10)]]
+  reports = [for line in split("\n", trim(var.input, "\n")) : split(" ", line)]
 }
 
 module "part1_valid" {
