@@ -131,6 +131,29 @@ run "day5_1" {
   }
 }
 
+run "day08" {
+  command = plan
+
+  module {
+    source = "./day08"
+  }
+
+  variables {
+    input = file("../tests/samples/08.txt")
+  }
+
+  assert {
+    condition     = output.part1 == 14
+    error_message = "Part1 output is wrong"
+  }
+
+
+  assert {
+    condition     = output.part2 == 34
+    error_message = "Part1 output is wrong"
+  }
+}
+
 run "day11" {
   command = plan
 
