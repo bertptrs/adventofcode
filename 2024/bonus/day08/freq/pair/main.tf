@@ -18,8 +18,8 @@ locals {
   dx = var.second[0] - var.first[0]
   dy = var.second[1] - var.first[1]
 
-  sorted = abs(local.dx) < abs(local.dy) ? [abs(local.dx), abs(local.dy)] : [abs(local.dy), abs(local.dx)]
-  gcd0   = local.sorted[0] == 0 ? [0, 1] : local.sorted
+  # sort() doesn't work as it turns the numbers into strings
+  gcd0 = abs(local.dx) < abs(local.dy) ? [abs(local.dx), abs(local.dy)] : [abs(local.dy), abs(local.dx)]
 
   # Do as many iterations as necessary. 
   gcd1  = local.gcd0[0] == 0 ? local.gcd0 : [local.gcd0[1] % local.gcd0[0], local.gcd0[0]]
