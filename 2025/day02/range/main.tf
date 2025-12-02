@@ -16,8 +16,8 @@ locals {
   maximum      = substr(tostring(var.max), 0, local.digits)
   real_maximum = length(tostring(var.max)) % var.repetitions == 0 ? tonumber(local.maximum) : pow(10, local.digits)
 
-  min_digits = max(floor(length(tostring(var.min)) / var.repetitions), 1)
-  minimum    = tonumber(substr(tostring(var.min), 0, local.min_digits))
+  minimum_prefix = substr(tostring(var.min), 0, length(tostring(var.min)) - local.digits * (var.repetitions - 1))
+  minimum        = local.minimum_prefix == "" ? 1 : tonumber(local.minimum_prefix)
 
   count = max(local.real_maximum - local.minimum + 1, 1)
 
