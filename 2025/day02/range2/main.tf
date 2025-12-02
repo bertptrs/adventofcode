@@ -12,10 +12,10 @@ locals {
 
 module "range" {
   source      = "../range"
-  count       = local.digits
+  count       = local.digits - 1
   max         = var.max
   min         = var.min
-  repetitions = count.index + 1
+  repetitions = count.index + 2
 }
 
 locals {
