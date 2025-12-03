@@ -1,4 +1,4 @@
-## Day 02: Terraform
+# Day 02: Terraform
 
 The code assumes an input file at `../inputs/02.txt`. Other than that, simply try to run as follows:
 
