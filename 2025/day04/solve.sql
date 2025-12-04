@@ -45,3 +45,715 @@ WHERE (
             AND o.y >= r.y - 1
             AND o.y <= r.y + 1
     ) < 4;
+--- Create a scratch table where we're going to delete rolls from
+CREATE TABLE rolls2(
+    x INTEGER NOT NULL,
+    y INTEGER NOT NULL,
+    PRIMARY KEY (x, y)
+);
+INSERT INTO rolls2
+SELECT *
+FROM rolls;
+-- Delete the outer rolls of paper 77 times. This turns out to be enough.
+-- I tried really hard not to do this.
+DELETE FROM rolls2
+WHERE (
+        SELECT COUNT(*) - 1
+        FROM rolls2 o
+        WHERE o.x >= rolls2.x - 1
+            AND o.x <= rolls2.x + 1
+            AND o.y >= rolls2.y - 1
+            AND o.y <= rolls2.y + 1
+    ) < 4;
+DELETE FROM rolls2
+WHERE (
+        SELECT COUNT(*) - 1
+        FROM rolls2 o
+        WHERE o.x >= rolls2.x - 1
+            AND o.x <= rolls2.x + 1
+            AND o.y >= rolls2.y - 1
+            AND o.y <= rolls2.y + 1
+    ) < 4;
+DELETE FROM rolls2
+WHERE (
+        SELECT COUNT(*) - 1
+        FROM rolls2 o
+        WHERE o.x >= rolls2.x - 1
+            AND o.x <= rolls2.x + 1
+            AND o.y >= rolls2.y - 1
+            AND o.y <= rolls2.y + 1
+    ) < 4;
+DELETE FROM rolls2
+WHERE (
+        SELECT COUNT(*) - 1
+        FROM rolls2 o
+        WHERE o.x >= rolls2.x - 1
+            AND o.x <= rolls2.x + 1
+            AND o.y >= rolls2.y - 1
+            AND o.y <= rolls2.y + 1
+    ) < 4;
+DELETE FROM rolls2
+WHERE (
+        SELECT COUNT(*) - 1
+        FROM rolls2 o
+        WHERE o.x >= rolls2.x - 1
+            AND o.x <= rolls2.x + 1
+            AND o.y >= rolls2.y - 1
+            AND o.y <= rolls2.y + 1
+    ) < 4;
+DELETE FROM rolls2
+WHERE (
+        SELECT COUNT(*) - 1
+        FROM rolls2 o
+        WHERE o.x >= rolls2.x - 1
+            AND o.x <= rolls2.x + 1
+            AND o.y >= rolls2.y - 1
+            AND o.y <= rolls2.y + 1
+    ) < 4;
+DELETE FROM rolls2
+WHERE (
+        SELECT COUNT(*) - 1
+        FROM rolls2 o
+        WHERE o.x >= rolls2.x - 1
+            AND o.x <= rolls2.x + 1
+            AND o.y >= rolls2.y - 1
+            AND o.y <= rolls2.y + 1
+    ) < 4;
+DELETE FROM rolls2
+WHERE (
+        SELECT COUNT(*) - 1
+        FROM rolls2 o
+        WHERE o.x >= rolls2.x - 1
+            AND o.x <= rolls2.x + 1
+            AND o.y >= rolls2.y - 1
+            AND o.y <= rolls2.y + 1
+    ) < 4;
+DELETE FROM rolls2
+WHERE (
+        SELECT COUNT(*) - 1
+        FROM rolls2 o
+        WHERE o.x >= rolls2.x - 1
+            AND o.x <= rolls2.x + 1
+            AND o.y >= rolls2.y - 1
+            AND o.y <= rolls2.y + 1
+    ) < 4;
+DELETE FROM rolls2
+WHERE (
+        SELECT COUNT(*) - 1
+        FROM rolls2 o
+        WHERE o.x >= rolls2.x - 1
+            AND o.x <= rolls2.x + 1
+            AND o.y >= rolls2.y - 1
+            AND o.y <= rolls2.y + 1
+    ) < 4;
+DELETE FROM rolls2
+WHERE (
+        SELECT COUNT(*) - 1
+        FROM rolls2 o
+        WHERE o.x >= rolls2.x - 1
+            AND o.x <= rolls2.x + 1
+            AND o.y >= rolls2.y - 1
+            AND o.y <= rolls2.y + 1
+    ) < 4;
+DELETE FROM rolls2
+WHERE (
+        SELECT COUNT(*) - 1
+        FROM rolls2 o
+        WHERE o.x >= rolls2.x - 1
+            AND o.x <= rolls2.x + 1
+            AND o.y >= rolls2.y - 1
+            AND o.y <= rolls2.y + 1
+    ) < 4;
+DELETE FROM rolls2
+WHERE (
+        SELECT COUNT(*) - 1
+        FROM rolls2 o
+        WHERE o.x >= rolls2.x - 1
+            AND o.x <= rolls2.x + 1
+            AND o.y >= rolls2.y - 1
+            AND o.y <= rolls2.y + 1
+    ) < 4;
+DELETE FROM rolls2
+WHERE (
+        SELECT COUNT(*) - 1
+        FROM rolls2 o
+        WHERE o.x >= rolls2.x - 1
+            AND o.x <= rolls2.x + 1
+            AND o.y >= rolls2.y - 1
+            AND o.y <= rolls2.y + 1
+    ) < 4;
+DELETE FROM rolls2
+WHERE (
+        SELECT COUNT(*) - 1
+        FROM rolls2 o
+        WHERE o.x >= rolls2.x - 1
+            AND o.x <= rolls2.x + 1
+            AND o.y >= rolls2.y - 1
+            AND o.y <= rolls2.y + 1
+    ) < 4;
+DELETE FROM rolls2
+WHERE (
+        SELECT COUNT(*) - 1
+        FROM rolls2 o
+        WHERE o.x >= rolls2.x - 1
+            AND o.x <= rolls2.x + 1
+            AND o.y >= rolls2.y - 1
+            AND o.y <= rolls2.y + 1
+    ) < 4;
+DELETE FROM rolls2
+WHERE (
+        SELECT COUNT(*) - 1
+        FROM rolls2 o
+        WHERE o.x >= rolls2.x - 1
+            AND o.x <= rolls2.x + 1
+            AND o.y >= rolls2.y - 1
+            AND o.y <= rolls2.y + 1
+    ) < 4;
+DELETE FROM rolls2
+WHERE (
+        SELECT COUNT(*) - 1
+        FROM rolls2 o
+        WHERE o.x >= rolls2.x - 1
+            AND o.x <= rolls2.x + 1
+            AND o.y >= rolls2.y - 1
+            AND o.y <= rolls2.y + 1
+    ) < 4;
+DELETE FROM rolls2
+WHERE (
+        SELECT COUNT(*) - 1
+        FROM rolls2 o
+        WHERE o.x >= rolls2.x - 1
+            AND o.x <= rolls2.x + 1
+            AND o.y >= rolls2.y - 1
+            AND o.y <= rolls2.y + 1
+    ) < 4;
+DELETE FROM rolls2
+WHERE (
+        SELECT COUNT(*) - 1
+        FROM rolls2 o
+        WHERE o.x >= rolls2.x - 1
+            AND o.x <= rolls2.x + 1
+            AND o.y >= rolls2.y - 1
+            AND o.y <= rolls2.y + 1
+    ) < 4;
+DELETE FROM rolls2
+WHERE (
+        SELECT COUNT(*) - 1
+        FROM rolls2 o
+        WHERE o.x >= rolls2.x - 1
+            AND o.x <= rolls2.x + 1
+            AND o.y >= rolls2.y - 1
+            AND o.y <= rolls2.y + 1
+    ) < 4;
+DELETE FROM rolls2
+WHERE (
+        SELECT COUNT(*) - 1
+        FROM rolls2 o
+        WHERE o.x >= rolls2.x - 1
+            AND o.x <= rolls2.x + 1
+            AND o.y >= rolls2.y - 1
+            AND o.y <= rolls2.y + 1
+    ) < 4;
+DELETE FROM rolls2
+WHERE (
+        SELECT COUNT(*) - 1
+        FROM rolls2 o
+        WHERE o.x >= rolls2.x - 1
+            AND o.x <= rolls2.x + 1
+            AND o.y >= rolls2.y - 1
+            AND o.y <= rolls2.y + 1
+    ) < 4;
+DELETE FROM rolls2
+WHERE (
+        SELECT COUNT(*) - 1
+        FROM rolls2 o
+        WHERE o.x >= rolls2.x - 1
+            AND o.x <= rolls2.x + 1
+            AND o.y >= rolls2.y - 1
+            AND o.y <= rolls2.y + 1
+    ) < 4;
+DELETE FROM rolls2
+WHERE (
+        SELECT COUNT(*) - 1
+        FROM rolls2 o
+        WHERE o.x >= rolls2.x - 1
+            AND o.x <= rolls2.x + 1
+            AND o.y >= rolls2.y - 1
+            AND o.y <= rolls2.y + 1
+    ) < 4;
+DELETE FROM rolls2
+WHERE (
+        SELECT COUNT(*) - 1
+        FROM rolls2 o
+        WHERE o.x >= rolls2.x - 1
+            AND o.x <= rolls2.x + 1
+            AND o.y >= rolls2.y - 1
+            AND o.y <= rolls2.y + 1
+    ) < 4;
+DELETE FROM rolls2
+WHERE (
+        SELECT COUNT(*) - 1
+        FROM rolls2 o
+        WHERE o.x >= rolls2.x - 1
+            AND o.x <= rolls2.x + 1
+            AND o.y >= rolls2.y - 1
+            AND o.y <= rolls2.y + 1
+    ) < 4;
+DELETE FROM rolls2
+WHERE (
+        SELECT COUNT(*) - 1
+        FROM rolls2 o
+        WHERE o.x >= rolls2.x - 1
+            AND o.x <= rolls2.x + 1
+            AND o.y >= rolls2.y - 1
+            AND o.y <= rolls2.y + 1
+    ) < 4;
+DELETE FROM rolls2
+WHERE (
+        SELECT COUNT(*) - 1
+        FROM rolls2 o
+        WHERE o.x >= rolls2.x - 1
+            AND o.x <= rolls2.x + 1
+            AND o.y >= rolls2.y - 1
+            AND o.y <= rolls2.y + 1
+    ) < 4;
+DELETE FROM rolls2
+WHERE (
+        SELECT COUNT(*) - 1
+        FROM rolls2 o
+        WHERE o.x >= rolls2.x - 1
+            AND o.x <= rolls2.x + 1
+            AND o.y >= rolls2.y - 1
+            AND o.y <= rolls2.y + 1
+    ) < 4;
+DELETE FROM rolls2
+WHERE (
+        SELECT COUNT(*) - 1
+        FROM rolls2 o
+        WHERE o.x >= rolls2.x - 1
+            AND o.x <= rolls2.x + 1
+            AND o.y >= rolls2.y - 1
+            AND o.y <= rolls2.y + 1
+    ) < 4;
+DELETE FROM rolls2
+WHERE (
+        SELECT COUNT(*) - 1
+        FROM rolls2 o
+        WHERE o.x >= rolls2.x - 1
+            AND o.x <= rolls2.x + 1
+            AND o.y >= rolls2.y - 1
+            AND o.y <= rolls2.y + 1
+    ) < 4;
+DELETE FROM rolls2
+WHERE (
+        SELECT COUNT(*) - 1
+        FROM rolls2 o
+        WHERE o.x >= rolls2.x - 1
+            AND o.x <= rolls2.x + 1
+            AND o.y >= rolls2.y - 1
+            AND o.y <= rolls2.y + 1
+    ) < 4;
+DELETE FROM rolls2
+WHERE (
+        SELECT COUNT(*) - 1
+        FROM rolls2 o
+        WHERE o.x >= rolls2.x - 1
+            AND o.x <= rolls2.x + 1
+            AND o.y >= rolls2.y - 1
+            AND o.y <= rolls2.y + 1
+    ) < 4;
+DELETE FROM rolls2
+WHERE (
+        SELECT COUNT(*) - 1
+        FROM rolls2 o
+        WHERE o.x >= rolls2.x - 1
+            AND o.x <= rolls2.x + 1
+            AND o.y >= rolls2.y - 1
+            AND o.y <= rolls2.y + 1
+    ) < 4;
+DELETE FROM rolls2
+WHERE (
+        SELECT COUNT(*) - 1
+        FROM rolls2 o
+        WHERE o.x >= rolls2.x - 1
+            AND o.x <= rolls2.x + 1
+            AND o.y >= rolls2.y - 1
+            AND o.y <= rolls2.y + 1
+    ) < 4;
+DELETE FROM rolls2
+WHERE (
+        SELECT COUNT(*) - 1
+        FROM rolls2 o
+        WHERE o.x >= rolls2.x - 1
+            AND o.x <= rolls2.x + 1
+            AND o.y >= rolls2.y - 1
+            AND o.y <= rolls2.y + 1
+    ) < 4;
+DELETE FROM rolls2
+WHERE (
+        SELECT COUNT(*) - 1
+        FROM rolls2 o
+        WHERE o.x >= rolls2.x - 1
+            AND o.x <= rolls2.x + 1
+            AND o.y >= rolls2.y - 1
+            AND o.y <= rolls2.y + 1
+    ) < 4;
+DELETE FROM rolls2
+WHERE (
+        SELECT COUNT(*) - 1
+        FROM rolls2 o
+        WHERE o.x >= rolls2.x - 1
+            AND o.x <= rolls2.x + 1
+            AND o.y >= rolls2.y - 1
+            AND o.y <= rolls2.y + 1
+    ) < 4;
+DELETE FROM rolls2
+WHERE (
+        SELECT COUNT(*) - 1
+        FROM rolls2 o
+        WHERE o.x >= rolls2.x - 1
+            AND o.x <= rolls2.x + 1
+            AND o.y >= rolls2.y - 1
+            AND o.y <= rolls2.y + 1
+    ) < 4;
+DELETE FROM rolls2
+WHERE (
+        SELECT COUNT(*) - 1
+        FROM rolls2 o
+        WHERE o.x >= rolls2.x - 1
+            AND o.x <= rolls2.x + 1
+            AND o.y >= rolls2.y - 1
+            AND o.y <= rolls2.y + 1
+    ) < 4;
+DELETE FROM rolls2
+WHERE (
+        SELECT COUNT(*) - 1
+        FROM rolls2 o
+        WHERE o.x >= rolls2.x - 1
+            AND o.x <= rolls2.x + 1
+            AND o.y >= rolls2.y - 1
+            AND o.y <= rolls2.y + 1
+    ) < 4;
+DELETE FROM rolls2
+WHERE (
+        SELECT COUNT(*) - 1
+        FROM rolls2 o
+        WHERE o.x >= rolls2.x - 1
+            AND o.x <= rolls2.x + 1
+            AND o.y >= rolls2.y - 1
+            AND o.y <= rolls2.y + 1
+    ) < 4;
+DELETE FROM rolls2
+WHERE (
+        SELECT COUNT(*) - 1
+        FROM rolls2 o
+        WHERE o.x >= rolls2.x - 1
+            AND o.x <= rolls2.x + 1
+            AND o.y >= rolls2.y - 1
+            AND o.y <= rolls2.y + 1
+    ) < 4;
+DELETE FROM rolls2
+WHERE (
+        SELECT COUNT(*) - 1
+        FROM rolls2 o
+        WHERE o.x >= rolls2.x - 1
+            AND o.x <= rolls2.x + 1
+            AND o.y >= rolls2.y - 1
+            AND o.y <= rolls2.y + 1
+    ) < 4;
+DELETE FROM rolls2
+WHERE (
+        SELECT COUNT(*) - 1
+        FROM rolls2 o
+        WHERE o.x >= rolls2.x - 1
+            AND o.x <= rolls2.x + 1
+            AND o.y >= rolls2.y - 1
+            AND o.y <= rolls2.y + 1
+    ) < 4;
+DELETE FROM rolls2
+WHERE (
+        SELECT COUNT(*) - 1
+        FROM rolls2 o
+        WHERE o.x >= rolls2.x - 1
+            AND o.x <= rolls2.x + 1
+            AND o.y >= rolls2.y - 1
+            AND o.y <= rolls2.y + 1
+    ) < 4;
+DELETE FROM rolls2
+WHERE (
+        SELECT COUNT(*) - 1
+        FROM rolls2 o
+        WHERE o.x >= rolls2.x - 1
+            AND o.x <= rolls2.x + 1
+            AND o.y >= rolls2.y - 1
+            AND o.y <= rolls2.y + 1
+    ) < 4;
+DELETE FROM rolls2
+WHERE (
+        SELECT COUNT(*) - 1
+        FROM rolls2 o
+        WHERE o.x >= rolls2.x - 1
+            AND o.x <= rolls2.x + 1
+            AND o.y >= rolls2.y - 1
+            AND o.y <= rolls2.y + 1
+    ) < 4;
+DELETE FROM rolls2
+WHERE (
+        SELECT COUNT(*) - 1
+        FROM rolls2 o
+        WHERE o.x >= rolls2.x - 1
+            AND o.x <= rolls2.x + 1
+            AND o.y >= rolls2.y - 1
+            AND o.y <= rolls2.y + 1
+    ) < 4;
+DELETE FROM rolls2
+WHERE (
+        SELECT COUNT(*) - 1
+        FROM rolls2 o
+        WHERE o.x >= rolls2.x - 1
+            AND o.x <= rolls2.x + 1
+            AND o.y >= rolls2.y - 1
+            AND o.y <= rolls2.y + 1
+    ) < 4;
+DELETE FROM rolls2
+WHERE (
+        SELECT COUNT(*) - 1
+        FROM rolls2 o
+        WHERE o.x >= rolls2.x - 1
+            AND o.x <= rolls2.x + 1
+            AND o.y >= rolls2.y - 1
+            AND o.y <= rolls2.y + 1
+    ) < 4;
+DELETE FROM rolls2
+WHERE (
+        SELECT COUNT(*) - 1
+        FROM rolls2 o
+        WHERE o.x >= rolls2.x - 1
+            AND o.x <= rolls2.x + 1
+            AND o.y >= rolls2.y - 1
+            AND o.y <= rolls2.y + 1
+    ) < 4;
+DELETE FROM rolls2
+WHERE (
+        SELECT COUNT(*) - 1
+        FROM rolls2 o
+        WHERE o.x >= rolls2.x - 1
+            AND o.x <= rolls2.x + 1
+            AND o.y >= rolls2.y - 1
+            AND o.y <= rolls2.y + 1
+    ) < 4;
+DELETE FROM rolls2
+WHERE (
+        SELECT COUNT(*) - 1
+        FROM rolls2 o
+        WHERE o.x >= rolls2.x - 1
+            AND o.x <= rolls2.x + 1
+            AND o.y >= rolls2.y - 1
+            AND o.y <= rolls2.y + 1
+    ) < 4;
+DELETE FROM rolls2
+WHERE (
+        SELECT COUNT(*) - 1
+        FROM rolls2 o
+        WHERE o.x >= rolls2.x - 1
+            AND o.x <= rolls2.x + 1
+            AND o.y >= rolls2.y - 1
+            AND o.y <= rolls2.y + 1
+    ) < 4;
+DELETE FROM rolls2
+WHERE (
+        SELECT COUNT(*) - 1
+        FROM rolls2 o
+        WHERE o.x >= rolls2.x - 1
+            AND o.x <= rolls2.x + 1
+            AND o.y >= rolls2.y - 1
+            AND o.y <= rolls2.y + 1
+    ) < 4;
+DELETE FROM rolls2
+WHERE (
+        SELECT COUNT(*) - 1
+        FROM rolls2 o
+        WHERE o.x >= rolls2.x - 1
+            AND o.x <= rolls2.x + 1
+            AND o.y >= rolls2.y - 1
+            AND o.y <= rolls2.y + 1
+    ) < 4;
+DELETE FROM rolls2
+WHERE (
+        SELECT COUNT(*) - 1
+        FROM rolls2 o
+        WHERE o.x >= rolls2.x - 1
+            AND o.x <= rolls2.x + 1
+            AND o.y >= rolls2.y - 1
+            AND o.y <= rolls2.y + 1
+    ) < 4;
+DELETE FROM rolls2
+WHERE (
+        SELECT COUNT(*) - 1
+        FROM rolls2 o
+        WHERE o.x >= rolls2.x - 1
+            AND o.x <= rolls2.x + 1
+            AND o.y >= rolls2.y - 1
+            AND o.y <= rolls2.y + 1
+    ) < 4;
+DELETE FROM rolls2
+WHERE (
+        SELECT COUNT(*) - 1
+        FROM rolls2 o
+        WHERE o.x >= rolls2.x - 1
+            AND o.x <= rolls2.x + 1
+            AND o.y >= rolls2.y - 1
+            AND o.y <= rolls2.y + 1
+    ) < 4;
+DELETE FROM rolls2
+WHERE (
+        SELECT COUNT(*) - 1
+        FROM rolls2 o
+        WHERE o.x >= rolls2.x - 1
+            AND o.x <= rolls2.x + 1
+            AND o.y >= rolls2.y - 1
+            AND o.y <= rolls2.y + 1
+    ) < 4;
+DELETE FROM rolls2
+WHERE (
+        SELECT COUNT(*) - 1
+        FROM rolls2 o
+        WHERE o.x >= rolls2.x - 1
+            AND o.x <= rolls2.x + 1
+            AND o.y >= rolls2.y - 1
+            AND o.y <= rolls2.y + 1
+    ) < 4;
+DELETE FROM rolls2
+WHERE (
+        SELECT COUNT(*) - 1
+        FROM rolls2 o
+        WHERE o.x >= rolls2.x - 1
+            AND o.x <= rolls2.x + 1
+            AND o.y >= rolls2.y - 1
+            AND o.y <= rolls2.y + 1
+    ) < 4;
+DELETE FROM rolls2
+WHERE (
+        SELECT COUNT(*) - 1
+        FROM rolls2 o
+        WHERE o.x >= rolls2.x - 1
+            AND o.x <= rolls2.x + 1
+            AND o.y >= rolls2.y - 1
+            AND o.y <= rolls2.y + 1
+    ) < 4;
+DELETE FROM rolls2
+WHERE (
+        SELECT COUNT(*) - 1
+        FROM rolls2 o
+        WHERE o.x >= rolls2.x - 1
+            AND o.x <= rolls2.x + 1
+            AND o.y >= rolls2.y - 1
+            AND o.y <= rolls2.y + 1
+    ) < 4;
+DELETE FROM rolls2
+WHERE (
+        SELECT COUNT(*) - 1
+        FROM rolls2 o
+        WHERE o.x >= rolls2.x - 1
+            AND o.x <= rolls2.x + 1
+            AND o.y >= rolls2.y - 1
+            AND o.y <= rolls2.y + 1
+    ) < 4;
+DELETE FROM rolls2
+WHERE (
+        SELECT COUNT(*) - 1
+        FROM rolls2 o
+        WHERE o.x >= rolls2.x - 1
+            AND o.x <= rolls2.x + 1
+            AND o.y >= rolls2.y - 1
+            AND o.y <= rolls2.y + 1
+    ) < 4;
+DELETE FROM rolls2
+WHERE (
+        SELECT COUNT(*) - 1
+        FROM rolls2 o
+        WHERE o.x >= rolls2.x - 1
+            AND o.x <= rolls2.x + 1
+            AND o.y >= rolls2.y - 1
+            AND o.y <= rolls2.y + 1
+    ) < 4;
+DELETE FROM rolls2
+WHERE (
+        SELECT COUNT(*) - 1
+        FROM rolls2 o
+        WHERE o.x >= rolls2.x - 1
+            AND o.x <= rolls2.x + 1
+            AND o.y >= rolls2.y - 1
+            AND o.y <= rolls2.y + 1
+    ) < 4;
+DELETE FROM rolls2
+WHERE (
+        SELECT COUNT(*) - 1
+        FROM rolls2 o
+        WHERE o.x >= rolls2.x - 1
+            AND o.x <= rolls2.x + 1
+            AND o.y >= rolls2.y - 1
+            AND o.y <= rolls2.y + 1
+    ) < 4;
+DELETE FROM rolls2
+WHERE (
+        SELECT COUNT(*) - 1
+        FROM rolls2 o
+        WHERE o.x >= rolls2.x - 1
+            AND o.x <= rolls2.x + 1
+            AND o.y >= rolls2.y - 1
+            AND o.y <= rolls2.y + 1
+    ) < 4;
+DELETE FROM rolls2
+WHERE (
+        SELECT COUNT(*) - 1
+        FROM rolls2 o
+        WHERE o.x >= rolls2.x - 1
+            AND o.x <= rolls2.x + 1
+            AND o.y >= rolls2.y - 1
+            AND o.y <= rolls2.y + 1
+    ) < 4;
+DELETE FROM rolls2
+WHERE (
+        SELECT COUNT(*) - 1
+        FROM rolls2 o
+        WHERE o.x >= rolls2.x - 1
+            AND o.x <= rolls2.x + 1
+            AND o.y >= rolls2.y - 1
+            AND o.y <= rolls2.y + 1
+    ) < 4;
+DELETE FROM rolls2
+WHERE (
+        SELECT COUNT(*) - 1
+        FROM rolls2 o
+        WHERE o.x >= rolls2.x - 1
+            AND o.x <= rolls2.x + 1
+            AND o.y >= rolls2.y - 1
+            AND o.y <= rolls2.y + 1
+    ) < 4;
+DELETE FROM rolls2
+WHERE (
+        SELECT COUNT(*) - 1
+        FROM rolls2 o
+        WHERE o.x >= rolls2.x - 1
+            AND o.x <= rolls2.x + 1
+            AND o.y >= rolls2.y - 1
+            AND o.y <= rolls2.y + 1
+    ) < 4;
+DELETE FROM rolls2
+WHERE (
+        SELECT COUNT(*) - 1
+        FROM rolls2 o
+        WHERE o.x >= rolls2.x - 1
+            AND o.x <= rolls2.x + 1
+            AND o.y >= rolls2.y - 1
+            AND o.y <= rolls2.y + 1
+    ) < 4;
+-- See how many we've deleted
+SELECT (
+        SELECT COUNT(*)
+        FROM rolls
+    ) - (
+        SELECT COUNT(*)
+        FROM rolls2
+    ) as part2;
