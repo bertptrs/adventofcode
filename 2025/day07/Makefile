@@ -6,7 +6,7 @@ test: solve
 	./solve sample.txt
 
 solve: solve.hs
-	ghc -dynamic -O -o $@ $^
+	ghc -dynamic -O -g -o $@ $^
 
 clean:
 	$(RM) solve
