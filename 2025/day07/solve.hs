@@ -1,7 +1,6 @@
 import Data.Array
 import Data.List
 import Data.Maybe
-import Data.Set
 import System.Environment
 import System.Exit
 
@@ -13,18 +12,17 @@ stringToArray s = listArray (0, length s - 1) s
 run :: String -> IO ()
 run input =
   let gridLines = lines input
-      startingPoint = findStartingPoint (head gridLines)
-      initial = Data.Set.singleton startingPoint
-      arrLines = Data.List.map stringToArray (tail gridLines)
+      startingPoint = findStartingPoint $ head gridLines
+      arrLines = Data.List.map stringToArray $ tail gridLines
    in do
-        print (part1 arrLines startingPoint)
-        print (part2 arrLines startingPoint)
+        print $ part1 arrLines startingPoint
+        print $ part2 arrLines startingPoint
 
 findStartingPoint :: [Char] -> Int
-findStartingPoint line = fromJust (elemIndex 'S' line)
+findStartingPoint line = fromJust $ elemIndex 'S' line
 
 part1 arrLines startingPoint =
-  let initial = Data.Set.singleton startingPoint
+  let initial = [startingPoint]
    in simulate arrLines 0 initial
 
 checkHit :: Array Int Char -> Int -> [Int]
@@ -35,8 +33,8 @@ checkHit line idx = case line ! idx of
 simulate [] count active = count
 simulate lines count active =
   let arr = head lines
-      followUp = Data.Set.fromList $ concatMap (checkHit arr) (Data.Set.toList active)
-      hits = length (Data.Set.filter (\i -> arr ! i == '^') active)
+      followUp = nub $ concatMap (checkHit arr) active
+      hits = length $ Data.List.filter (\i -> arr ! i == '^') active
       remainder = tail lines
    in simulate remainder (hits + count) followUp
 
