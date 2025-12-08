@@ -1,6 +1,8 @@
 package main
 
 import (
+	"bufio"
+	"container/heap"
 	"fmt"
 	"os"
 	"sort"
@@ -64,6 +66,26 @@ func (d *DisjointSet) Size(item int) int {
 	}
 }
 
+type DistanceHeap [][3]int
+
+func (h DistanceHeap) Len() int           { return len(h) }
+func (h DistanceHeap) Less(i, j int) bool { return h[i][0] < h[j][0] }
+func (h DistanceHeap) Swap(i, j int)      { h[i], h[j] = h[j], h[i] }
+
+func (h *DistanceHeap) Push(x any) {
+	// Push and Pop use pointer receivers because they modify the slice's length,
+	// not just its contents.
+	*h = append(*h, x.([3]int))
+}
+
+func (h *DistanceHeap) Pop() any {
+	old := *h
+	n := len(old)
+	x := old[n-1]
+	*h = old[0 : n-1]
+	return x
+}
+
 func read_input(filename string) [][3]int {
 	var points [][3]int
 	var point [3]int
@@ -74,15 +96,16 @@ func read_input(filename string) [][3]int {
 		panic(err)
 	}
 
+	defer file.Close()
+	reader := bufio.NewReader(file)
+
 	for {
-		parsed, err := fmt.Fscanf(file, "%d,%d,%d\n", &point[0], &point[1], &point[2])
+		parsed, err := fmt.Fscanf(reader, "%d,%d,%d\n", &point[0], &point[1], &point[2])
 		if err != nil || parsed != 3 {
 			break
 		}
 		points = append(points, point)
 	}
-
-	file.Close()
 
 	return points
 }
@@ -122,7 +145,7 @@ func main() {
 
 	points := read_input(os.Args[1])
 
-	var distances [][3]int
+	distances := make([][3]int, 0, len(points)*(len(points)-1)/2)
 
 	for i, a := range points {
 		for j := i + 1; j < len(points); j += 1 {
@@ -134,11 +157,14 @@ func main() {
 		}
 	}
 
-	sort.Slice(distances, func(i, j int) bool { return distances[i][0] < distances[j][0] })
+	size_heap := DistanceHeap(distances)
+	heap.Init(&size_heap)
 
 	groups := NewDisjointSet(len(points))
 
-	for _, d := range distances[:connections] {
+	for range connections {
+		first := heap.Pop(&size_heap)
+		d := first.([3]int)
 		groups.Union(d[1], d[2])
 	}
 
@@ -152,7 +178,9 @@ func main() {
 	fmt.Printf("Part 1: %v\n", product)
 
 	to_merge := len(sizes) - 1
-	for _, d := range distances[connections:] {
+	for {
+		first := heap.Pop(&size_heap)
+		d := first.([3]int)
 		if groups.Union(d[1], d[2]) {
 			to_merge -= 1
 			if to_merge == 0 {
@@ -161,6 +189,4 @@ func main() {
 			}
 		}
 	}
-
-	println("I should not get here")
 }
