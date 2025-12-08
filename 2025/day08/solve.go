@@ -171,8 +171,8 @@ func main() {
 	sizes := compute_group_sizes(groups, len(points))
 
 	product := 1
-	for i := len(sizes) - 3; i < len(sizes); i += 1 {
-		product *= sizes[i]
+	for _, size := range sizes[len(sizes)-3:] {
+		product *= size
 	}
 
 	fmt.Printf("Part 1: %v\n", product)
