@@ -26,14 +26,53 @@ const points = lines.map(line => {
 });
 
 let max_size = 0;
+let max_size_contained = 0;
+
+function has_intersection(left: number, right: number, bottom: number, top: number): boolean {
+    for (let i = 0; i < points.length; ++i) {
+        const first = points[i];
+        const second = points[(i + 1) % points.length];
+
+        if (first.x == second.x) {
+            const yMin = Math.min(first.y, second.y);
+            const yMax = Math.max(first.y, second.y);
+
+            if (left < first.x && first.x < right && (yMin <= bottom && bottom < yMax || yMin < top && top <= yMax)) {
+                return true;
+            }
+        } else if (first.y == second.y) {
+            const xMin = Math.min(first.x, second.x);
+            const xMax = Math.max(first.x, second.x);
+
+            if (bottom < first.y && first.y < top && (xMin <= left && left < xMax || xMin < right && right <= xMax)) {
+                return true;
+            }
+        } else {
+            throw "Invalid input";
+        }
+    }
+    return false;
+}
 
 for (let i = 0; i < points.length; ++i) {
     for (let j = i + 1; j < points.length; ++j) {
-        const width = Math.abs(points[i].x - points[j].x) + 1;
-        const height = Math.abs(points[i].y - points[j].y) + 1;
+        const left = Math.min(points[i].x, points[j].x);
+        const right = Math.max(points[i].x, points[j].x);
+        const bottom = Math.min(points[i].y, points[j].y);
+        const top = Math.max(points[i].y, points[j].y);
 
-        max_size = Math.max(max_size, width * height);
+        const width = right - left + 1;
+        const height = top - bottom + 1;
+
+        const area = width * height;
+
+        max_size = Math.max(max_size, area);
+        if (area > max_size_contained && !has_intersection(left, right, bottom, top)) {
+            max_size_contained = area;
+        }
     }
 }
 
 console.log("Part 1:", max_size);
+// Too high: 4531758980
+console.log("Part 2:", max_size_contained);
