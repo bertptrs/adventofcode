@@ -3,7 +3,12 @@ use std::env;
 use std::fs;
 use std::io;
 
-fn parse_line(line: &str) -> (u32, Vec<u32>) {
+use microlp::ComparisonOp;
+use microlp::LinearExpr;
+use microlp::OptimizationDirection;
+use microlp::Problem;
+
+fn parse_line(line: &str) -> (u32, Vec<u32>, Vec<u8>) {
     let mut buttons = vec![];
     let mut target = 0;
 
@@ -38,7 +43,35 @@ fn parse_line(line: &str) -> (u32, Vec<u32>) {
         buttons.push(button);
     }
 
-    (target, buttons)
+    let rem = it.as_str().trim().trim_end_matches('}');
+
+    let joltage = rem.split(',').map(|j| j.parse().unwrap()).collect();
+
+    (target, buttons, joltage)
+}
+
+fn min_joltage(buttons: &[u32], joltage: &[u8]) -> i32 {
+    let mut problem = Problem::new(OptimizationDirection::Minimize);
+    let max = i32::from(*joltage.iter().max().unwrap_or(&0));
+
+    let variables: Vec<_> = buttons
+        .iter()
+        .map(|_| problem.add_integer_var(1.0, (0, max)))
+        .collect();
+
+    for (bit, &value) in joltage.iter().enumerate() {
+        let mut equation = LinearExpr::empty();
+
+        for (&button, &variable) in buttons.iter().zip(&variables) {
+            if button & (1 << bit) != 0 {
+                equation.add(variable, 1.0);
+            }
+        }
+
+        problem.add_constraint(equation, ComparisonOp::Eq, value.into());
+    }
+
+    problem.solve().unwrap().objective().round() as i32
 }
 
 fn minimum_clicks(target: u32, buttons: &[u32]) -> i32 {
@@ -68,21 +101,24 @@ fn minimum_clicks(target: u32, buttons: &[u32]) -> i32 {
     unreachable!("Did not find target");
 }
 
-fn solve(input: &str) -> i32 {
+fn solve(input: &str) -> (i32, i32) {
     let mut total_clicks = 0;
+    let mut total_presses = 0;
     for line in input.trim().lines() {
-        let (target, buttons) = parse_line(line);
+        let (target, buttons, joltage) = parse_line(line);
         total_clicks += minimum_clicks(target, &buttons);
+        total_presses += min_joltage(&buttons, &joltage)
     }
 
-    total_clicks
+    (total_clicks, total_presses)
 }
 
 fn main() -> io::Result<()> {
     if let Some(path) = env::args_os().nth(1) {
         let input = fs::read_to_string(path)?;
 
-        println!("{}", solve(&input));
+        let (part1, part2) = solve(&input);
+        println!("Part 1: {part1}\nPart 2: {part2}");
         Ok(())
     } else {
         eprintln!("Usage: {} INPUT_FILE", env::args().next().unwrap());
@@ -97,7 +133,9 @@ mod tests {
     const SAMPLE: &str = include_str!("../sample.txt");
 
     #[test]
-    fn test_part1() {
-        assert_eq!(7, solve(SAMPLE));
+    fn test_sample() {
+        let (part1, part2) = solve(SAMPLE);
+        assert_eq!(7, part1);
+        assert_eq!(33, part2);
     }
 }
