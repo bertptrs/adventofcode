@@ -37,9 +37,7 @@ def bfs(
     return result
 
 
-def part1(data: TextIO) -> int:
-    map_ = data.read().strip().splitlines()
-
+def find_keys(map_: list[str]) -> dict[str, tuple[int, int]]:
     keys = {}
 
     for y, line in enumerate(map_):
@@ -51,7 +49,13 @@ def part1(data: TextIO) -> int:
                     keys[key] = (x, y)
                 case _:
                     continue
+    return keys
 
+
+def part1(data: TextIO) -> int:
+    map_ = data.read().strip().splitlines()
+
+    keys = find_keys(map_)
     key_to_keys = {key: bfs(pos, map_) for key, pos in keys.items()}
     target_keys = len(keys) - 1
 
@@ -74,5 +78,54 @@ def part1(data: TextIO) -> int:
             if next_state not in shortest or shortest[next_state] > next_total:
                 shortest[next_state] = next_total
                 heapq.heappush(todo, (next_total, next_, next_keys))
+
+    raise ValueError("Did not find the way to collect all the keys")
+
+
+def part2(data: TextIO) -> int:
+    map_ = data.read().strip().splitlines()
+
+    keys = find_keys(map_)
+    target_keys = len(keys) - 1
+
+    xstart, ystart = keys["@"]
+    del keys["@"]
+    keys["1"] = (xstart - 1, ystart - 1)
+    keys["2"] = (xstart + 1, ystart - 1)
+    keys["3"] = (xstart - 1, ystart + 1)
+    keys["4"] = (xstart + 1, ystart + 1)
+
+    map_[ystart - 1] = (
+        map_[ystart - 1][: xstart - 1] + "1#2" + map_[ystart - 1][xstart + 2 :]
+    )
+    map_[ystart] = map_[ystart][: xstart - 1] + "###" + map_[ystart][xstart + 2 :]
+    map_[ystart + 1] = (
+        map_[ystart + 1][: xstart - 1] + "3#4" + map_[ystart + 1][xstart + 2 :]
+    )
+
+    key_to_keys = {key: bfs(pos, map_) for key, pos in keys.items()}
+
+    todo = [(0, "1234", frozenset())]
+    shortest = {}
+
+    while len(todo) > 0:
+        dist, pos, keys = heapq.heappop(todo)
+        if len(keys) == target_keys:
+            return dist
+
+        for robot in pos:
+            for next_, next_dist, required_keys in key_to_keys[robot]:
+                if not required_keys.issubset(keys):
+                    continue
+
+                next_pos = "".join(c if c != robot else next_ for c in pos)
+
+                next_total = dist + next_dist
+                next_keys = keys.union({next_})
+                next_state = (next_pos, next_keys)
+
+                if next_state not in shortest or shortest[next_state] > next_total:
+                    shortest[next_state] = next_total
+                    heapq.heappush(todo, (next_total, next_pos, next_keys))
 
     raise ValueError("Did not find the way to collect all the keys")
