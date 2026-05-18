@@ -29,15 +29,22 @@ LARGE_SAMPLE = """\
 """
 
 
-@pytest.mark.parametrize('visible,field', [
-    (8, dedent("""\
+@pytest.mark.parametrize(
+    "visible,field",
+    [
+        (
+            8,
+            dedent("""\
         .#..#
         .....
         #####
         ....#
         ...##
-        """)),
-    (33, dedent("""\
+        """),
+        ),
+        (
+            33,
+            dedent("""\
         ......#.#.
         #..#.#....
         ..#######.
@@ -48,8 +55,11 @@ LARGE_SAMPLE = """\
         .##.#..###
         ##...#..#.
         .#....####
-        """)),
-    (35, dedent("""\
+        """),
+        ),
+        (
+            35,
+            dedent("""\
         #.#...#.#.
         .###....#.
         .#....#...
@@ -60,8 +70,11 @@ LARGE_SAMPLE = """\
         ..##....##
         ......#...
         .####.###.
-        """)),
-    (41, dedent("""\
+        """),
+        ),
+        (
+            41,
+            dedent("""\
         .#..#..###
         ####.###.#
         ....###.#.
@@ -72,9 +85,11 @@ LARGE_SAMPLE = """\
         #..#.#.###
         .##...##.#
         .....#.#..
-        """)),
-    (210, LARGE_SAMPLE),
-])
+        """),
+        ),
+        (210, LARGE_SAMPLE),
+    ],
+)
 def test_samples_part1(visible: int, field: str) -> None:
     data = StringIO(field.strip())
     assert part1(data) == visible

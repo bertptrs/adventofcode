@@ -11,14 +11,14 @@ SAMPLES = [
 ]
 
 
-@pytest.mark.parametrize('paths,outcome', zip(SAMPLES, [6, 159, 135]))
+@pytest.mark.parametrize("paths,outcome", zip(SAMPLES, [6, 159, 135]))
 def test_part1(paths: str, outcome: int):
     path_data = StringIO(paths)
 
     assert part1(path_data) == outcome
 
 
-@pytest.mark.parametrize('paths,outcome', zip(SAMPLES, [30, 610, 410]))
+@pytest.mark.parametrize("paths,outcome", zip(SAMPLES, [30, 610, 410]))
 def test_part2(paths: str, outcome: int):
     path_data = StringIO(paths)
 

@@ -32,7 +32,9 @@ CORRECT_SHUFFLES = [
 ]
 
 
-@pytest.mark.parametrize('instructions,correct', zip(SAMPLE_INSTRUCTIONS, CORRECT_SHUFFLES))
+@pytest.mark.parametrize(
+    "instructions,correct", zip(SAMPLE_INSTRUCTIONS, CORRECT_SHUFFLES)
+)
 def test_shuffle(instructions, correct):
     instructions = [line.strip() for line in instructions.splitlines()]
 

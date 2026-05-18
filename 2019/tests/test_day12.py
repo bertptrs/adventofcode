@@ -9,17 +9,23 @@ SAMPLES = [
 ]
 
 
-@pytest.mark.parametrize('iterations,result,moons', [
-    (10, 179, numpy.copy(SAMPLES[0])),
-    (100, 1940, numpy.copy(SAMPLES[1])),
-])
+@pytest.mark.parametrize(
+    "iterations,result,moons",
+    [
+        (10, 179, numpy.copy(SAMPLES[0])),
+        (100, 1940, numpy.copy(SAMPLES[1])),
+    ],
+)
 def test_kinetic_energy(moons: numpy.array, iterations: int, result: int) -> None:
     assert simulate_moons(moons, iterations) == result
 
 
-@pytest.mark.parametrize('outcome,moons', [
-    (2772, numpy.copy(SAMPLES[0])),
-    (4686774924, numpy.copy(SAMPLES[1])),
-])
+@pytest.mark.parametrize(
+    "outcome,moons",
+    [
+        (2772, numpy.copy(SAMPLES[0])),
+        (4686774924, numpy.copy(SAMPLES[1])),
+    ],
+)
 def test_repetition(moons: numpy.array, outcome: int) -> None:
     assert find_repetition(moons) == outcome

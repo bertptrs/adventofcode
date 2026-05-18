@@ -71,7 +71,9 @@ def test_part1(sample: str, correct: int):
     assert result == correct
 
 
-@pytest.mark.parametrize("sample,correct", zip(SAMPLES[1:], [82892753, 5586022, 460664]))
+@pytest.mark.parametrize(
+    "sample,correct", zip(SAMPLES[1:], [82892753, 5586022, 460664])
+)
 def test_part2(sample: str, correct: int):
     data = StringIO(sample)
 
