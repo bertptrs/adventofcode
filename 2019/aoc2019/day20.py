@@ -50,8 +50,6 @@ def scan_column(
     left: bool,
     outer: bool,
 ) -> dict[tuple[int, int], tuple[str, bool, tuple[int, int]]]:
-    height = len(map_) - 1
-
     position = col_id + 1 if left else col_id
     entrance = col_id + 2 if left else col_id - 1
 
@@ -98,16 +96,18 @@ def build_map(
                     case ".":
                         todo.append(((nx, ny), dist + 1))
                     case _ if (nx, ny) in portals:
-                        dest, outer, _ = portals[nx, ny]
-                        neighbours.append(((dest, outer), dist + 1))
+                        dest, douter, _ = portals[nx, ny]
+                        if dest == "AA" or dest == name and outer == douter:
+                            # Self loop
+                            continue
+                        neighbours.append(((dest, douter), dist + 1))
 
     return {portal: neighbours for portal, (_, neighbours) in portal_index.items()}
 
 
-def part1(data: TextIO) -> int:
-    # Can't use strip() because the first line starts with significant whitespace
-    map_ = data.read().splitlines()
-
+def find_portals(
+    map_: list[str],
+) -> dict[tuple[int, int], tuple[str, bool, tuple[int, int]]]:
     width = len(map_[0])
     height = len(map_) - 1  # N.B. empty line at the end
 
@@ -123,10 +123,18 @@ def part1(data: TextIO) -> int:
     portals.update(scan_column(map_, bx - 1, outer=False, left=True))
     portals.update(scan_column(map_, width - 2, outer=True, left=False))
 
+    return portals
+
+
+def part1(data: TextIO) -> int:
+    # Can't use strip() because the first line starts with significant whitespace
+    map_ = data.read().splitlines()
+
+    portals = find_portals(map_)
+
     portal_index = build_map(map_, portals)
 
     best = {
-        ("AA", False): 0,
         ("AA", True): 0,
     }
 
@@ -146,6 +154,52 @@ def part1(data: TextIO) -> int:
             new_dist = dist + delta
             name, outer = neighbour
             dest = (name, not outer)
+
+            if dest not in best or best[dest] > new_dist:
+                best[dest] = new_dist
+                heapq.heappush(todo, (new_dist, dest))
+
+    raise ValueError("Did not find a way out")
+
+
+def part2(data: TextIO) -> int:
+    # Can't use strip() because the first line starts with significant whitespace
+    map_ = data.read().splitlines()
+
+    portals = find_portals(map_)
+
+    portal_index = build_map(map_, portals)
+
+    best = {
+        (0, "AA", True): 0,
+    }
+
+    todo = [(0, (0, "AA", True))]
+
+    while todo:
+        dist, state = heapq.heappop(todo)
+
+        if best[state] < dist:
+            continue
+
+        level, pos, outer = state
+        if pos == "ZZ":
+            return dist - 1
+
+        for neighbour, delta in portal_index[(pos, outer)]:
+            new_dist = dist + delta
+            name, outer = neighbour
+
+            if name == "ZZ" and level != 0:
+                # Is a wall
+                continue
+
+            if name != "ZZ" and outer and level <= 0:
+                continue
+
+            next_level = level - 1 if outer else level + 1
+
+            dest = (next_level, name, not outer)
 
             if dest not in best or best[dest] > new_dist:
                 best[dest] = new_dist
