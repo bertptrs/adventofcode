@@ -3,14 +3,14 @@ from typing import TextIO
 
 
 def read_range(data: TextIO) -> range:
-    a, b = next(data).split('-')
+    a, b = next(data).split("-")
 
     return range(int(a), int(b) + 1)  # plus one because inclusive
 
 
 def valid(number: int, strict: bool) -> bool:
     s = str(number)
-    prev = '/'  # is smaller than '0'
+    prev = "/"  # is smaller than '0'
     has_group = False
 
     if len(s) != 6:

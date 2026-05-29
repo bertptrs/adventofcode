@@ -61,7 +61,7 @@ def modpow(a: int, b: int, m: int) -> int:
 
 
 def inverse(a: int, m: int) -> int:
-    """ Computes the modulo multiplicative inverse """
+    """Computes the modulo multiplicative inverse"""
     return modpow(a, m - 2, m)
 
 
@@ -72,10 +72,10 @@ def part2(data: TextIO) -> int:
     a, b = 1, 0
 
     for line in data:
-        parts = line.split(' ')
-        if 'new stack' in line:
+        parts = line.split(" ")
+        if "new stack" in line:
             la, lb = -1, -1
-        elif parts[0] == 'deal':
+        elif parts[0] == "deal":
             la, lb = int(parts[-1]), 0
         else:
             la, lb = 1, -int(parts[-1])
@@ -87,4 +87,3 @@ def part2(data: TextIO) -> int:
     final_b = ((b * (final_a - 1)) * inverse(a - 1, deck_size)) % deck_size
 
     return ((2020 - final_b) * inverse(final_a, deck_size)) % deck_size
-

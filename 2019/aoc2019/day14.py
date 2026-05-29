@@ -6,7 +6,7 @@ from networkx import DiGraph, topological_sort  # type: ignore[import]
 
 
 def read_pair(item: str) -> Tuple[str, int]:
-    amount, element = item.split(' ')
+    amount, element = item.split(" ")
 
     return element, int(amount)
 
@@ -15,12 +15,12 @@ def read_recipes(data: TextIO) -> DiGraph:
     graph = DiGraph()
 
     for line in data:
-        requisites, production = line.strip().split(' => ')
+        requisites, production = line.strip().split(" => ")
 
         produced, produced_amount = read_pair(production)
         graph.add_node(produced, weight=produced_amount)
 
-        for requisite in requisites.split(', '):
+        for requisite in requisites.split(", "):
             required, required_amount = read_pair(requisite)
             graph.add_edge(produced, required, weight=required_amount)
 
@@ -29,22 +29,22 @@ def read_recipes(data: TextIO) -> DiGraph:
 
 def ore_required(graph: DiGraph, fuel_required: int) -> int:
     requirements = defaultdict(int)
-    requirements['FUEL'] = fuel_required
+    requirements["FUEL"] = fuel_required
 
     for element in topological_sort(graph):
         if element not in requirements:
             continue
 
-        if element == 'ORE':
+        if element == "ORE":
             break
 
-        element_produced = graph.nodes[element]['weight']
+        element_produced = graph.nodes[element]["weight"]
         productions_required = math.ceil(requirements[element] / element_produced)
 
-        for _, elem_required, amount_required in graph.edges(element, data='weight'):
+        for _, elem_required, amount_required in graph.edges(element, data="weight"):
             requirements[elem_required] += amount_required * productions_required
 
-    return requirements['ORE']
+    return requirements["ORE"]
 
 
 def part1(data: TextIO) -> int:

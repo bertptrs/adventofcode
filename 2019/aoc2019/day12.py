@@ -17,8 +17,11 @@ def read_moons(data: TextIO) -> numpy.array:
 
 
 def advance(pos: numpy.array, vel: numpy.array) -> None:
-    """ update pos and vel in place """
-    pos_prime = numpy.repeat(numpy.reshape(pos, (1, len(pos))), len(pos), axis=0).transpose() - pos
+    """update pos and vel in place"""
+    pos_prime = (
+        numpy.repeat(numpy.reshape(pos, (1, len(pos))), len(pos), axis=0).transpose()
+        - pos
+    )
     pos_prime = -numpy.sign(pos_prime)
     vel += numpy.sum(pos_prime, axis=1)
     pos += vel

@@ -19,12 +19,12 @@ def simulate(numbers: List[int]) -> str:
     for i in range(len(numbers)):
         base = numpy.repeat(pattern, i + 1)
         needed_repetitions = math.ceil((len(numbers) + 1) / len(base))
-        matrix[i, :] = numpy.tile(base, needed_repetitions)[1:len(numbers) + 1]
+        matrix[i, :] = numpy.tile(base, needed_repetitions)[1 : len(numbers) + 1]
 
     for _ in range(100):
         numbers = numpy.abs(numpy.dot(matrix, numbers)) % 10
 
-    return ''.join(str(s) for s in numbers[:8])
+    return "".join(str(s) for s in numbers[:8])
 
 
 def simulate2(numbers: List[int]) -> str:
@@ -42,7 +42,7 @@ def simulate2(numbers: List[int]) -> str:
     for _ in range(100):
         numbers = numpy.abs(numpy.flip(numpy.cumsum(numpy.flip(numbers)))) % 10
 
-    return ''.join(str(s) for s in numbers[:8])
+    return "".join(str(s) for s in numbers[:8])
 
 
 def part1(data: TextIO) -> str:

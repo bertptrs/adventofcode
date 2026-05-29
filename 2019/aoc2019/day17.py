@@ -8,19 +8,24 @@ def part1(data: TextIO) -> int:
 
     computer.run()
 
-    output = ''.join(chr(c) for c in computer.output)
+    output = "".join(chr(c) for c in computer.output)
 
     tiles = set()
 
     for y, line in enumerate(output.splitlines()):
         for x, c in enumerate(line):
-            if c == '#':
+            if c == "#":
                 tiles.add((x, y))
 
     total = 0
 
     for x, y in tiles:
-        if (x - 1, y) in tiles and (x + 1, y) in tiles and (x, y - 1) in tiles and (x, y + 1) in tiles:
+        if (
+            (x - 1, y) in tiles
+            and (x + 1, y) in tiles
+            and (x, y - 1) in tiles
+            and (x, y + 1) in tiles
+        ):
             total += x * y
 
     return total

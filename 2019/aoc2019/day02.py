@@ -30,4 +30,4 @@ def part2(data: TextIO) -> int:
             if computer[0] == 19690720:
                 return 100 * noun + verb
 
-    raise ValueError('Did not find valid combination')
+    raise ValueError("Did not find valid combination")

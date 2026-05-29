@@ -6,7 +6,9 @@ from aoc2019.intcode import read_program, Computer
 
 def powerset(iterable: Iterable) -> Iterable[Tuple]:
     s = list(iterable)
-    return itertools.chain.from_iterable(itertools.combinations(s, r) for r in range(len(s) + 1))
+    return itertools.chain.from_iterable(
+        itertools.combinations(s, r) for r in range(len(s) + 1)
+    )
 
 
 def print_output(computer: Computer) -> str:
@@ -15,7 +17,7 @@ def print_output(computer: Computer) -> str:
     while len(computer.output):
         output += chr(computer.get_output())
 
-    print(output, end='')
+    print(output, end="")
 
     return output
 
@@ -67,7 +69,9 @@ def force(computer: Computer, direction: str, items: Set[str]):
 
 
 def part1(data: TextIO):
-    print("This day must use a file as input as it requires the stdin for other things.")
+    print(
+        "This day must use a file as input as it requires the stdin for other things."
+    )
 
     computer = Computer(read_program(data))
     items = set()
@@ -80,14 +84,14 @@ def part1(data: TextIO):
             print_output(computer)
 
             print("detected a death, loading auto save...")
-            load_save(saves['auto'], computer)
+            load_save(saves["auto"], computer)
             print("Command?")
         except IndexError:
             pass
 
         print_output(computer)
 
-        saves['auto'] = create_save(computer)
+        saves["auto"] = create_save(computer)
 
         try:
             command = input().strip()
@@ -120,4 +124,3 @@ def part1(data: TextIO):
             continue
 
         send_command(computer, command)
-

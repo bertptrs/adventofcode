@@ -66,4 +66,6 @@ def part1(data: TextIO) -> int:
 def part2(data: TextIO) -> int:
     program = read_program(data)
 
-    return max(reamplify(phase, program) for phase in itertools.permutations(range(5, 10)))
+    return max(
+        reamplify(phase, program) for phase in itertools.permutations(range(5, 10))
+    )

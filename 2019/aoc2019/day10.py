@@ -10,7 +10,7 @@ def read_asteroids(data: TextIO) -> Tuple[numpy.array, numpy.array]:
     ys = []
     for y, line in enumerate(data):
         for x, c in enumerate(line):
-            if c == '#':
+            if c == "#":
                 xs.append(x)
                 ys.append(y)
 
@@ -90,4 +90,3 @@ def part2(data: TextIO) -> int:
                 x = cx + dx
                 y = -(cy + dy)
                 return 100 * x + y
-

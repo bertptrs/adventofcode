@@ -10,17 +10,19 @@ def parse_layers(width: int, height: int, data: TextIO) -> Iterable[numpy.array]
     content = next(data).strip()
 
     for pos in range(0, len(content), chunk_size):
-        yield numpy.array([int(c) for c in content[pos:pos + chunk_size]])
+        yield numpy.array([int(c) for c in content[pos : pos + chunk_size]])
 
 
 def part1(data: TextIO) -> int:
-    best_layer: Counter[int] = min((Counter(layer) for layer in parse_layers(25, 6, data)), key=lambda c: c[0])
+    best_layer: Counter[int] = min(
+        (Counter(layer) for layer in parse_layers(25, 6, data)), key=lambda c: c[0]
+    )
 
     return best_layer[1] * best_layer[2]
 
 
 def format_row(row: Iterable[int]) -> str:
-    return ''.join('#' if p == 1 else ' ' for p in row)
+    return "".join("#" if p == 1 else " " for p in row)
 
 
 def part2(data: TextIO) -> str:
@@ -31,4 +33,4 @@ def part2(data: TextIO) -> str:
         mask = background == 2
         background[mask] = layer[mask]
 
-    return '\n'.join(format_row(row) for row in background.reshape(6, 25))
+    return "\n".join(format_row(row) for row in background.reshape(6, 25))

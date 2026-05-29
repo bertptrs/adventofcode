@@ -9,13 +9,13 @@ def compute_points(line: str) -> Dict[complex, int]:
     pos = complex(0)
 
     directions = {
-        'U': 1j,
-        'R': 1,
-        'D': -1j,
-        'L': -1,
+        "U": 1j,
+        "R": 1,
+        "D": -1j,
+        "L": -1,
     }
 
-    for move in line.strip().split(','):
+    for move in line.strip().split(","):
         direction = directions[move[0]]
 
         for _ in range(int(move[1:])):

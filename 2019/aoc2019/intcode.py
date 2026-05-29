@@ -5,7 +5,7 @@ from typing import List, TextIO, Tuple, Union
 def read_program(data: TextIO) -> List[int]:
     line = next(data)
 
-    return [int(i) for i in line.split(',')]
+    return [int(i) for i in line.split(",")]
 
 
 class Computer:
@@ -48,9 +48,9 @@ class Computer:
         mode, key = self._mode_and_key(item)
 
         if mode == 1:
-            raise ValueError('Cannot assign to an immediate')
+            raise ValueError("Cannot assign to an immediate")
         elif mode == 0:
-            pass # Nothing to do here, handled below
+            pass  # Nothing to do here, handled below
         elif mode == 2:
             key += self.relative_base
         else:
@@ -69,7 +69,7 @@ class Computer:
                 self.program.extend(0 for _ in range(length - len(self.program)))
 
     def run(self) -> None:
-        """ Run until failure """
+        """Run until failure"""
         while self.execute_current():
             pass
 
@@ -144,7 +144,6 @@ class Computer:
             # Halt
             return False
         else:
-            raise ValueError(f'Unknown opcode {opcode} at {pointer}')
+            raise ValueError(f"Unknown opcode {opcode} at {pointer}")
 
         return True
-

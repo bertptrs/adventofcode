@@ -72,7 +72,7 @@ def read_graph(data: TextIO) -> networkx.Graph:
 
         if value == 2:
             # Create an imaginary edge to the oxygen
-            graph.add_edge('O', pos, weight=0)
+            graph.add_edge("O", pos, weight=0)
 
         x, y = pos
 
@@ -93,10 +93,10 @@ def read_graph(data: TextIO) -> networkx.Graph:
 def part1(data: TextIO) -> int:
     graph = read_graph(data)
 
-    return networkx.shortest_path_length(graph, (0, 0), 'O') - 1
+    return networkx.shortest_path_length(graph, (0, 0), "O") - 1
 
 
 def part2(data: TextIO) -> int:
     graph = read_graph(data)
 
-    return networkx.eccentricity(graph, 'O') - 1
+    return networkx.eccentricity(graph, "O") - 1

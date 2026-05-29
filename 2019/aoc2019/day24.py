@@ -2,10 +2,7 @@ from typing import TextIO, Iterable, Tuple, List
 
 
 def read_board(data: TextIO) -> Tuple[Tuple[bool]]:
-    return tuple(
-        tuple(c == '#' for c in line.strip())
-        for line in data
-    )
+    return tuple(tuple(c == "#" for c in line.strip()) for line in data)
 
 
 def flatten(it: Iterable[Iterable]) -> Iterable:
@@ -124,7 +121,7 @@ def part1(data: TextIO) -> int:
     while True:
         board = advance_board(board)
         if board in seen:
-            return sum(2 ** i for i, b in enumerate(flatten(board)) if b)
+            return sum(2**i for i, b in enumerate(flatten(board)) if b)
 
         seen.add(board)
 
