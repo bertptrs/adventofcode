@@ -12,3 +12,7 @@ This repository contains my solutions for Advent of Code. See:
 - [2020 edition](./2020)
 - [2021 edition](./2021)
 - [2022 edition](./2022)
+- [2023 edition](./2023)
+- [2024 edition](./2024)
+- [2025 edition](./2025)
+- [2026 edition](./2026)
